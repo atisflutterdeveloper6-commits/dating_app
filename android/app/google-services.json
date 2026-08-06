@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "968762410313",
+    "project_id": "datingappproject-ef535",
+    "storage_bucket": "datingappproject-ef535.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:968762410313:android:049e10fe8e18e19b884698",
+        "android_client_info": {
+          "package_name": "com.example.dating_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFaYJ2MrK0KkI4WjyhB8e_Y4mec_E-QPU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
