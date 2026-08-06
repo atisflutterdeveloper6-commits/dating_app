@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class LocalNotificationService {
@@ -8,25 +9,43 @@ class LocalNotificationService {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  Future<void> initialize() async {
-    const android = AndroidInitializationSettings("@mipmap/ic_launcher");
+  static const String channelId = "chat_messages_channel";
+  static const String channelName = "Chat Messages";
 
-    const settings = InitializationSettings(
-      android: android,
-    );
+  final AndroidNotificationChannel _channel = const AndroidNotificationChannel(
+    channelId,
+    channelName,
+    description: "Notifications for chat messages",
+    importance: Importance.max,
+  );
 
-    await flutterLocalNotificationsPlugin.initialize(
-      settings: settings,
-    );
-  }
+Future<void> initialize() async {
+  const android = AndroidInitializationSettings("@mipmap/ic_launcher");
 
+  const settings = InitializationSettings(
+    android: android,
+  );
+
+  await flutterLocalNotificationsPlugin.initialize(
+    settings: settings,
+  );
+
+  // ✅ FIX: () को generic के ठीक बाद, बिना line break confusion के लगाएं
+  final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
+      flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+
+  await androidImplementation?.createNotificationChannel(_channel);
+
+  log("✅ Notification channel created: $channelId");
+}
   Future<void> show({
     required String title,
     required String body,
   }) async {
-    const android = AndroidNotificationDetails(
-      "high_importance_channel",
-      "High Importance Notifications",
+    final android = AndroidNotificationDetails(
+      channelId,
+      channelName,
       importance: Importance.max,
       priority: Priority.high,
       playSound: true,
@@ -36,11 +55,7 @@ class LocalNotificationService {
       id: 0,
       title: title,
       body: body,
-      notificationDetails: const NotificationDetails(
-        android: android,
-      ),
+      notificationDetails: NotificationDetails(android: android),
     );
   }
-
-
 }

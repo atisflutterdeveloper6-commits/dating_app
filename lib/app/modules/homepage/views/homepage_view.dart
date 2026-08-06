@@ -1,4 +1,5 @@
 import 'dart:math' as Math;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dating_app/app/apiurl/api_url.dart';
 import 'package:dating_app/app/custom_widget/location_controller.dart';
 import 'package:dating_app/app/modules/chat/views/chat_service.dart';
@@ -2337,8 +2338,10 @@ void _refreshProfileLikeCount(String profileId) async {
     return Scaffold(
       backgroundColor: const Color(0xFFFAFAFA),
       appBar: AppBar(
+          surfaceTintColor: Colors.transparent,   // ✅ FIX: tint hata do, sirf shadow chahiye
+  shadowColor: Colors.black.withOpacity(0.15),
         backgroundColor: Colors.white,
-        elevation: 2,
+        elevation: 5,
         title: _isLoadingLocation
             ? Shimmer.fromColors(
                 baseColor: Colors.grey[300]!,
@@ -2654,7 +2657,7 @@ onPanEnd: isTop && !_isSwiping
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment(0, 0.10),
-                  end: Alignment.bottomCenter,
+                  end: Alignment.bottomCenter,  
                   colors: [Colors.transparent, Colors.black87],
                 ),
               ),
@@ -2699,21 +2702,11 @@ onPanEnd: isTop && !_isSwiping
                   ),
                 ),
               ),
-            Positioned(
-              left: 15,
-              top: 15,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-                child: Row(
-                  children: [
-                    CircleAvatar(radius: 4, backgroundColor: profile.isVerified ? Colors.green : Colors.grey),
-                    const SizedBox(width: 6),
-                    Text(profile.isVerified ? "Active" : "Offline", style: const TextStyle(fontSize: 12)),
-                  ],
-                ),
-              ),
-            ),
+           Positioned(
+  left: 15,
+  top: 15,
+  child: _buildOnlineStatusBadge(profile.id),  // ✅ Yahi ek line badli
+),
             Positioned(
               right: 15,
               top: 15,
@@ -3055,4 +3048,44 @@ actionButton(
 enum SwipeDirection {
   like,
   dislike,
+}
+Widget _buildOnlineStatusBadge(String profileId) {
+  final chatService = Get.find<ChatService>();
+
+  return StreamBuilder<DocumentSnapshot>(
+    stream: chatService.getUserStatus(profileId),
+    builder: (context, snapshot) {
+      bool isOnline = false;
+
+      if (snapshot.hasData && snapshot.data!.exists) {
+        final data = snapshot.data!.data() as Map<String, dynamic>?;
+        final isOnlineFlag = data?['online'] ?? false;
+        final lastSeen = data?['lastSeen'] as Timestamp?;
+
+        if (isOnlineFlag && lastSeen != null) {
+          final diff = DateTime.now().difference(lastSeen.toDate());
+          isOnline = diff.inSeconds < 60;
+        }
+      }
+
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            CircleAvatar(
+              radius: 4,
+              backgroundColor: isOnline ? Colors.green : Colors.grey,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              isOnline ? "Active" : "Offline",
+              style: const TextStyle(fontSize: 12),
+            ),
+          ],
+        ),
+      );
+    },
+  );
 }

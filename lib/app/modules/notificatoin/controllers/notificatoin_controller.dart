@@ -25,12 +25,24 @@ class NotificatoinController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    print('========================================');
+    print('🔔 [NotificationController] onInit called');
+    print('========================================');
     fetchLikes();
   }
 
   Future<void> fetchLikes() async {
+    print('========================================');
+    print('🔔 [NotificationController] fetchLikes() called');
+    print('👤 myProfileId: $myProfileId');
+    print('🔑 authToken: ${authToken.isNotEmpty ? "${authToken.substring(0, authToken.length > 20 ? 20 : authToken.length)}..." : "EMPTY"}');
+    print('========================================');
+
     if (myProfileId.isEmpty || authToken.isEmpty) {
       errorMessage.value = 'Missing profile id or auth token';
+      print('❌ [NotificationController] Missing profileId or authToken — aborting fetch');
+      print('   myProfileId isEmpty: ${myProfileId.isEmpty}');
+      print('   authToken isEmpty: ${authToken.isEmpty}');
       return;
     }
 
@@ -42,6 +54,8 @@ class NotificatoinController extends GetxController {
         '${ApiUrls.baseUrl}${ApiUrls.getMyLikes(myProfileId)}',
       );
 
+      print('📤 [NotificationController] GET request to: $uri');
+
       final response = await http.get(
         uri,
         headers: {
@@ -50,30 +64,54 @@ class NotificatoinController extends GetxController {
         },
       );
 
+      print('📥 [NotificationController] Response status: ${response.statusCode}');
+      print('📥 [NotificationController] Response body: ${response.body}');
+
       if (response.statusCode == 200) {
         final body = jsonDecode(response.body);
+        print('📦 [NotificationController] Decoded body: $body');
 
         if (body['success'] == true) {
           final List data = body['data'] ?? [];
+          print('✅ [NotificationController] success=true, data length: ${data.length}');
+
           likes.value = data
               .map((e) => LikeModel.fromJson(e as Map<String, dynamic>))
               .toList();
+
+          print('✅ [NotificationController] Parsed ${likes.length} LikeModel items');
+          for (var i = 0; i < likes.length; i++) {
+            final l = likes[i];
+            print('   [$i] id=${l.id}, name=${l.name}, image=${l.image}, isUnread=${l.isUnread}, createdAt=${l.createdAt}');
+          }
+          print('🆕 [NotificationController] newNotifications count: ${newNotifications.length}');
+          print('📜 [NotificationController] earlierNotifications count: ${earlierNotifications.length}');
         } else {
-          errorMessage.value = body['message']?.toString() ??
-              'Something went wrong';
+          errorMessage.value =
+              body['message']?.toString() ?? 'Something went wrong';
+          print('⚠️ [NotificationController] success=false — message: ${errorMessage.value}');
         }
       } else {
         errorMessage.value = 'Failed to load likes (${response.statusCode})';
+        print('❌ [NotificationController] Non-200 status — ${errorMessage.value}');
       }
-    } catch (e) {
+    } catch (e, stack) {
       errorMessage.value = 'Network error: $e';
+      print('❌ [NotificationController] Exception during fetchLikes: $e');
+      print('❌ [NotificationController] Stack trace: $stack');
     } finally {
       isLoading.value = false;
+      print('🔔 [NotificationController] fetchLikes() finished — isLoading: ${isLoading.value}');
+      print('========================================');
     }
   }
 
-  Future<void> refresh() => fetchLikes();
+  Future<void> refresh() {
+    print('🔄 [NotificationController] refresh() called');
+    return fetchLikes();
+  }
 }
+
 class LikeModel {
   final String id;
   final String name;
@@ -92,6 +130,8 @@ class LikeModel {
   });
 
   factory LikeModel.fromJson(Map<String, dynamic> json) {
+    print('🧩 [LikeModel.fromJson] raw json: $json');
+
     // NOTE: sample response had "data": [], so field names below are
     // best-guess based on your profiles schema. Send a non-empty
     // response and I'll correct these mappings.
@@ -105,7 +145,7 @@ class LikeModel {
       extractedImage = photos[0]?.toString();
     }
 
-    return LikeModel(
+    final model = LikeModel(
       id: (json['_id'] ?? json['id'] ?? '').toString(),
       name: (json['name'] ?? profile?['name'] ?? 'Unknown').toString(),
       image: extractedImage,
@@ -115,6 +155,10 @@ class LikeModel {
           : null,
       isUnread: json['isUnread'] == true,
     );
+
+    print('🧩 [LikeModel.fromJson] parsed -> id=${model.id}, name=${model.name}, image=${model.image}, isUnread=${model.isUnread}');
+
+    return model;
   }
 
   Map<String, dynamic> toJson() {

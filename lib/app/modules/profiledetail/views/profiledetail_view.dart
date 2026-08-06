@@ -25,6 +25,15 @@ class ProfiledetailView extends StatefulWidget {
 }
 
 class _ProfiledetailViewState extends State<ProfiledetailView> {
+  String _capitalize(String text) {
+  if (text.isEmpty) return text;
+  return text
+      .split(' ')
+      .map((word) => word.isEmpty
+          ? word
+          : word[0].toUpperCase() + word.substring(1).toLowerCase())
+      .join(' ');
+}
   @override
   void dispose() {
     _reviewController.dispose();
@@ -1021,18 +1030,18 @@ class _ProfiledetailViewState extends State<ProfiledetailView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  "$name, $age",
-                                  style: TextStyle(
-                                    letterSpacing: 1.5,
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
+                  Row(
+  children: [
+    Expanded(
+      child: Text(
+        "${_capitalize(name)}, $age",
+        style: TextStyle(
+          letterSpacing: 1.5,
+          fontSize: 14.sp,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ),
                               Container(
                                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                                 decoration: BoxDecoration(

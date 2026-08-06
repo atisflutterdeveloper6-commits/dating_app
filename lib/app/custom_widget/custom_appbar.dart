@@ -26,8 +26,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
     return AppBar(
       backgroundColor: const Color(0xFFFAFAFA),
-      surfaceTintColor: Colors.white,
-      elevation: 0,
+  surfaceTintColor: Colors.transparent,   // ✅ FIX: tint hata do, sirf shadow chahiye
+  shadowColor: Colors.black.withOpacity(0.15),
+  elevation: 8,
       leadingWidth: 70.w,
       leading: Padding(
         padding: EdgeInsets.only(left: 5.w),

@@ -1,4 +1,5 @@
 // lib/app/services/chat_service.dart
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -44,7 +45,19 @@ class ChatService extends GetxService with WidgetsBindingObserver {
     }
     return _storageService!;
   }
-  
+  Timer? _heartbeatTimer;
+
+void _startHeartbeat() {
+  _heartbeatTimer?.cancel();
+  _heartbeatTimer = Timer.periodic(const Duration(seconds: 30), (timer) {
+    updateOnlineStatus(true);  // ✅ har 30 second me lastSeen refresh hoga
+  });
+}
+
+void _stopHeartbeat() {
+  _heartbeatTimer?.cancel();
+  _heartbeatTimer = null;
+}
   @override
   void onInit() {
     super.onInit();
@@ -1061,6 +1074,7 @@ Future<Map<String, dynamic>?> getUserOnce(String userId) async {
     
     await saveUserProfileToFirestore();
      await updateOnlineStatus(true);
+       _startHeartbeat(); 
       
   }
   
@@ -1070,6 +1084,7 @@ Future<Map<String, dynamic>?> getUserOnce(String userId) async {
     switch (state) {
       case AppLifecycleState.resumed:
         updateOnlineStatus(true);
+              _startHeartbeat();
         break;
       case AppLifecycleState.paused:
       case AppLifecycleState.inactive:
@@ -1083,6 +1098,7 @@ Future<Map<String, dynamic>?> getUserOnce(String userId) async {
   // ✅ add — poora naya method
   @override
   void onClose() {
+      _stopHeartbeat();
     WidgetsBinding.instance.removeObserver(this);
     updateOnlineStatus(false);
     super.onClose();

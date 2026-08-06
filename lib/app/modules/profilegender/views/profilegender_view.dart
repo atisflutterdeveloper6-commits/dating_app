@@ -18,7 +18,15 @@ class ProfilegenderView extends StatefulWidget {
 
 class _ProfilegenderViewState extends State<ProfilegenderView> {
   final ProfileServiceController profileController = Get.find<ProfileServiceController>();
+ String _getGenderImagePath(String genderName) {
+  final normalized = genderName.trim().toLowerCase();
   
+  if (normalized == 'man' || normalized == 'male') {
+    return 'assets/images/male.png';
+  } else {
+    return 'assets/images/female.png';  // ✅ Ab sirf Man/Woman hi aayenge, safe hai
+  }
+}
   // Gender selection (Man/Woman)
   String? selectedGenderId;
   String? selectedGenderTitle;
@@ -146,7 +154,7 @@ class _ProfilegenderViewState extends State<ProfilegenderView> {
       });
 
       if (success) {
-        CustomToast.success("Gender and orientation updated successfully");
+        CustomToast.success("Gender updated successfully");
         
         // Navigate back after update
         Future.delayed(const Duration(milliseconds: 500), () {
@@ -180,7 +188,7 @@ class _ProfilegenderViewState extends State<ProfilegenderView> {
           GestureDetector(
             onTap: () {
               Get.find<DashboardController>().changeTab(6);
-              Get.until((route) => route.settings.name == '/dashboard' || Get.currentRoute == '/dashboard');
+              Get.offAllNamed('/dashboard');
             },
             child: Icon(
               Icons.settings,
@@ -216,78 +224,74 @@ class _ProfilegenderViewState extends State<ProfilegenderView> {
                   SizedBox(height: 16.h),
                   
                   // Gender selection (Man / Woman)
-                  Row(
-                    children: genders.map((gender) {
-                      final isSelected = selectedGenderId == gender.id;
-                      final imagePath = gender.gender == 'Man' 
-                          ? 'assets/images/male.png' 
-                          : 'assets/images/female.png';
-                      
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              selectedGenderId = gender.id;
-                              selectedGenderTitle = gender.gender;
-                            });
-                          },
-                          child: Container(
-                            margin: EdgeInsets.symmetric(horizontal: 4.w),
-                            padding: EdgeInsets.symmetric(vertical: 12.h),
-                            decoration: BoxDecoration(
-                              color: isSelected 
-                                  ? const Color(0xffFF6B00).withOpacity(0.1)
-                                  : Colors.white,
-                              borderRadius: BorderRadius.circular(12.r),
-                              border: Border.all(
-                                color: isSelected 
-                                    ? const Color(0xffFF6B00)
-                                    : const Color(0xffE5E5E5),
-                                width: isSelected ? 1.5.w : 1.w,
-                              ),
-                            ),
-                            child: Column(
-                              children: [
-                                Container(
-                                  height: 54.h,
-                                  width: 54.w,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: isSelected
-                                        ? Border.all(
-                                            color: const Color(0xffFF6B00),
-                                            width: 0.5,
-                                          )
-                                        : null,
-                                  ),
-                                  child: ClipOval(
-                                    child: Image.asset(
-                                      imagePath,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 8.h),
-                                Text(
-                                  gender.gender,
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 11.sp,
-                                    fontWeight: isSelected 
-                                        ? FontWeight.w600 
-                                        : FontWeight.w500,
-                                    color: isSelected 
-                                        ? const Color(0xffFF6B00)
-                                        : const Color(0xff1E1E1E),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
+                Row(
+  children: genders
+      .where((gender) {
+        final normalized = gender.gender.trim().toLowerCase();
+        return normalized == 'man' || normalized == 'male' || 
+               normalized == 'woman' || normalized == 'female';
+      })
+      .map((gender) {
+        final isSelected = selectedGenderId == gender.id;
+        final imagePath = _getGenderImagePath(gender.gender);
+        
+        return Expanded(
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedGenderId = gender.id;
+                selectedGenderTitle = gender.gender;
+              });
+            },
+            child: Container(
+              margin: EdgeInsets.symmetric(horizontal: 4.w),
+              padding: EdgeInsets.symmetric(vertical: 12.h),
+              decoration: BoxDecoration(
+                color: isSelected 
+                    ? const Color(0xffFF6B00).withOpacity(0.1)
+                    : Colors.white,
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(
+                  color: isSelected 
+                      ? const Color(0xffFF6B00)
+                      : const Color(0xffE5E5E5),
+                  width: isSelected ? 1.5.w : 1.w,
+                ),
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    height: 54.h,
+                    width: 54.w,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: isSelected
+                          ? Border.all(color: const Color(0xffFF6B00), width: 0.5)
+                          : null,
+                    ),
+                    child: ClipOval(
+                      child: Image.asset(
+                        imagePath,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
                   ),
-
+                  SizedBox(height: 8.h),
+                  Text(
+                    gender.gender,
+                    style: GoogleFonts.poppins(
+                      fontSize: 11.sp,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                      color: isSelected ? const Color(0xffFF6B00) : const Color(0xff1E1E1E),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+),
                   SizedBox(height: 40.h),
 
                   // Sexual Orientation Section

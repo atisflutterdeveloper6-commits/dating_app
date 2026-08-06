@@ -163,7 +163,7 @@ class _WeightViewState extends State<WeightView> {
           GestureDetector(
             onTap: () {
               Get.find<DashboardController>().changeTab(6);
-              Get.until((route) => route.settings.name == '/dashboard' || Get.currentRoute == '/dashboard');
+                       Get.offAllNamed('/dashboard');
             },
             child: Padding(
               padding: EdgeInsets.only(right: 16.w),

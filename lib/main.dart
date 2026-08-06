@@ -17,7 +17,6 @@ import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
 
 import 'app/routes/app_pages.dart';
 
-// ✅ top-level (global) — main() ke bahar, taaki MyApp bhi access kar sake
 final GlobalKey<NavigatorState> callNavigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
@@ -35,7 +34,14 @@ void main() async {
     ),
   );
 
-    // initCloudinary();
+  // ✅ FIX: background handler ko Firebase init ke turant baad, top-level par register karo
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
+  // ✅ FIX: NotificationService initialize karna zaroori hai — pehle ye call hi nahi ho raha tha
+  await NotificationService.instance.initialize();
+
+  // ✅ Token fetch/save/print karne ke liye
+  await NotificationService.instance.saveFCMToken();
 
   Get.put(LocationController(), permanent: true);
   Get.put(ProfileServiceController());
@@ -55,10 +61,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      navigatorKey: callNavigatorKey, // ✅ fixed: variable, not method name
+      navigatorKey: callNavigatorKey,
       debugShowCheckedModeBanner: false,
       title: "Dating App",
-
       theme: ThemeData(
         useMaterial3: true,
         scaffoldBackgroundColor: const Color(0xFFFAFAFA),
@@ -83,7 +88,6 @@ class MyApp extends StatelessWidget {
           ),
         ),
       ),
-
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
     );

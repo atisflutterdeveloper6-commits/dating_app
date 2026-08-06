@@ -43,41 +43,41 @@ class _PremiumViewState extends State<PremiumView> {
         }
 
         // Actual error state (network/server failure) — show Retry
-        if (controller.errorMessage.value.isNotEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 60,
-                  color: Colors.red[300],
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30),
-                  child: Text(
-                    controller.errorMessage.value,
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: controller.retry,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xffFF6338),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          );
-        }
+        // if (controller.errorMessage.value.isNotEmpty) {
+        //   return Center(
+        //     child: Column(
+        //       mainAxisAlignment: MainAxisAlignment.center,
+        //       children: [
+        //         Icon(
+        //           Icons.error_outline,
+        //           size: 60,
+        //           color: Colors.red[300],
+        //         ),
+        //         const SizedBox(height: 16),
+        //         Padding(
+        //           padding: const EdgeInsets.symmetric(horizontal: 30),
+        //           child: Text(
+        //             controller.errorMessage.value,
+        //             style: const TextStyle(color: Colors.red),
+        //             textAlign: TextAlign.center,
+        //           ),
+        //         ),
+        //         const SizedBox(height: 20),
+        //         ElevatedButton(
+        //           onPressed: controller.retry,
+        //           style: ElevatedButton.styleFrom(
+        //             backgroundColor: const Color(0xffFF6338),
+        //             foregroundColor: Colors.white,
+        //             shape: RoundedRectangleBorder(
+        //               borderRadius: BorderRadius.circular(12),
+        //             ),
+        //           ),
+        //           child: const Text('Retry'),
+        //         ),
+        //       ],
+        //     ),
+        //   );
+        // }
 
         // No active subscription — friendly empty state, not an "error"
         if (!controller.hasActiveSubscription.value) {

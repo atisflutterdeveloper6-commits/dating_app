@@ -10,6 +10,7 @@ class CallInvitationService {
 
   static bool _isInitialized = false;
   static String? _initializedForUserId;
+  static bool _isFullyReady = false;  // ✅ NAYA — signaling ready confirm karne ke liye
 
   static final Map<String, String> userAvatars = {};
 
@@ -22,8 +23,8 @@ class CallInvitationService {
       return false;
     }
 
-    if (_isInitialized && _initializedForUserId == userId) {
-      print('ℹ️ CallInvitationService already initialized for $userId');
+    // ✅ Agar already init + fully ready hai, turant true return karo
+    if (_isInitialized && _initializedForUserId == userId && _isFullyReady) {
       return true;
     }
 
@@ -33,7 +34,7 @@ class CallInvitationService {
 
     try {
       print('📤 Attempting Zego login for userId: $userId, userName: $userName');
-      
+
       await ZegoUIKitPrebuiltCallInvitationService().init(
         appID: appID,
         appSign: appSign,
@@ -57,20 +58,12 @@ class CallInvitationService {
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) => Container(
                           color: Colors.grey.shade300,
-                          child: Icon(
-                            Icons.person,
-                            size: size.width * 0.6,
-                            color: Colors.white,
-                          ),
+                          child: Icon(Icons.person, size: size.width * 0.6, color: Colors.white),
                         ),
                       )
                     : Container(
                         color: Colors.grey.shade300,
-                        child: Icon(
-                          Icons.person,
-                          size: size.width * 0.6,
-                          color: Colors.white,
-                        ),
+                        child: Icon(Icons.person, size: size.width * 0.6, color: Colors.white),
                       ),
               ),
             );
@@ -79,16 +72,22 @@ class CallInvitationService {
         },
       );
 
-      // ✅ init() call successfully complete hui — matlab Zego ne user register kar liya
       _isInitialized = true;
       _initializedForUserId = userId;
-      print('✅ ZEGO LOGIN CONFIRMED — user "$userId" ka data ab Zego ke paas hai (${DateTime.now()})');
+
+      // ✅ FIX: init() Future resolve hone ke baad bhi Zego ka internal
+      // pageManager/signaling connection background me settle ho raha hota hai.
+      // Isliye ek chhota settle-delay do taaki turant send() call fail na ho.
+      await Future.delayed(const Duration(milliseconds: 2000));
+
+      _isFullyReady = true;
+      print('✅ ZEGO LOGIN CONFIRMED aur signaling settle ho gaya — user "$userId" (${DateTime.now()})');
       return true;
-      
+
     } catch (e, stack) {
-      // ❌ Yahan pata chalega agar Zego ne register nahi kiya
       _isInitialized = false;
       _initializedForUserId = null;
+      _isFullyReady = false;
       print('❌ ZEGO LOGIN FAILED for $userId: $e');
       print('❌ Stack trace: $stack');
       return false;
@@ -100,11 +99,11 @@ class CallInvitationService {
     await ZegoUIKitPrebuiltCallInvitationService().uninit();
     _isInitialized = false;
     _initializedForUserId = null;
+    _isFullyReady = false;  // ✅ reset karo
     print('🔄 Zego uninit — user ka data ab Zego signaling se hata diya gaya');
   }
 
-  // ✅ NAYA — current state check karne ke liye, kisi bhi jagah se puch sakte ho
   static bool isCurrentUserRegisteredWithZego(String userId) {
-    return _isInitialized && _initializedForUserId == userId;
+    return _isInitialized && _initializedForUserId == userId && _isFullyReady;  // ✅ _isFullyReady bhi check karo
   }
 }

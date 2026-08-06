@@ -1,5 +1,5 @@
 class ApiUrls {
-  static const String baseUrl = 'https://dating-app-2-ivwb.onrender.com';
+  static const String baseUrl = 'https://dating-app-4-igom.onrender.com';
    static const String googleMapsApiKey = "AIzaSyAj1ZxP6ZkYfGXhcT0pYl_uUCX_aEFgcsI";
   // Auth endpoints
   static const String login = '/v1/api/auth/login';
