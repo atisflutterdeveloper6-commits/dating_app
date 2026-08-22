@@ -1,11 +1,11 @@
 import 'package:dating_app/app/apiurl/api_url.dart';
-
-import 'package:dating_app/app/modules/primiumplan/views/primiumplan_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'package:video_player/video_player.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
+
 class AdvertisementResponse {
   final bool success;
   final int statusCode;
@@ -90,11 +90,12 @@ class PrimiumplanController extends GetxController {
   var isLoading = true.obs;
   var errorMessage = ''.obs;
   var advertisement = Rxn<AdvertisementData>();
-  
-  // Video player controller
-  var videoController = Rxn<VideoPlayerController>();
+
+  // media_kit player
+  Player? player;
+  VideoController? videoController;
   var isVideoInitialized = false.obs;
-  
+
   // Default features (fallback)
   final List<Map<String, dynamic>> defaultFeatures = [
     {
@@ -132,9 +133,7 @@ class PrimiumplanController extends GetxController {
 
   @override
   void onClose() {
-    if (videoController.value != null) {
-      videoController.value!.dispose();
-    }
+    player?.dispose();
     super.onClose();
   }
 
@@ -143,8 +142,7 @@ class PrimiumplanController extends GetxController {
     try {
       isLoading.value = true;
       errorMessage.value = '';
-      
-      // API Call
+
       final response = await http.get(
         Uri.parse('${ApiUrls.baseUrl}${ApiUrls.advertisement}'),
         headers: {
@@ -158,61 +156,58 @@ class PrimiumplanController extends GetxController {
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         final responseData = AdvertisementResponse.fromJson(jsonData);
-        
+
         if (responseData.success && responseData.data.isNotEmpty) {
           advertisement.value = responseData.data.first;
-          
-          // Initialize video
           await initializeVideo(responseData.data.first.backgroundVideo);
         } else {
           errorMessage.value = 'No advertisement data available';
-          // Use default data
           useDefaultData();
         }
       } else {
         errorMessage.value = 'Failed to load data (${response.statusCode})';
-        // Use default data
         useDefaultData();
       }
     } catch (e) {
       errorMessage.value = 'Error: $e';
       print('Error fetching advertisement: $e');
-      // Use default data
       useDefaultData();
     } finally {
       isLoading.value = false;
     }
   }
 
-  // Initialize video from URL
+  // 🔥 Initialize video using media_kit (audio hamesha muted)
   Future<void> initializeVideo(String videoUrl) async {
     try {
-      if (videoController.value != null) {
-        videoController.value!.dispose();
-      }
+      await player?.dispose();
 
-      final controller = VideoPlayerController.networkUrl(
-        Uri.parse(videoUrl),
-      );
+      player = Player();
+      videoController = VideoController(player!);
 
-      await controller.initialize();
-      
-      controller.setLooping(true);
-      controller.play();
-      
-      videoController.value = controller;
+      await player!.setVolume(0.0); // mute pehle hi set karo
+
+      await player!.open(Media(videoUrl));
+      await player!.setPlaylistMode(PlaylistMode.loop);
+
+      await player!.setVolume(0.0); // double safety
+
       isVideoInitialized.value = true;
     } catch (e) {
       print('Error initializing video: $e');
       isVideoInitialized.value = false;
-      
-      // Try local video as fallback
+
+      // Local asset fallback
       try {
-        final localController = VideoPlayerController.asset('assets/videos/bg_video.mp4');
-        await localController.initialize();
-        localController.setLooping(true);
-        localController.play();
-        videoController.value = localController;
+        await player?.dispose();
+        player = Player();
+        videoController = VideoController(player!);
+
+        await player!.setVolume(0.0);
+        await player!.open(Media('asset:///assets/videos/bg_video.mp4'));
+        await player!.setPlaylistMode(PlaylistMode.loop);
+        await player!.setVolume(0.0);
+
         isVideoInitialized.value = true;
       } catch (localError) {
         print('Local video also failed: $localError');
@@ -223,7 +218,6 @@ class PrimiumplanController extends GetxController {
 
   // Use default data if API fails
   void useDefaultData() {
-    // Create default advertisement data
     advertisement.value = AdvertisementData(
       id: 'default',
       title: 'Upgrade Your\nDating Experience',
@@ -240,7 +234,7 @@ class PrimiumplanController extends GetxController {
     if (advertisement.value != null && advertisement.value!.features.isNotEmpty) {
       return advertisement.value!.features.map((feature) {
         return {
-          'icon': _getIconDataFromString(feature.icon), // Convert string to IconData
+          'icon': _getIconDataFromString(feature.icon),
           'title': feature.title,
           'subtitle': feature.description,
         };
@@ -251,7 +245,6 @@ class PrimiumplanController extends GetxController {
 
   // 🔥 Convert icon string to IconData
   IconData _getIconDataFromString(String iconName) {
-    // Map of icon names to IconData
     const iconMap = {
       'chat_bubble_outline': Icons.chat_bubble_outline,
       'favorite_border': Icons.favorite_border,
@@ -269,7 +262,7 @@ class PrimiumplanController extends GetxController {
       'flash_on': Icons.flash_on,
     };
 
-    return iconMap[iconName] ?? Icons.star_border; // Default fallback
+    return iconMap[iconName] ?? Icons.star_border;
   }
 
   // Get title
@@ -282,7 +275,7 @@ class PrimiumplanController extends GetxController {
 
   // Check if video is available
   bool isVideoAvailable() {
-    return isVideoInitialized.value && videoController.value != null;
+    return isVideoInitialized.value && videoController != null;
   }
 
   // Retry loading

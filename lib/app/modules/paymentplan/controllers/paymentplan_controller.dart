@@ -1,16 +1,12 @@
 import 'package:dating_app/app/apiurl/api_url.dart';
-import 'package:dating_app/app/custom_widget/custom_toast.dart';
-import 'package:dating_app/app/custom_widget/profile_service_controller.dart';
 import 'package:dating_app/app/custom_widget/storage_services.dart';
-import 'package:dating_app/app/modules/paymentsuccess/views/paymentsuccess_view.dart';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import 'dart:convert';
-import 'dart:async';
-import 'package:video_player/video_player.dart';
-import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 class SubscriptionResponse {
   final bool success;
@@ -88,44 +84,33 @@ class SubscriptionData {
   }
 }
 
-// What Razorpay Checkout needs to open in SUBSCRIPTION mode.
-class RazorpaySubscriptionInit {
-  final String razorpaySubscriptionId;
-  final String keyId;
-
-  RazorpaySubscriptionInit({
-    required this.razorpaySubscriptionId,
-    required this.keyId,
-  });
-}
-
 class PaymentplanController extends GetxController {
   final StorageService _storage = StorageService();
 
+  static const platform = MethodChannel('com.atis.dating_app/audio_mute');
   // Observable variables
   var isLoading = true.obs;
   var errorMessage = ''.obs;
   var subscription = Rxn<SubscriptionData>();
+  var subscriptionStatus = 'created'.obs;
+  var isPaymentInProgress = false.obs;
 
-  // Video player controller
-  var videoController = Rxn<VideoPlayerController>();
+ Player? player;
+  VideoController? videoController;
   var isVideoInitialized = false.obs;
+
 
   // App branding
   final String appName = 'Vibely';
 
-  // 🔥 Razorpay now lives here, created once in onInit(), cleared once in
-  // onClose() — NOT re-created every time the view's build() runs.
-  late final Razorpay razorpay;
+  // Subscription details
+  String? pendingRazorpaySubscriptionId;
+  String? pendingUserSubscriptionId;
+  String? pendingRazorpayKeyId;
+  bool isExistingSubscription = false;
+  bool hasTriedPayment = false;
 
-  // Prevents double-handling if a payment event somehow fires twice.
-  bool _paymentEventHandled = false;
-
-  // Keeps the current userSubscriptionId around so the polling step knows
-  // which record to check on the backend.
-  String? _lastRazorpaySubscriptionId;
-
-  // Default data (fallback)
+  // Default data
   final SubscriptionData defaultData = SubscriptionData(
     id: 'default',
     backgroundVideo: '',
@@ -145,23 +130,169 @@ class PaymentplanController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    print('🟢 [PaymentplanController] onInit — fetching subscription + setting up Razorpay');
-    fetchSubscription();
-
-    razorpay = Razorpay();
-    razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-    razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-    razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+    checkExistingSubscriptionStatus().then((hasActive) {
+      if (!hasActive) {
+        fetchSubscription();
+      } else {
+        isLoading.value = false;
+        fetchSubscription();
+      }
+    });
+  }
+Future<void> forceMuteMediaStream() async {
+  try {
+    final result = await platform.invokeMethod('muteMediaStream');
+    print('✅ Native media stream muted, result: $result');
+  } catch (e) {
+    print('⚠️ Native mute failed: $e');
+  }
+}
+  Future<void> forceUnmuteMediaStream() async {
+    try {
+      await platform.invokeMethod('unmuteMediaStream');
+      print('✅ Native media stream unmuted');
+    } catch (e) {
+      print('⚠️ Native unmute failed: $e');
+    }
   }
 
+  Future<void> initializeVideo(String videoUrl) async {
+    try {
+      // Purana player dispose karo agar hai
+      await player?.dispose();
+
+      player = Player();
+      videoController = VideoController(player!);
+
+      // Pehle mute set karo, phir open karo
+      await player!.setVolume(0.0); // 0-100 scale hoti hai media_kit me, 0.0 = fully mute
+
+      await player!.open(Media(videoUrl));
+      await player!.setPlaylistMode(PlaylistMode.loop);
+
+      // Double safety
+      await player!.setVolume(0.0);
+
+      isVideoInitialized.value = true;
+    } catch (e) {
+      print('Network video error: $e');
+
+      // Local asset fallback
+      try {
+        await player?.dispose();
+        player = Player();
+        videoController = VideoController(player!);
+
+        await player!.setVolume(0.0);
+        await player!.open(Media('asset:///assets/videos/bg_video.mp4'));
+        await player!.setPlaylistMode(PlaylistMode.loop);
+        await player!.setVolume(0.0);
+
+        isVideoInitialized.value = true;
+      } catch (localError) {
+        print('Local video also failed: $localError');
+        isVideoInitialized.value = false;
+      }
+    }
+  }
+
+  bool isVideoAvailable() {
+    return isVideoInitialized.value && videoController != null;
+  }
   @override
   void onClose() {
-    print('🔴 [PaymentplanController] onClose — disposing video + clearing Razorpay listeners');
-    if (videoController.value != null) {
-      videoController.value!.dispose();
-    }
-    razorpay.clear();
+    player?.dispose();
     super.onClose();
+  }
+
+
+  Future<bool> checkExistingSubscriptionStatus() async {
+    try {
+      final token = _storage.getLoginToken() ?? _storage.getToken();
+      if (token == null || token.isEmpty) {
+        return false;
+      }
+
+      final response = await http.get(
+        Uri.parse('${ApiUrls.baseUrl}/v1/api/user-subscription/me'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      print('Check Subscription Status Response: ${response.statusCode} ${response.body}');
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        if (jsonData['success'] == true && jsonData['data'] != null) {
+          final status = jsonData['data']['status'] ?? 'created';
+          subscriptionStatus.value = status;
+          
+          // Store subscription details even for created status
+          pendingRazorpaySubscriptionId = jsonData['data']['razorpaySubscriptionId'];
+          pendingUserSubscriptionId = jsonData['data']['_id'];
+          
+          if (status == 'active' || status == 'verified' || status == 'completed') {
+            isExistingSubscription = true;
+            // Store the plan data if available
+            if (jsonData['data']['subscriptionPlan'] != null) {
+              final planData = jsonData['data']['subscriptionPlan'];
+              final subData = SubscriptionData(
+                id: planData['_id'] ?? '',
+                backgroundVideo: planData['backgroundVideo'] ?? '',
+                mainTitle: planData['mainTitle'] ?? 'Unlock Premium',
+                highlightText: planData['highlightText'] ?? 'Most Popular',
+                planName: planData['planName'] ?? 'Premium Monthly',
+                trialPrice: planData['trialPrice'] ?? '0',
+                trialText: planData['trialText'] ?? 'free trial',
+                trialDuration: planData['trialDuration'] ?? '7',
+                priceAfterTrial: planData['priceAfterTrial'] ?? '499',
+                afterTrialText: planData['afterTrialText'] ?? 'then ₹499/month',
+                isDeleted: planData['isDeleted'] ?? false,
+                createdAt: planData['createdAt'] ?? '',
+                updatedAt: planData['updatedAt'] ?? '',
+              );
+              subscription.value = subData;
+              await initializeVideo(subData.backgroundVideo);
+            }
+            return true;
+          } else if (status == 'created' || status == 'pending') {
+            // Subscription exists but payment not completed
+            isExistingSubscription = true;
+            hasTriedPayment = true;
+            print('⚠️ Subscription exists with status: $status - need to complete payment');
+            
+            // Fetch the plan details if available
+            if (jsonData['data']['subscriptionPlan'] != null) {
+              final planData = jsonData['data']['subscriptionPlan'];
+              final subData = SubscriptionData(
+                id: planData['_id'] ?? '',
+                backgroundVideo: planData['backgroundVideo'] ?? '',
+                mainTitle: planData['mainTitle'] ?? 'Unlock Premium',
+                highlightText: planData['highlightText'] ?? 'Most Popular',
+                planName: planData['planName'] ?? 'Premium Monthly',
+                trialPrice: planData['trialPrice'] ?? '0',
+                trialText: planData['trialText'] ?? 'free trial',
+                trialDuration: planData['trialDuration'] ?? '7',
+                priceAfterTrial: planData['priceAfterTrial'] ?? '499',
+                afterTrialText: planData['afterTrialText'] ?? 'then ₹499/month',
+                isDeleted: planData['isDeleted'] ?? false,
+                createdAt: planData['createdAt'] ?? '',
+                updatedAt: planData['updatedAt'] ?? '',
+              );
+              subscription.value = subData;
+              await initializeVideo(subData.backgroundVideo);
+            }
+            return false;
+          }
+        }
+      }
+      return false;
+    } catch (e) {
+      print('Error checking subscription status: $e');
+      return false;
+    }
   }
 
   Future<void> fetchSubscription() async {
@@ -171,10 +302,13 @@ class PaymentplanController extends GetxController {
 
       final response = await http.get(
         Uri.parse('${ApiUrls.baseUrl}${ApiUrls.subscriptionScreen}'),
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'Content-Type': 'application/json',
+        },
       );
 
-      print('📥 Subscription-screen response: ${response.statusCode} ${response.body}');
+      print('Subscription Response Status: ${response.statusCode}');
+      print('Subscription Response Body: ${response.body}');
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
@@ -193,340 +327,198 @@ class PaymentplanController extends GetxController {
       }
     } catch (e) {
       errorMessage.value = 'Error: $e';
-      print('❌ Error fetching subscription: $e');
+      print('Error fetching subscription: $e');
       subscription.value = defaultData;
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<void> initializeVideo(String videoUrl) async {
-    try {
-      if (videoController.value != null) {
-        videoController.value!.dispose();
-      }
-      try {
-        final controller = VideoPlayerController.networkUrl(Uri.parse(videoUrl));
-        await controller.initialize();
-        controller.setLooping(true);
-        controller.play();
-        videoController.value = controller;
-        isVideoInitialized.value = true;
-        return;
-      } catch (e) {
-        print('⚠️ Network video error: $e');
-      }
-      try {
-        final localController = VideoPlayerController.asset('assets/videos/bg_video.mp4');
-        await localController.initialize();
-        localController.setLooping(true);
-        localController.play();
-        videoController.value = localController;
-        isVideoInitialized.value = true;
-      } catch (localError) {
-        print('⚠️ Local video also failed: $localError');
-        isVideoInitialized.value = false;
-      }
-    } catch (e) {
-      print('❌ Error initializing video: $e');
-      isVideoInitialized.value = false;
-    }
+
+  SubscriptionData getSubscription() {
+    return subscription.value ?? defaultData;
   }
 
-  SubscriptionData getSubscription() => subscription.value ?? defaultData;
 
-  bool isVideoAvailable() => isVideoInitialized.value && videoController.value != null;
 
-  void retryLoading() => fetchSubscription();
+  void retryLoading() {
+    fetchSubscription();
+  }
 
-  String formatPrice(String price) => price.isEmpty ? '₹0' : '₹$price';
+  String formatPrice(String price) {
+    if (price.isEmpty) return '₹0';
+    return '₹$price';
+  }
 
   bool isTrialFree() {
     final price = getSubscription().trialPrice;
     return price == '0' || (int.tryParse(price) ?? -1) == 0;
   }
 
+  bool isSubscriptionActive() {
+    final status = subscriptionStatus.value;
+    return status == 'active' || status == 'verified' || status == 'completed';
+  }
+
+  bool shouldShowPayment() {
+    final status = subscriptionStatus.value;
+    return status == 'created' || status == 'pending' || status == 'initiated';
+  }
+
+  // FIXED: Get pay button text based on subscription status
   String getPayButtonText() {
     final data = getSubscription();
+    final status = subscriptionStatus.value;
+    
+    // If subscription is active, show "Go to Profile Setup"
+    if (isSubscriptionActive()) {
+      return 'Go to Profile Setup';
+    }
+    
+    // For created/pending status, show payment options
+    if (status == 'created' || status == 'pending' || status == 'initiated') {
+      if (isTrialFree()) {
+        return 'Activate Free Trial';
+      }
+      return 'Pay ₹${data.trialPrice}';
+    }
+    
+    // Default fallback
     return 'Pay ₹${data.trialPrice}';
   }
 
-  String? _getAuthToken() {
-    return _storage.getLoginToken() ?? _storage.getToken();
+  void resetPaymentState() {
+    isPaymentInProgress.value = false;
+    hasTriedPayment = false;
   }
 
-  Future<bool> activateFreeTrial() async {
-    try {
-      final data = getSubscription();
-      final token = _getAuthToken();
-      print('🆓 activateFreeTrial() called for planId=${data.id}');
+Future<bool> createSubscription() async {
+  try {
+    // Fallback: agar in-memory keyId nahi hai to local storage se le lo
+    pendingRazorpayKeyId ??= _storage.getRazorpayKeyId();
 
-      if (token == null || token.isEmpty) {
-        print('⚠️ No auth token found — user might not be logged in');
-        return false;
-      }
-
-      final response = await http.post(
-        Uri.parse('${ApiUrls.baseUrl}/v1/api/user-subscription/subscribe'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: json.encode({'subscriptionPlanId': data.id}),
-      );
-
-      print('📥 /subscribe (free trial) response: ${response.statusCode} ${response.body}');
-      return response.statusCode == 200;
-    } catch (e) {
-      print('❌ Error activating free trial: $e');
-      return false;
-    }
-  }
-
-  Future<RazorpaySubscriptionInit?> createRazorpaySubscription() async {
-    try {
-      final data = getSubscription();
-      final token = _getAuthToken();
-
-      print('========================================');
-      print('📡 CREATING RAZORPAY SUBSCRIPTION');
-      print('subscriptionPlanId: ${data.id}');
-      print('========================================');
-
-      if (token == null || token.isEmpty) {
-        print('⚠️ No auth token found — user might not be logged in');
-        return null;
-      }
-
-      final response = await http.post(
-        Uri.parse('${ApiUrls.baseUrl}/v1/api/user-subscription/subscribe'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: json.encode({'subscriptionPlanId': data.id}),
-      );
-
-      print('📥 /subscribe response: ${response.statusCode} ${response.body}');
-
-      if (response.statusCode != 200) {
-        print('❌ /subscribe failed with status ${response.statusCode}');
-        return null;
-      }
-
-      final body = json.decode(response.body);
-      final resData = body['data'];
-      if (resData == null) {
-        print('❌ /subscribe response missing "data" field');
-        return null;
-      }
-
-      final razorpaySubscriptionId = resData['razorpaySubscriptionId'];
-      final keyId = resData['keyId'];
-
-      if (razorpaySubscriptionId == null || keyId == null) {
-        print('⚠️ Missing razorpaySubscriptionId or keyId in response');
-        return null;
-      }
-
-      _lastRazorpaySubscriptionId = razorpaySubscriptionId;
-
-      print('✅ razorpaySubscriptionId: $razorpaySubscriptionId');
-      print('✅ keyId: $keyId');
-
-      return RazorpaySubscriptionInit(
-        razorpaySubscriptionId: razorpaySubscriptionId,
-        keyId: keyId,
-      );
-    } catch (e) {
-      print('❌ Error creating razorpay subscription: $e');
-      return null;
-    }
-  }
-
-  // ─────────────────────────────────────────────────────────────
-  // Payment flow entry point — called by the view's button.
-  // ─────────────────────────────────────────────────────────────
-  Future<void> handlePayButtonTap() async {
-    print('🔘 Pay button tapped. isTrialFree=${isTrialFree()}');
-    _paymentEventHandled = false;
-
-    if (isTrialFree()) {
-      CustomToast.info('Activating your free trial...');
-      final success = await activateFreeTrial();
-      print('🆓 activateFreeTrial() result: $success');
-      if (success) {
-        Get.to(() => const PaymentsuccessView());
-      } else {
-        CustomToast.error('Could not start your free trial. Please try again.');
-      }
-    } else {
-      await _startPayment();
-    }
-  }
-
-  Future<void> _startPayment() async {
-    CustomToast.info('Opening payment gateway...');
-
-    final init = await createRazorpaySubscription();
-    if (init == null) {
-      print('❌ _startPayment: createRazorpaySubscription() returned null');
-      CustomToast.error('Could not start subscription. Please try again.');
-      return;
-    }
-
-    String contactNumber = '9876543210';
-    try {
-      final profileController = Get.find<ProfileServiceController>();
-      final savedNumber = profileController.phoneNumber.value;
-      if (savedNumber.isNotEmpty) {
-        contactNumber = savedNumber;
-      }
-    } catch (e) {
-      print('⚠️ ProfileServiceController not found, using fallback contact: $e');
+    if (hasTriedPayment &&
+        pendingRazorpaySubscriptionId != null &&
+        pendingRazorpaySubscriptionId!.isNotEmpty &&
+        pendingRazorpayKeyId != null &&
+        pendingRazorpayKeyId!.isNotEmpty) {
+      print('🔄 Reusing existing subscription: $pendingRazorpaySubscriptionId');
+      return true;
     }
 
     final data = getSubscription();
+    final token = _storage.getLoginToken() ?? _storage.getToken();
 
-    var options = {
-      'key': init.keyId,
-      'subscription_id': init.razorpaySubscriptionId,
-      'name': 'Dating App Subscription',
-      'description': data.planName,
-      'prefill': {'contact': contactNumber, 'email': 'user@example.com'},
-      'theme': {'color': '#FF6A00'},
-    };
-
-    print('========================================');
-    print('💰 RAZORPAY SUBSCRIPTION CHECKOUT');
-    print('razorpaySubscriptionId: ${init.razorpaySubscriptionId}');
-    print('keyId: ${init.keyId}');
-    print('contactNumber: $contactNumber');
-    print('Full options: $options');
-    print('========================================');
-
-    try {
-      razorpay.open(options);
-      print('✅ razorpay.open() called successfully');
-    } catch (e) {
-      print('❌ Error opening Razorpay checkout: $e');
-      CustomToast.error('Failed to open payment gateway');
-    }
-  }
-
-  void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    if (_paymentEventHandled) {
-      print('⚠️ Duplicate EVENT_PAYMENT_SUCCESS fired — ignoring (guard caught it)');
-      return;
-    }
-    _paymentEventHandled = true;
-
-    print('========================================');
-    print('✅ PAYMENT SUCCESS (client-side callback)');
-    print('Payment ID: ${response.paymentId}');
-    print('Order ID: ${response.orderId}');
-    print('Subscription ID: ${response.data?['razorpay_subscription_id']}');
-    print('Signature: ${response.signature}');
-    print('========================================');
-    print('ℹ️ This callback ONLY confirms the checkout UI closed successfully.');
-    print('ℹ️ Actual DB status update depends on the RAZORPAY WEBHOOK firing.');
-    print('ℹ️ Polling GET /v1/api/user-subscription/me now to confirm...');
-    print('========================================');
-
-    CustomToast.success('Payment received — confirming subscription...');
-    _pollSubscriptionStatusThenNavigate();
-  }
-
-  void _handlePaymentError(PaymentFailureResponse response) {
-    print('========================================');
-    print('❌ PAYMENT ERROR');
-    print('Code: ${response.code}');
-    print('Message: ${response.message}');
-    print('========================================');
-
-    String errorMessage;
-    switch (response.code) {
-      case -1:
-        errorMessage = 'Payment cancelled by user';
-        break;
-      case -2:
-        errorMessage = 'Network connection error';
-        break;
-      case -3:
-        errorMessage = 'Payment failed. Please check your details';
-        break;
-      default:
-        errorMessage = 'Payment failed. Please try again.';
-    }
-    CustomToast.error(errorMessage);
-  }
-
-  void _handleExternalWallet(ExternalWalletResponse response) {
-    print('🔥 External wallet selected: ${response.walletName}');
-    CustomToast.info('Selected wallet: ${response.walletName}');
-  }
-
-  // ─────────────────────────────────────────────────────────────
-  // 🔥 NEW: polls GET /v1/api/user-subscription/me right after checkout
-  // closes, since your backend's status change ONLY happens via the
-  // Razorpay webhook (subscription.authenticated etc — see
-  // userSubscription.controller.ts razorpayWebhook). This gives you
-  // visibility in the terminal into exactly when/if that webhook landed.
-  // ─────────────────────────────────────────────────────────────
-  Future<void> _pollSubscriptionStatusThenNavigate() async {
-    final token = _getAuthToken();
     if (token == null || token.isEmpty) {
-      print('⚠️ No auth token — cannot poll /me. Navigating anyway.');
-      Get.to(() => const PaymentsuccessView());
-      return;
+      print('⚠️ No auth token found');
+      return false;
     }
 
-    const maxAttempts = 6; // ~ 6 x 2s = 12s window
-    const delayBetween = Duration(seconds: 2);
+    final response = await http.post(
+      Uri.parse('${ApiUrls.baseUrl}/v1/api/user-subscription/subscribe'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: json.encode({'subscriptionPlanId': data.id}),
+    );
 
-    for (int attempt = 1; attempt <= maxAttempts; attempt++) {
-      try {
-        final response = await http.get(
-          Uri.parse('${ApiUrls.baseUrl}/v1/api/user-subscription/me'),
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer $token',
-          },
-        );
+    print('Subscribe Response: ${response.statusCode} ${response.body}');
 
-        print('🔄 [poll #$attempt] GET /user-subscription/me → '
-            '${response.statusCode} ${response.body}');
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      if (jsonData['success'] == true && jsonData['data'] != null) {
+        pendingRazorpaySubscriptionId =
+            jsonData['data']['razorpaySubscriptionId'];
+        pendingUserSubscriptionId = jsonData['data']['userSubscriptionId'];
 
-        if (response.statusCode == 200) {
-          final body = json.decode(response.body);
-          final status = body['data']?['status'];
-          print('🔄 [poll #$attempt] current status field: $status');
+        // Sirf tab overwrite karo jab backend ne naya keyId bheja ho
+        final String? freshKeyId = jsonData['data']['keyId'];
+        if (freshKeyId != null && freshKeyId.isNotEmpty) {
+          pendingRazorpayKeyId = freshKeyId;
+          await _storage.saveRazorpayKeyId(freshKeyId); // <-- persist karo
+        }
 
-          if (status != null && status != 'created') {
-            print('✅ Webhook confirmed! Subscription status is now "$status"');
-            CustomToast.success('Subscription confirmed! 🎉');
-            Get.to(() => const PaymentsuccessView());
-            return;
+        subscriptionStatus.value = jsonData['data']['status'] ?? 'created';
+
+        final String message = (jsonData['message'] ?? '').toString();
+        isExistingSubscription =
+            message.toLowerCase().contains('existing subscription found');
+
+        if (isExistingSubscription) {
+          if (isSubscriptionActive()) {
+            return true;
+          } else {
+            hasTriedPayment = true;
+            // Ab local-storage fallback ke wajah se keyId mil chuka hoga
+            // agar pehle kabhi successfully fetch hua tha
+            if (pendingRazorpayKeyId == null || pendingRazorpayKeyId!.isEmpty) {
+              print('⚠️ Existing subscription but no keyId available (fresh install / cleared storage)');
+              return false;
+            }
+            return true;
           }
         }
-      } catch (e) {
-        print('❌ [poll #$attempt] Error checking subscription status: $e');
-      }
 
-      if (attempt < maxAttempts) {
-        await Future.delayed(delayBetween);
+        if (pendingRazorpayKeyId == null || pendingRazorpayKeyId!.isEmpty) {
+          print('⚠️ Backend did not return keyId');
+          return false;
+        }
+        return pendingRazorpaySubscriptionId != null &&
+            pendingRazorpaySubscriptionId!.isNotEmpty;
       }
     }
+    return false;
+  } catch (e) {
+    print('Error creating subscription: $e');
+    return false;
+  }
+}
+ 
+  Future<bool> verifyPayment({
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+    String? razorpaySubscriptionId,
+  }) async {
+    try {
+      final token = _storage.getLoginToken() ?? _storage.getToken();
 
-    // Webhook still hasn't landed after the polling window — this is the
-    // exact signal to go check Razorpay Dashboard → Webhooks → Logs.
-    print('========================================');
-    print('⚠️ TIMED OUT waiting for webhook to update status.');
-    print('⚠️ Check Razorpay Dashboard → Webhooks → Logs for delivery');
-    print('⚠️ attempts/response codes against ${_lastRazorpaySubscriptionId ?? "(unknown sub id)"}.');
-    print('========================================');
+      if (token == null || token.isEmpty) {
+        print('⚠️ No auth token found');
+        return false;
+      }
 
-    CustomToast.info('Payment received. Confirming subscription — this may take a moment.');
-    Get.to(() => const PaymentsuccessView());
+      final body = <String, dynamic>{
+        'razorpay_payment_id': razorpayPaymentId,
+        'razorpay_signature': razorpaySignature,
+        'razorpay_subscription_id':
+            razorpaySubscriptionId ?? pendingRazorpaySubscriptionId ?? '',
+      };
+
+      final response = await http.post(
+        Uri.parse('${ApiUrls.baseUrl}${ApiUrls.verifySubscription}'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode(body),
+      );
+
+      print('Verify Payment Response: ${response.statusCode} ${response.body}');
+      
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        if (jsonData['data'] != null && jsonData['data']['status'] != null) {
+          subscriptionStatus.value = jsonData['data']['status'];
+          isExistingSubscription = true;
+          hasTriedPayment = false; // Reset after successful payment
+        }
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print('Error verifying payment: $e');
+      return false;
+    }
   }
 }

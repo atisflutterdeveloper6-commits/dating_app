@@ -144,18 +144,21 @@ class BirthdayView extends GetView<BirthdayController> {
             padding: EdgeInsets.symmetric(horizontal: 12.w),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(color: Colors.black), // 🔥 border black
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<int>(
                 value: controller.selectedDay.value,
                 isExpanded: true,
-                style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+                style: TextStyle(fontSize: 14.sp, color: Colors.black), // 🔥 selected text black
                 items: List.generate(
                   31,
                   (index) => DropdownMenuItem(
                     value: index + 1,
-                    child: Text((index + 1).toString().padLeft(2, '0')),
+                    child: Text(
+                      (index + 1).toString().padLeft(2, '0'),
+                      style: TextStyle(color: Colors.black), // 🔥 dropdown list item text black
+                    ),
                   ),
                 ),
                 onChanged: (value) {
@@ -168,7 +171,7 @@ class BirthdayView extends GetView<BirthdayController> {
       ),
     );
   }
-
+  
   Widget _monthDropdown() {
     return Obx(
       () => Column(
@@ -181,15 +184,21 @@ class BirthdayView extends GetView<BirthdayController> {
             padding: EdgeInsets.symmetric(horizontal: 12.w),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(color: Colors.black), // 🔥 border black
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<String>(
                 value: controller.selectedMonth.value,
                 isExpanded: true,
-                style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+                style: TextStyle(fontSize: 14.sp, color: Colors.black), // 🔥 selected text black
                 items: controller.months
-                    .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                    .map((e) => DropdownMenuItem(
+                          value: e,
+                          child: Text(
+                            e,
+                            style: TextStyle(color: Colors.black), // 🔥 list item text black
+                          ),
+                        ))
                     .toList(),
                 onChanged: (value) {
                   controller.selectedMonth.value = value!;
@@ -201,8 +210,7 @@ class BirthdayView extends GetView<BirthdayController> {
       ),
     );
   }
-
-  Widget _yearDropdown() {
+   Widget _yearDropdown() {
     return Obx(
       () => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,20 +222,23 @@ class BirthdayView extends GetView<BirthdayController> {
             padding: EdgeInsets.symmetric(horizontal: 12.w),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(color: Colors.black),
             ),
             child: DropdownButtonHideUnderline(
               child: DropdownButton<int>(
                 value: controller.selectedYear.value,
                 isExpanded: true,
-                style: TextStyle(fontSize: 14.sp, color: Colors.grey),
+                style: TextStyle(fontSize: 14.sp, color: Colors.black), // 🔥 selected text black
                 items: List.generate(
                   70,
                   (index) {
                     final year = DateTime.now().year - index;
                     return DropdownMenuItem(
                       value: year,
-                      child: Text(year.toString()),
+                      child: Text(
+                        year.toString(),
+                        style: TextStyle(color: Colors.black), // 🔥 list item text black
+                      ),
                     );
                   },
                 ),
@@ -241,7 +252,6 @@ class BirthdayView extends GetView<BirthdayController> {
       ),
     );
   }
-
   // ==================== Meet Button ====================
   Widget _meetButton(String value) {
     final selected = controller.meetPlace.value == value;

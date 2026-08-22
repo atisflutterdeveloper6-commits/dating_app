@@ -6,6 +6,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:file_picker/file_picker.dart';
+import 'package:dating_app/app/custom_widget/custom_toast.dart';
 
 import 'dart:io';
 
@@ -17,316 +19,321 @@ class InvoiceView extends GetView<InvoiceController> {
 
   @override
   Widget build(BuildContext context) {
+    // 🔥 Safety net — agar route navigation me InvoiceBinding attach nahi
+    // hui (jaise Get.to() bina 'binding:' ke call hua), to controller
+    // khud yahan register kar do taaki "Controller not found" error na aaye.
+    if (!Get.isRegistered<InvoiceController>()) {
+      Get.put(InvoiceController());
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xffF7F7F7),
       appBar: const CustomAppBar(
         title: "Invoice",
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              padding: EdgeInsets.all(20.w),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(18.r),
-                border: Border.all(
-                  color: Colors.grey.shade300,
-                  width: .5,
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (controller.errorMessage.value.isNotEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, size: 60, color: Colors.grey[400]),
+                SizedBox(height: 16.h),
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 30.w),
+                  child: Text(
+                    controller.errorMessage.value,
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Column(
-                children: [
-
-                  /// Header
-                  Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(12.w),
-                        decoration: const BoxDecoration(
-                          color: Color(0xffFFF2E8),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.receipt_long_rounded,
-                          color: const Color(0xffFF6B00),
-                          size: 26.sp,
-                        ),
-                      ),
-                      SizedBox(width: 14.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Premium Membership",
-                              style: GoogleFonts.poppins(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w600, // w600 works
-                              ),
-                            ),
-                            SizedBox(height: 4.h),
-                            Text(
-                              "Invoice #INV20260718001",
-                              style: GoogleFonts.poppins(
-                                color: Colors.grey,
-                                fontSize: 11.sp,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 14.w, vertical: 6.h),
-                        decoration: BoxDecoration(
-                          color: Colors.green.shade50,
-                          borderRadius: BorderRadius.circular(30.r),
-                          border: Border.all(
-                            color: Colors.green.shade200,
-                          ),
-                        ),
-                        child: Text(
-                          "PAID",
-                          style: GoogleFonts.poppins(
-                            color: Colors.green.shade700,
-                            fontWeight: FontWeight.w600, // w600 works
-                            fontSize: 11.sp,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 25.h),
-
-                  _row("Customer", "Pavan Dhote"),
-                  _row("Email", "pavan@gmail.com"),
-                  _row("Date", "18 Jul 2026"),
-                  _row("Payment", "UPI"),
-                  _row("Transaction ID", "TXN948563728"),
-
-                  SizedBox(height: 20.h),
-
-                  Divider(color: Colors.grey.shade300),
-
-                  SizedBox(height: 20.h),
-
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Billing Summary",
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.w600, // w600 works
-                        fontSize: 15.sp,
-                      ),
+                SizedBox(height: 20.h),
+                ElevatedButton(
+                  onPressed: controller.retry,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xffFF6338),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                   ),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          );
+        }
 
-                  SizedBox(height: 15.h),
-
-                  _priceRow("Premium Plan", "₹299.00"),
-                  _priceRow("GST (18%)", "₹53.82"),
-                  _priceRow("Discount", "- ₹20.00"),
-
-                  Padding(
-                    padding: EdgeInsets.symmetric(vertical: 15.h),
-                    child: Divider(color: Colors.grey.shade300),
+        return SingleChildScrollView(
+          padding: EdgeInsets.all(16.w),
+          child: Column(
+            children: [
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(20.w),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18.r),
+                  border: Border.all(
+                    color: Colors.grey.shade300,
+                    width: .5,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  children: [
+                    /// Header
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(12.w),
+                          decoration: const BoxDecoration(
+                            color: Color(0xffFFF2E8),
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(
+                            Icons.receipt_long_rounded,
+                            color: const Color(0xffFF6B00),
+                            size: 26.sp,
+                          ),
+                        ),
+                        SizedBox(width: 14.w),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                controller.planTitle.value,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              SizedBox(height: 4.h),
+                              Text(
+                                controller.transactionId.value,
+                                style: GoogleFonts.poppins(
+                                  color: Colors.grey,
+                                  fontSize: 11.sp,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 14.w, vertical: 6.h),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade50,
+                            borderRadius: BorderRadius.circular(30.r),
+                            border: Border.all(
+                              color: Colors.green.shade200,
+                            ),
+                          ),
+                          child: Text(
+                            controller.displayStatus.value,
+                            style: GoogleFonts.poppins(
+                              color: Colors.green.shade700,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 11.sp,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
 
-                  Row(
-                    children: [
-                      Text(
-                        "Total Paid",
+                    SizedBox(height: 25.h),
+
+                    _row("Customer", controller.customerName.value),
+                    _row("Date", controller.date.value),
+                    _row("Payment", controller.paymentMode.value),
+                    _row("Transaction ID", controller.transactionId.value),
+
+                    SizedBox(height: 20.h),
+
+                    Divider(color: Colors.grey.shade300),
+
+                    SizedBox(height: 20.h),
+
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Billing Summary",
                         style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w700, // w700 works
-                          fontSize: 16.sp,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15.sp,
                         ),
                       ),
-                      const Spacer(),
-                      Text(
-                        "₹332.82",
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w700, // w700 works
-                          color: const Color(0xffFF6B00),
-                          fontSize: 18.sp,
+                    ),
+
+                    SizedBox(height: 15.h),
+
+                    _priceRow(
+                        controller.planTitle.value, controller.priceAfterTrial.value),
+
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 15.h),
+                      child: Divider(color: Colors.grey.shade300),
+                    ),
+
+                    Row(
+                      children: [
+                        Text(
+                          "Total Paid",
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 16.sp,
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
-            SizedBox(height: 30.h),
-
-            SizedBox(
-              width: double.infinity,
-              height: 52.h,
-              child: ElevatedButton.icon(
-                onPressed: _downloadInvoice,
-                icon: const Icon(Icons.download),
-                label: Text(
-                  "Download Invoice",
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600, // w600 works
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xffFF6B00),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.r),
-                  ),
+                        const Spacer(),
+                        Text(
+                          controller.totalPaidAmount.value,
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xffFF6B00),
+                            fontSize: 18.sp,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-            ),
 
-            SizedBox(height: 15.h),
+              SizedBox(height: 30.h),
 
-            SizedBox(
-              width: double.infinity,
-              height: 52.h,
-              child: OutlinedButton.icon(
-                onPressed: _shareInvoice,
-                icon: const Icon(Icons.share),
-                label: Text(
-                  "Share Invoice",
-                  style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600, // w600 works
+              SizedBox(
+                width: double.infinity,
+                height: 52.h,
+                child: ElevatedButton.icon(
+                  onPressed: () => _downloadInvoice(controller),
+                  icon: const Icon(Icons.download),
+                  label: Text(
+                    "Download Invoice",
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
                   ),
-                ),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xffFF6B00),
-                  side: const BorderSide(
-                    color: Color(0xffFF6B00),
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.r),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xffFF6B00),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.r),
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ),
+
+              SizedBox(height: 15.h),
+
+              SizedBox(
+                width: double.infinity,
+                height: 52.h,
+                child: OutlinedButton.icon(
+                  onPressed: () => _shareInvoice(controller),
+                  icon: const Icon(Icons.share),
+                  label: Text(
+                    "Share Invoice",
+                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xffFF6B00),
+                    side: const BorderSide(color: Color(0xffFF6B00)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.r),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
     );
   }
 
-  // ==================== INVOICE DATA ====================
-  
-  Map<String, dynamic> get _invoiceData => {
-    "invoiceNo": "INV20260718001",
-    "date": "18 Jul 2026",
-    "customer": "Pavan Dhote",
-    "email": "pavan@gmail.com",
-    "payment": "UPI",
-    "transactionId": "TXN948563728",
-    "items": [
-      {"description": "Premium Plan", "amount": "₹299.00"},
-      {"description": "GST (18%)", "amount": "₹53.82"},
-      {"description": "Discount", "amount": "- ₹20.00"},
-    ],
-    "total": "₹332.82",
-    "status": "PAID",
-  };
-
   // ==================== DOWNLOAD INVOICE ====================
-  
-  Future<void> _downloadInvoice() async {
+
+  // 🔥 Uses the native Android/iOS "Save As" dialog (via file_picker) so the
+  // user picks a real, visible location (Downloads by default) — unlike
+  // getExternalStorageDirectory(), which saves into a hidden app-private
+  // folder that never shows up in the Files app.
+  Future<void> _downloadInvoice(InvoiceController controller) async {
     try {
-      // Show loading indicator
       Get.dialog(
-        const Center(
-          child: CircularProgressIndicator(),
-        ),
+        const Center(child: CircularProgressIndicator()),
         barrierDismissible: false,
       );
 
-      // Generate PDF
-      final pdf = await _generateInvoicePDF();
-      
-      // Save PDF
-      final output = await getExternalStorageDirectory();
-      final file = File("${output?.path}/Invoice_${_invoiceData["invoiceNo"]}.pdf");
-      await file.writeAsBytes(await pdf.save());
-      
-      // Close loading dialog
-      Get.back();
-      
-      // Show success message
-      _showSnackBar(
-        "Invoice downloaded successfully!",
-        Colors.green,
-        Icons.check_circle,
+      final pdf = await _generateInvoicePDF(controller);
+      final bytes = await pdf.save();
+
+      Get.back(); // close loading dialog before the native save dialog opens
+
+      final fileName = "Invoice_${controller.transactionId.value}.pdf";
+
+      final savedPath = await FilePicker.platform.saveFile(
+        dialogTitle: 'Save Invoice',
+        fileName: fileName,
+        bytes: bytes,
+        type: FileType.custom,
+        allowedExtensions: ['pdf'],
       );
-      
+
+      if (savedPath != null) {
+        CustomToast.success("Invoice saved successfully!");
+      }
+      // savedPath == null → user cancelled the save dialog, no toast needed
     } catch (e) {
-      Get.back();
-      _showSnackBar(
-        "Failed to download invoice: $e",
-        Colors.red,
-        Icons.error,
-      );
+      if (Get.isDialogOpen ?? false) Get.back();
+      CustomToast.error("Failed to download invoice: $e");
     }
   }
 
   // ==================== SHARE INVOICE ====================
-  
-  Future<void> _shareInvoice() async {
+
+  Future<void> _shareInvoice(InvoiceController controller) async {
     try {
-      // Show loading indicator
       Get.dialog(
-        const Center(
-          child: CircularProgressIndicator(),
-        ),
+        const Center(child: CircularProgressIndicator()),
         barrierDismissible: false,
       );
 
-      // Generate PDF
-      final pdf = await _generateInvoicePDF();
-      
-      // Save temporary file
+      final pdf = await _generateInvoicePDF(controller);
+
       final output = await getTemporaryDirectory();
-      final file = File("${output.path}/Invoice_${_invoiceData["invoiceNo"]}.pdf");
+      final file = File(
+          "${output.path}/Invoice_${controller.transactionId.value}.pdf");
       await file.writeAsBytes(await pdf.save());
-      
-      // Close loading dialog
+
       Get.back();
-      
-      // Share the file
+
       await Share.shareXFiles(
         [XFile(file.path)],
-        text: "📄 Here is your invoice #${_invoiceData["invoiceNo"]}\n\n"
-               "Customer: ${_invoiceData["customer"]}\n"
-               "Date: ${_invoiceData["date"]}\n"
-               "Total Amount: ${_invoiceData["total"]}\n"
-               "Status: ${_invoiceData["status"]}",
-        subject: "Invoice #${_invoiceData["invoiceNo"]}",
+        text: "📄 Here is your invoice\n\n"
+            "Customer: ${controller.customerName.value}\n"
+            "Date: ${controller.date.value}\n"
+            "Total Amount: ${controller.totalPaidAmount.value}\n"
+            "Status: ${controller.displayStatus.value}",
+        subject: "Invoice - ${controller.planTitle.value}",
       );
-      
     } catch (e) {
       Get.back();
-      _showSnackBar(
-        "Failed to share invoice: $e",
-        Colors.red,
-        Icons.error,
-      );
+      CustomToast.error("Failed to share invoice: $e");
     }
   }
 
   // ==================== GENERATE PDF ====================
-  
-  Future<pw.Document> _generateInvoicePDF() async {
+
+  Future<pw.Document> _generateInvoicePDF(InvoiceController controller) async {
     final pdf = pw.Document();
 
     pdf.addPage(
@@ -355,11 +362,8 @@ class InvoiceView extends GetView<InvoiceController> {
                         ),
                         pw.SizedBox(height: 8),
                         pw.Text(
-                          'Dating App Premium Membership',
-                          style: pw.TextStyle(
-                            fontSize: 16,
-                            // fontWeight: pw.FontWeight.w500, // w500 works in pdf package too
-                          ),
+                          controller.planTitle.value,
+                          style: pw.TextStyle(fontSize: 16),
                         ),
                       ],
                     ),
@@ -370,7 +374,7 @@ class InvoiceView extends GetView<InvoiceController> {
                         borderRadius: pw.BorderRadius.circular(30),
                       ),
                       child: pw.Text(
-                        'PAID',
+                        controller.displayStatus.value,
                         style: pw.TextStyle(
                           color: PdfColors.green800,
                           fontWeight: pw.FontWeight.bold,
@@ -380,9 +384,9 @@ class InvoiceView extends GetView<InvoiceController> {
                     ),
                   ],
                 ),
-                
+
                 pw.SizedBox(height: 30),
-                
+
                 // Invoice Details
                 pw.Container(
                   padding: pw.EdgeInsets.all(20),
@@ -392,18 +396,17 @@ class InvoiceView extends GetView<InvoiceController> {
                   ),
                   child: pw.Column(
                     children: [
-                      _pdfRow("Invoice #", _invoiceData["invoiceNo"]),
-                      _pdfRow("Date", _invoiceData["date"]),
-                      _pdfRow("Customer", _invoiceData["customer"]),
-                      _pdfRow("Email", _invoiceData["email"]),
-                      _pdfRow("Payment", _invoiceData["payment"]),
-                      _pdfRow("Transaction ID", _invoiceData["transactionId"]),
+                      _pdfRow("Date", controller.date.value),
+                      _pdfRow("Customer", controller.customerName.value),
+                      _pdfRow("Payment", controller.paymentMode.value),
+                      _pdfRow(
+                          "Transaction ID", controller.transactionId.value),
                     ],
                   ),
                 ),
-                
+
                 pw.SizedBox(height: 30),
-                
+
                 // Billing Summary
                 pw.Text(
                   'Billing Summary',
@@ -413,7 +416,7 @@ class InvoiceView extends GetView<InvoiceController> {
                   ),
                 ),
                 pw.SizedBox(height: 15),
-                
+
                 pw.Container(
                   padding: pw.EdgeInsets.all(20),
                   decoration: pw.BoxDecoration(
@@ -422,14 +425,11 @@ class InvoiceView extends GetView<InvoiceController> {
                   ),
                   child: pw.Column(
                     children: [
-                      _pdfPriceRow("Premium Plan", "₹299.00"),
-                      _pdfPriceRow("GST (18%)", "₹53.82"),
-                      _pdfPriceRow("Discount", "- ₹20.00"),
-                      
+                      _pdfPriceRow(controller.planTitle.value,
+                          controller.priceAfterTrial.value),
                       pw.SizedBox(height: 15),
                       pw.Divider(color: PdfColors.grey400),
                       pw.SizedBox(height: 15),
-                      
                       pw.Row(
                         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                         children: [
@@ -441,7 +441,7 @@ class InvoiceView extends GetView<InvoiceController> {
                             ),
                           ),
                           pw.Text(
-                            '₹332.82',
+                            controller.totalPaidAmount.value,
                             style: pw.TextStyle(
                               fontSize: 20,
                               fontWeight: pw.FontWeight.bold,
@@ -453,9 +453,9 @@ class InvoiceView extends GetView<InvoiceController> {
                     ],
                   ),
                 ),
-                
+
                 pw.SizedBox(height: 40),
-                
+
                 // Footer
                 pw.Container(
                   alignment: pw.Alignment.center,
@@ -493,12 +493,12 @@ class InvoiceView extends GetView<InvoiceController> {
         },
       ),
     );
-    
+
     return pdf;
   }
 
   // ==================== PDF HELPER WIDGETS ====================
-  
+
   pw.Widget _pdfRow(String label, String value) {
     return pw.Padding(
       padding: const pw.EdgeInsets.only(bottom: 10),
@@ -507,18 +507,9 @@ class InvoiceView extends GetView<InvoiceController> {
         children: [
           pw.Text(
             label,
-            style: pw.TextStyle(
-              color: PdfColors.grey700,
-              fontSize: 14,
-            ),
+            style: pw.TextStyle(color: PdfColors.grey700, fontSize: 14),
           ),
-          pw.Text(
-            value,
-            style: pw.TextStyle(
-              // fontWeight: pw.FontWeight.w500, // w500 works
-              fontSize: 14,
-            ),
-          ),
+          pw.Text(value, style: pw.TextStyle(fontSize: 14)),
         ],
       ),
     );
@@ -530,19 +521,8 @@ class InvoiceView extends GetView<InvoiceController> {
       child: pw.Row(
         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
         children: [
-          pw.Text(
-            label,
-            style: pw.TextStyle(
-              fontSize: 14,
-            ),
-          ),
-          pw.Text(
-            amount,
-            style: pw.TextStyle(
-              // fontWeight: pw.FontWeight.w500, // w500 works
-              fontSize: 14,
-            ),
-          ),
+          pw.Text(label, style: pw.TextStyle(fontSize: 14)),
+          pw.Text(amount, style: pw.TextStyle(fontSize: 14)),
         ],
       ),
     );
@@ -560,14 +540,14 @@ class InvoiceView extends GetView<InvoiceController> {
             style: GoogleFonts.poppins(
               color: Colors.grey.shade600,
               fontSize: 13.sp,
-              fontWeight: FontWeight.w400, // w400 is normal
+              fontWeight: FontWeight.w400,
             ),
           ),
           const Spacer(),
           Text(
             value,
             style: GoogleFonts.poppins(
-              fontWeight: FontWeight.w500, // w500 is medium
+              fontWeight: FontWeight.w500,
               fontSize: 13.sp,
             ),
           ),
@@ -585,14 +565,14 @@ class InvoiceView extends GetView<InvoiceController> {
             title,
             style: GoogleFonts.poppins(
               fontSize: 14.sp,
-              fontWeight: FontWeight.w400, // w400 is normal
+              fontWeight: FontWeight.w400,
             ),
           ),
           const Spacer(),
           Text(
             value,
             style: GoogleFonts.poppins(
-              fontWeight: FontWeight.w500, // w500 is medium
+              fontWeight: FontWeight.w500,
               fontSize: 14.sp,
             ),
           ),
@@ -601,34 +581,4 @@ class InvoiceView extends GetView<InvoiceController> {
     );
   }
 
-  void _showSnackBar(String message, Color color, IconData icon) {
-    Get.snackbar(
-      "",
-      "",
-      titleText: const SizedBox.shrink(),
-      messageText: Row(
-        children: [
-          Icon(icon, color: Colors.white, size: 24),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              message,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 14,
-                fontWeight: FontWeight.w500, // w500 works
-              ),
-            ),
-          ),
-        ],
-      ),
-      backgroundColor: color,
-      colorText: Colors.white,
-      borderRadius: 12,
-      margin: const EdgeInsets.all(16),
-      duration: const Duration(seconds: 3),
-      snackPosition: SnackPosition.BOTTOM,
-      isDismissible: true,
-    );
-  }
 }

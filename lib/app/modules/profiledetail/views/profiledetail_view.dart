@@ -1428,13 +1428,13 @@ class _ProfiledetailViewState extends State<ProfiledetailView> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                _circleButton(
-                  Icons.close,
-                  Colors.white,
-                  Colors.black54,
-                  28,
-                  onTap: () => Navigator.pop(context),
-                ),
+                // _circleButton(
+                //   Icons.close,
+                //   Colors.white,
+                //   Colors.black54,
+                //   28,
+                //   onTap: () => Navigator.pop(context),
+                // ),
                 SizedBox(width: 20.w),
                 _circleButton(
                     isLiked ? Icons.favorite : Icons.favorite_border,
@@ -1443,30 +1443,32 @@ class _ProfiledetailViewState extends State<ProfiledetailView> {
                     38,
                     onTap: _handleLikeToggle,
                   ),
-                SizedBox(width: 20.w),
-                _circleButton(
-                  Icons.chat_bubble_rounded,
-                  Colors.white,
-                  Colors.deepPurple,
-                  28,
-                  onTap: () {
-                    final targetUserId = (profile['id'] ?? profile['_id'] ?? '').toString();
+                // SizedBox(width: 20.w),
+                // _circleButton(
+                //   Icons.chat_bubble_rounded,
+                //   Colors.white,
+                //   Colors.deepPurple,
+                //   28,
+                //   onTap: () {
+                //     final targetUserId = (profile['id'] ?? profile['_id'] ?? '').toString();
 
-                    if (targetUserId.isEmpty) {
-                      CustomToast.error('Unable to start chat: user not found');
-                      return;
-                    }
+                //     if (targetUserId.isEmpty) {
+                //       CustomToast.error('Unable to start chat: user not found');
+                //       return;
+                //     }
 
-                    Get.to(
-                      () => const ChatView(),
-                      arguments: {
-                        'userId': targetUserId,
-                        'userName': getDisplayName(),
-                        'userImage': selectedProfileImage.startsWith('http') ? selectedProfileImage : '',
-                      },
-                    );
-                  },
-                ),
+                //     Get.to(
+                //       () => const ChatView(),
+                //       arguments: {
+                //         'userId': targetUserId,
+                //         'userName': getDisplayName(),
+                //         'userImage': selectedProfileImage.startsWith('http') ? selectedProfileImage : '',
+                //       },
+                //     );
+                //   },
+                // ),
+           
+           
               ],
             ),
           ),

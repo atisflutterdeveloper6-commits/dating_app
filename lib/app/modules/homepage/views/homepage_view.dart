@@ -949,10 +949,10 @@ void dispose() {
 
   // ==================== FILTER METHODS ====================
   
-  int _getFilterCount() {
+int _getFilterCount() {
     int count = 0;
-    if (_selectedDistance != "40km") count++;
-    if (_selectedAgeRange != "22-30") count++;
+    if (_selectedDistance != "40km" && _selectedDistance != "Select Distance") count++;
+    if (_selectedAgeRange != "22-30" && _selectedAgeRange != "Select Age") count++;
     if (_hasPhoto) count++;
     if (_selectedGender != "Man") count++;
     if (_selectedLocation != "Pune, Mh") count++;
@@ -964,7 +964,6 @@ void dispose() {
     if (_selectedLanguage != "All") count++;
     return count;
   }
-
 void _applyFilters() {
   // ✅ Update controller values
   controller.selectedDistance.value = _selectedDistance;
@@ -1001,11 +1000,55 @@ void _applyFilters() {
                       child: Column(
                         children: [
                           const SizedBox(height: 35),
-                          const Text(
-                            "All Filters",
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 20),
+                            child: Row(
+                              children: [
+                                const SizedBox(width: 60),
+                                const Expanded(
+                                  child: Text(
+                                    "All Filters",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 60,
+                                  child: TextButton(
+                                  onPressed: () {
+                                      setModalState(() {
+                                        _selectedDistance = "Select Distance";
+                                        _selectedAgeRange = "Select Age";
+                                      });
+                                      setState(() {
+                                        _selectedDistance = "Select Distance";
+                                        _selectedAgeRange = "Select Age";
+                                      });
+                                      // Controller ka real default rakho — placeholder text
+                                      // yahan bhejne se agar baad me Distance/Age sheet me
+                                      // koi value select kiye bina "Apply" dabaye, parsing
+                                      // crash ho sakta hai (double.parse fail).
+                                      controller.selectedDistance.value = "40km";
+                                      controller.selectedAgeRange.value = "22-30";
+// sheet band karo
+                                      _forceRefreshProfiles(); // saari (unfiltered) profiles
+                                    },
+                                  
+                                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
+                                    child: const Text(
+                                      "Reset",
+                                      style: TextStyle(
+                                        color: Colors.orange,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 22),

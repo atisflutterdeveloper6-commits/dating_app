@@ -99,18 +99,7 @@ class BioView extends GetView<BioController> {
               ),
             ),
 
-            SizedBox(height: 25.h),
-
-            Center(
-              child: Text(
-                "✨  Need Help? Use AI To Write Bio",
-                style: TextStyle(
-                  fontSize: 10.sp,
-                  color: const Color(0xffFF6B00),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
+         
 
             const Spacer(),
 

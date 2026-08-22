@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:968762410313:android:c146cd57bf76108c884698",
+        "android_client_info": {
+          "package_name": "com.atis.dating_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFaYJ2MrK0KkI4WjyhB8e_Y4mec_E-QPU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:968762410313:android:049e10fe8e18e19b884698",
         "android_client_info": {
           "package_name": "com.example.dating_app"

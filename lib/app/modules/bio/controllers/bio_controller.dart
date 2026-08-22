@@ -35,15 +35,7 @@ Future<void> finishProfile() async {
   final bio = bioController.text.trim();
 
   // Validation with CustomToast
-  if (bio.isEmpty) {
-    CustomToast.warning("Please write something about yourself");
-    return;
-  }
 
-  if (bio.length < 10) {
-    CustomToast.warning("Please write at least 10 characters");
-    return;
-  }
 
   try {
     isLoading.value = true;

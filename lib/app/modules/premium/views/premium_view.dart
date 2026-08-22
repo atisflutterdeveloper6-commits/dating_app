@@ -2,7 +2,6 @@
 
 import 'package:dating_app/app/custom_widget/custom_appbar.dart';
 import 'package:dating_app/app/modules/dashboard/controllers/dashboard_controller.dart';
-import 'package:dating_app/app/modules/paymentplan/views/paymentplan_view.dart';
 import 'package:dating_app/app/modules/premium/controllers/premium_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -42,49 +41,44 @@ class _PremiumViewState extends State<PremiumView> {
           return _buildShimmerLoading();
         }
 
-        // Actual error state (network/server failure) — show Retry
-        // if (controller.errorMessage.value.isNotEmpty) {
-        //   return Center(
-        //     child: Column(
-        //       mainAxisAlignment: MainAxisAlignment.center,
-        //       children: [
-        //         Icon(
-        //           Icons.error_outline,
-        //           size: 60,
-        //           color: Colors.red[300],
-        //         ),
-        //         const SizedBox(height: 16),
-        //         Padding(
-        //           padding: const EdgeInsets.symmetric(horizontal: 30),
-        //           child: Text(
-        //             controller.errorMessage.value,
-        //             style: const TextStyle(color: Colors.red),
-        //             textAlign: TextAlign.center,
-        //           ),
-        //         ),
-        //         const SizedBox(height: 20),
-        //         ElevatedButton(
-        //           onPressed: controller.retry,
-        //           style: ElevatedButton.styleFrom(
-        //             backgroundColor: const Color(0xffFF6338),
-        //             foregroundColor: Colors.white,
-        //             shape: RoundedRectangleBorder(
-        //               borderRadius: BorderRadius.circular(12),
-        //             ),
-        //           ),
-        //           child: const Text('Retry'),
-        //         ),
-        //       ],
-        //     ),
-        //   );
-        // }
-
-        // No active subscription — friendly empty state, not an "error"
-        if (!controller.hasActiveSubscription.value) {
-          return _buildNoSubscriptionState();
+        // Error state
+        if (controller.errorMessage.value.isNotEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 60,
+                  color: Colors.red[300],
+                ),
+                const SizedBox(height: 16),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 30),
+                  child: Text(
+                    controller.errorMessage.value,
+                    style: const TextStyle(color: Colors.red),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  onPressed: controller.retry,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xffFF6338),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          );
         }
 
-        // Main Content — has an active subscription
+        // Main Content
         return SingleChildScrollView(
           padding: EdgeInsets.all(14.w),
           child: Column(
@@ -129,7 +123,7 @@ class _PremiumViewState extends State<PremiumView> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'You are Premium',
+                                'Go Premium',
                                 style: GoogleFonts.poppins(
                                   letterSpacing: 1.5.w,
                                   color: Colors.white,
@@ -139,9 +133,7 @@ class _PremiumViewState extends State<PremiumView> {
                               ),
                               SizedBox(height: 2.h),
                               Text(
-                                controller.planName.value.isNotEmpty
-                                    ? controller.planName.value
-                                    : 'Enjoy All Premium Benefits',
+                                ' Upgrade for Enjoy All Premium Benefits',
                                 style: GoogleFonts.poppins(
                                   letterSpacing: 1.5.w,
                                   color: Colors.white70,
@@ -164,32 +156,8 @@ class _PremiumViewState extends State<PremiumView> {
                     SizedBox(height: 16.h),
 
                     // Auto Renewal Toggle
-
-                    SizedBox(height: 22.h),
-
-                    SizedBox(
-                      width: double.infinity,
-                      height: 50.h,
-                      child: ElevatedButton(
-                        onPressed: controller.cancelSubscription,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xffFF6B00),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30.r),
-                          ),
-                        ),
-                        child: Text(
-                          'Cancel Subscription',
-                          style: GoogleFonts.poppins(
-                            letterSpacing: 1.5.w,
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
+              
+            
                   ],
                 ),
               ),
@@ -258,160 +226,6 @@ class _PremiumViewState extends State<PremiumView> {
           ),
         );
       }),
-    );
-  }
-
-  // ✅ Friendly empty state — shown when the user simply has no active
-  // subscription yet (not a network/server error). Offers a direct CTA
-  // to the payment plan screen instead of a "Retry" button.
-  Widget _buildNoSubscriptionState() {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(14.w),
-      child: Column(
-        children: [
-          SizedBox(height: 40.h),
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(28.w),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18.r),
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xffD5C11D),
-                  Color(0xff3E2D2D),
-                  Color(0xffC96A11),
-                ],
-              ),
-            ),
-            child: Column(
-              children: [
-                Container(
-                  height: 56.h,
-                  width: 56.w,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(.15),
-                    borderRadius: BorderRadius.circular(16.r),
-                  ),
-                  child: Icon(
-                    Icons.workspace_premium_outlined,
-                    color: Colors.white,
-                    size: 30.sp,
-                  ),
-                ),
-                SizedBox(height: 16.h),
-                Text(
-                  controller.subscriptionStatus.value.isNotEmpty
-                      ? 'Subscription ${controller.subscriptionStatus.value}'
-                      : 'You\'re not Premium yet',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    letterSpacing: 1.0.w,
-                    color: Colors.white,
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                SizedBox(height: 6.h),
-                Text(
-                  'Unlock premium features and get noticed faster.',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.poppins(
-                    letterSpacing: 0.5.w,
-                    color: Colors.white70,
-                    fontSize: 12.sp,
-                  ),
-                ),
-                SizedBox(height: 22.h),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50.h,
-                  child: ElevatedButton(
-                    onPressed: () => Get.to(() => const PaymentplanView()),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xffFF6B00),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(30.r),
-                      ),
-                    ),
-                    child: Text(
-                      'View Plans',
-                      style: GoogleFonts.poppins(
-                        letterSpacing: 1.5.w,
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          SizedBox(height: 30.h),
-
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Text(
-              "FAQ's",
-              style: GoogleFonts.poppins(
-                letterSpacing: 1.5.w,
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xff2B2B2B),
-              ),
-            ),
-          ),
-
-          SizedBox(height: 14.h),
-
-          if (controller.faqList.isEmpty)
-            const Center(child: Text('No FAQ available'))
-          else
-            ...controller.faqList.map<Widget>((e) {
-              return Container(
-                margin: EdgeInsets.only(bottom: 10.h),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: const Color(0xffECECEC)),
-                ),
-                child: Theme(
-                  data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-                  child: ExpansionTile(
-                    tilePadding: EdgeInsets.symmetric(horizontal: 16.w),
-                    childrenPadding: EdgeInsets.only(
-                      left: 16.w,
-                      right: 16.w,
-                      bottom: 16.h,
-                    ),
-                    title: Text(
-                      e.question,
-                      style: GoogleFonts.poppins(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w500,
-                        color: const Color(0xff303030),
-                      ),
-                    ),
-                    children: [
-                      Text(
-                        e.answer,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12.sp,
-                          height: 1.7,
-                          color: const Color(0xff7B7B7B),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            }).toList(),
-        ],
-      ),
     );
   }
 

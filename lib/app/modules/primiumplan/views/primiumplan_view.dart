@@ -2,7 +2,8 @@ import 'package:dating_app/app/modules/paymentplan/views/paymentplan_view.dart';
 import 'package:dating_app/app/modules/primiumplan/controllers/primiumplan_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:video_player/video_player.dart';
+import 'package:media_kit_video/media_kit_video.dart';
+
 import 'package:shimmer/shimmer.dart';
 
 class PrimiumplanView extends StatelessWidget {
@@ -75,16 +76,20 @@ class PrimiumplanView extends StatelessWidget {
         return Stack(
           children: [
             // Background Video
-            Positioned.fill(
-              child: controller.isVideoAvailable()
-                  ? VideoPlayer(controller.videoController.value!)
-                  : Image.asset(
-                      "assets/images/bg.jpg",
-                      fit: BoxFit.cover,
-                      alignment: Alignment.topCenter,
-                    ),
-            ),
-
+       // Background Video
+Positioned.fill(
+  child: controller.isVideoAvailable()
+      ? Video(
+          controller: controller.videoController!,
+          controls: NoVideoControls,
+          fit: BoxFit.cover,
+        )
+      : Image.asset(
+          "assets/images/bg.jpg",
+          fit: BoxFit.cover,
+          alignment: Alignment.topCenter,
+        ),
+),
             // Dark Overlay
             Positioned.fill(
               child: Container(

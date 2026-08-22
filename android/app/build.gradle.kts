@@ -1,3 +1,13 @@
+import java.util.Properties
+import java.io.FileInputStream
+
+// ✅ key.properties load karo (signing details yaha se aayenge)
+val keystoreProperties = Properties()
+val keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+}
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -6,7 +16,8 @@ plugins {
 }
 
 android {
-    namespace = "com.example.dating_app"
+    // ✅ apna real package name daalo — jaise com.tumhari_company.dating_app
+    namespace = "com.atis.dating_app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -21,13 +32,24 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.example.dating_app"
+        // ✅ namespace jaisa hi rakho, dono match hone chahiye
+        applicationId = "com.atis.dating_app"
 
         minSdk = 28
         targetSdk = 34
 
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+    }
+
+    // ✅ release signing config add kiya
+    signingConfigs {
+        create("release") {
+            keyAlias = keystoreProperties["keyAlias"] as String?
+            keyPassword = keystoreProperties["keyPassword"] as String?
+            storeFile = keystoreProperties["storeFile"]?.let { file(it as String) }
+            storePassword = keystoreProperties["storePassword"] as String?
+        }
     }
 
     buildTypes {
@@ -40,7 +62,8 @@ android {
                 "proguard-rules.pro"
             )
 
-            signingConfig = signingConfigs.getByName("debug")
+            // ✅ ab debug nahi, release keystore se sign hoga
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 }

@@ -1049,12 +1049,22 @@ if (fcmToken != null && fcmToken.isNotEmpty) {
           print('✅ Login token and status saved');
         }
         
-        if (profileIdFromResponse != null && profileIdFromResponse.isNotEmpty) {
+     if (profileIdFromResponse != null && profileIdFromResponse.isNotEmpty) {
           await _storage.saveProfileId(profileIdFromResponse);
           this.profileId = profileIdFromResponse;
           print('✅ Profile ID saved: $profileIdFromResponse');
+
+          // 🔥 Profile create hote hi, isi profileId ke saath FCM token
+          // backend ko bhej do (fcmToken already upar fetch ho chuka hai,
+          // dobara fetch karne ki zaroorat nahi).
+          if (fcmToken != null && fcmToken!.isNotEmpty) {
+            await _updateFcmTokenOnBackend(
+              profileIdFromResponse,
+              fcmToken!,
+              firebaseToken,
+            );
+          }
         }
-        
         if (phoneFromResponse != null && phoneFromResponse.isNotEmpty) {
           await _storage.savePhoneNumber(phoneFromResponse);
           this.phoneNumber.value = phoneFromResponse;
@@ -1682,7 +1692,31 @@ Future<bool> fetchLikedProfiles() async {
       isSaving.value = false;
     }
   }
+// 🔥 PUT /v1/api/profiles/{id}/fcm-token — { "fcmToken": "..." }
+  // Called right after a profile is created (or its id becomes known),
+  // so the backend has the correct profileId ↔ fcmToken mapping from day 1.
+  Future<void> _updateFcmTokenOnBackend(
+    String profileId,
+    String fcmToken,
+    String? authToken,
+  ) async {
+    try {
+      final response = await http.put(
+        Uri.parse('${ApiUrls.baseUrl}${ApiUrls.fcmToken(profileId)}'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          if (authToken != null) 'Authorization': 'Bearer $authToken',
+        },
+        body: jsonEncode({'fcmToken': fcmToken}),
+      );
 
+      print('📤 FCM token update status: ${response.statusCode}');
+      print('📤 FCM token update body: ${response.body}');
+    } catch (e) {
+      print('⚠️ Error updating FCM token on backend: $e');
+    }
+  }
   Future<bool> fetchMyProfile() async {
     try {
       final storedProfileId = _storage.getProfileId();

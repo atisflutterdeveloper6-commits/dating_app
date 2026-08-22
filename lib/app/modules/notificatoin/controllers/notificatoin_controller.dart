@@ -132,28 +132,47 @@ class LikeModel {
   factory LikeModel.fromJson(Map<String, dynamic> json) {
     print('🧩 [LikeModel.fromJson] raw json: $json');
 
-    // NOTE: sample response had "data": [], so field names below are
-    // best-guess based on your profiles schema. Send a non-empty
-    // response and I'll correct these mappings.
-    final profile = json['profile'] is Map<String, dynamic>
-        ? json['profile'] as Map<String, dynamic>
-        : null;
+    // ✅ Actual backend shape (confirmed from real response):
+    // { _id, photos: [{ image, _id }], firstName, lastName, createdAt, updatedAt }
+    // There is NO 'name', 'message', or 'isUnread' field — handled below
+    // with sensible fallbacks.
 
     String? extractedImage;
-    final photos = json['photos'] ?? profile?['photos'];
+    final photos = json['photos'];
     if (photos is List && photos.isNotEmpty) {
-      extractedImage = photos[0]?.toString();
+      final firstPhoto = photos[0];
+      if (firstPhoto is Map<String, dynamic>) {
+        extractedImage = firstPhoto['image']?.toString();
+      } else if (firstPhoto is String) {
+        extractedImage = firstPhoto;
+      }
     }
+
+    final firstName = (json['firstName'] ?? '').toString();
+    final lastName = (json['lastName'] ?? '').toString();
+    final fullName = '$firstName $lastName'.trim();
+
+    // ⚠️ Backend currently sends the literal string "Invalid Date" for
+    // createdAt/updatedAt instead of a real ISO date string. Guard against
+    // that explicitly so DateTime.tryParse doesn't waste a parse attempt —
+    // result is null either way, so _timeAgo() shows '' until backend
+    // fixes the date formatting on their side.
+    final rawCreatedAt = json['createdAt']?.toString();
+    final parsedCreatedAt =
+        (rawCreatedAt != null && rawCreatedAt != 'Invalid Date')
+            ? DateTime.tryParse(rawCreatedAt)
+            : null;
 
     final model = LikeModel(
       id: (json['_id'] ?? json['id'] ?? '').toString(),
-      name: (json['name'] ?? profile?['name'] ?? 'Unknown').toString(),
+      name: fullName.isNotEmpty ? fullName : 'Unknown',
       image: extractedImage,
-      message: json['message']?.toString(),
-      createdAt: json['createdAt'] != null
-          ? DateTime.tryParse(json['createdAt'].toString())
-          : null,
-      isUnread: json['isUnread'] == true,
+      message: json['message']?.toString(), // backend doesn't send this yet
+      createdAt: parsedCreatedAt,
+      // ⚠️ Backend doesn't send a read/unread flag yet. Defaulting to
+      // true (unread) so likes show under "New" for now — once backend
+      // adds a real flag (e.g. 'isRead' or 'seenAt'), map it here instead.
+      isUnread: true,
     );
 
     print('🧩 [LikeModel.fromJson] parsed -> id=${model.id}, name=${model.name}, image=${model.image}, isUnread=${model.isUnread}');
@@ -162,10 +181,12 @@ class LikeModel {
   }
 
   Map<String, dynamic> toJson() {
+    final nameParts = name.split(' ');
     return {
       '_id': id,
-      'name': name,
-      'photos': image != null ? [image] : [],
+      'firstName': nameParts.isNotEmpty ? nameParts.first : '',
+      'lastName': nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '',
+      'photos': image != null ? [{'image': image}] : [],
       'message': message,
       'createdAt': createdAt?.toIso8601String(),
       'isUnread': isUnread,

@@ -6,6 +6,7 @@ import 'package:dating_app/app/custom_widget/profile_service_controller.dart';
 import 'package:dating_app/app/custom_widget/storage_services.dart';
 import 'package:dating_app/app/modules/chat/views/call_invitation_service.dart';
 import 'package:dating_app/app/modules/chat/views/chat_service.dart';
+import 'package:dating_app/app/modules/dashboard/controllers/dashboard_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -296,8 +297,16 @@ class OtpController extends ChangeNotifier {
             }
           }
           
-          if (hasProfile && profileId != null && profileId.isNotEmpty && isLoggedIn) {
+  if (hasProfile && profileId != null && profileId.isNotEmpty && isLoggedIn) {
             print('✅ Existing user with profile - navigating to dashboard');
+            // 🔥 DashboardController app-lifetime me persist karta hai — agar
+            // user pehle kisi aur tab par tha, wo state yahan tak carry ho
+            // sakti hai. Login hote hi hamesha index 0 (Home) pe le jao.
+            try {
+              Get.find<DashboardController>().currentIndex.value = 0;
+            } catch (e) {
+              print('⚠️ Could not reset dashboard index: $e');
+            }
             Get.offAllNamed('/dashboard');
             try {
               await Get.find<ChatService>().saveUserProfileToFirestore();

@@ -21,7 +21,7 @@ class StorageService {
   static const String keyProfileData = 'profile_data';
   static const String keyIsProfileCreated = 'is_profile_created';
   static const String keyUserId = 'user_id';
-  
+ static const String keyRazorpayKeyId = 'razorpay_key_id'; 
   // Login specific keys
   static const String keyLoginToken = 'login_token';
   static const String keyLoginData = 'login_data';
@@ -58,7 +58,19 @@ class StorageService {
     await _storage.remove(keyToken);
     print('🔄 Token removed from storage');
   }
+  
+  Future<void> saveRazorpayKeyId(String keyId) async {
+    await _storage.write(keyRazorpayKeyId, keyId);
+    print('✅ Razorpay keyId saved to storage');
+  }
 
+  String? getRazorpayKeyId() {
+    return _storage.read<String>(keyRazorpayKeyId);
+  }
+
+  Future<void> removeRazorpayKeyId() async {
+    await _storage.remove(keyRazorpayKeyId);
+  }
   // ============================================================
   // ✅ REFRESH TOKEN METHODS (NEW)
   // ============================================================

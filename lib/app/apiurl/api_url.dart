@@ -8,7 +8,8 @@ class ApiUrls {
   static const String me = '/v1/api/auth/me';
   static const String refreshToken = '/v1/api/auth/refresh-token';
     static const String profileFilter = '/v1/api/profiles/filter';
-  
+  static const String subscriptionScreen = '/v1/api/subscription-screen';
+  static const String verifySubscription = '/v1/api/user-subscription/verify'; // 👈 add this
   // Enum endpoints
   static const String gender = '/v1/api/gender';
   static const String sexualOrientation = '/v1/api/sexual-orientation';
@@ -30,7 +31,7 @@ class ApiUrls {
   static const String uploadPhoto = '/v1/api/profiles/upload-photo';
   static const String bio = '/v1/api/profiles/bio';
   static const String preferences = '/v1/api/profiles/preferences';
-  static const String subscriptionScreen = '/v1/api/subscription-screen';
+static String fcmToken(String profileId) => '/v1/api/profiles/$profileId/fcm-token';
   static const String helpCenter = '/v1/api/help-center';
   
   // Other endpoints

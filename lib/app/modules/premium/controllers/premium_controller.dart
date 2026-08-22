@@ -16,6 +16,10 @@ class PremiumController extends GetxController {
   var faqList = <FaqItem>[].obs;
   var errorMessage = ''.obs;
 
+  // 🔥 True while the /cancel API call is in flight — use this to disable
+  // the button / show a spinner so the user can't double-tap "Yes".
+  var isCancelling = false.obs;
+
   // Auto renewal toggle — kept for UI; API response doesn't expose an
   // auto-renew flag yet, so this stays local-only for now.
   var isAutoRenewalEnabled = true.obs;
@@ -214,6 +218,8 @@ class PremiumController extends GetxController {
     _loadInitialData();
   }
 
+  // Shows the confirmation dialog. Actual API call happens in
+  // confirmCancelSubscription() below, triggered by the "Yes" button.
   void cancelSubscription() {
     Get.dialog(
       AlertDialog(
@@ -221,24 +227,136 @@ class PremiumController extends GetxController {
         content: const Text('Are you sure you want to cancel your subscription?'),
         actions: [
           TextButton(onPressed: () => Get.back(), child: const Text('No')),
-          TextButton(
-            onPressed: () async {
-              Get.back();
-              // TODO: wire actual cancel endpoint here, e.g.
-              // POST ${ApiUrls.baseUrl}/v1/api/user-subscription/cancel
-              Get.snackbar(
-                'Success',
-                'Subscription cancelled successfully',
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: Colors.green,
-                colorText: Colors.white,
-              );
-            },
-            child: const Text('Yes'),
+          Obx(
+            () => TextButton(
+              onPressed: isCancelling.value ? null : confirmCancelSubscription,
+              child: isCancelling.value
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text('Yes'),
+            ),
           ),
         ],
       ),
+      barrierDismissible: false,
     );
+  }
+
+  // 🔥 Calls POST /v1/api/user-subscription/cancel with the Firebase auth
+  // token — mirrors the same 401 force-refresh-and-retry pattern used by
+  // fetchSubscriptionData(). On success, updates local state and closes
+  // both the dialog and (implicitly) reflects "cancelled" on screen.
+  Future<void> confirmCancelSubscription() async {
+    isCancelling.value = true;
+    try {
+      var token = await _getFirebaseAuthToken();
+
+      if (token == null || token.isEmpty) {
+        Get.back(); // close dialog
+        Get.snackbar(
+          'Error',
+          'Please login to cancel your subscription',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      Future<http.Response> sendRequest(String t) {
+        return http.post(
+          Uri.parse('${ApiUrls.baseUrl}/v1/api/user-subscription/cancel'),
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': 'Bearer $t',
+          },
+        );
+      }
+
+      var response = await sendRequest(token);
+
+      // ✅ 401 aane par force refresh karke ek retry
+      if (response.statusCode == 401) {
+        print('⚠️ 401 on cancel subscription, force refreshing token...');
+        final freshToken = await _getFirebaseAuthToken(forceRefresh: true);
+        if (freshToken != null && freshToken.isNotEmpty) {
+          token = freshToken;
+          response = await sendRequest(token);
+        }
+      }
+
+      print('Cancel Subscription Response Status: ${response.statusCode}');
+      print('Cancel Subscription Response Body: ${response.body}');
+
+      Get.back(); // close the confirmation dialog
+
+      if (response.statusCode == 200) {
+        final jsonData = jsonDecode(response.body);
+        if (jsonData['success'] == true && jsonData['data'] != null) {
+          subscriptionStatus.value = jsonData['data']['status'] ?? 'cancelled';
+          hasActiveSubscription.value = false;
+
+          Get.snackbar(
+            'Success',
+            jsonData['message'] ?? 'Subscription cancelled successfully',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
+            colorText: Colors.white,
+          );
+
+          // Refresh from backend so purchase/billing/amount fields reflect
+          // the latest state (in case backend also clears billing info).
+          await fetchSubscriptionData();
+        } else {
+          Get.snackbar(
+            'Error',
+            jsonData['message'] ?? 'Could not cancel subscription',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
+      } else if (response.statusCode == 404) {
+        Get.snackbar(
+          'Error',
+          'No active subscription found to cancel',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      } else if (response.statusCode == 401) {
+        Get.snackbar(
+          'Error',
+          'Session expired. Please login again.',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      } else {
+        Get.snackbar(
+          'Error',
+          'Server error: ${response.statusCode}',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      print('Error cancelling subscription: $e');
+      if (Get.isDialogOpen ?? false) Get.back();
+      Get.snackbar(
+        'Error',
+        'Network error: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isCancelling.value = false;
+    }
   }
 }
 
