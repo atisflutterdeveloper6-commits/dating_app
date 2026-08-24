@@ -1,5 +1,6 @@
 import 'package:dating_app/app/apiurl/api_url.dart';
 import 'package:dating_app/app/custom_widget/storage_services.dart';
+import 'package:dating_app/app/modules/profilesetup/views/profilesetup_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -72,10 +73,10 @@ class SubscriptionData {
       mainTitle: json['mainTitle'] ?? 'Unlock Premium',
       highlightText: json['highlightText'] ?? 'Most Popular',
       planName: json['planName'] ?? 'Premium Monthly',
-      trialPrice: json['trialPrice'] ?? '0',
+      trialPrice: json['trialPrice']?.toString() ?? '0',
       trialText: json['trialText'] ?? 'free trial',
-      trialDuration: json['trialDuration'] ?? '7',
-      priceAfterTrial: json['priceAfterTrial'] ?? '499',
+      trialDuration: json['trialDuration']?.toString() ?? '7',
+      priceAfterTrial: json['priceAfterTrial']?.toString() ?? '499',
       afterTrialText: json['afterTrialText'] ?? 'then ₹499/month',
       isDeleted: json['isDeleted'] ?? false,
       createdAt: json['createdAt'] ?? '',
@@ -88,6 +89,7 @@ class PaymentplanController extends GetxController {
   final StorageService _storage = StorageService();
 
   static const platform = MethodChannel('com.atis.dating_app/audio_mute');
+
   // Observable variables
   var isLoading = true.obs;
   var errorMessage = ''.obs;
@@ -95,10 +97,9 @@ class PaymentplanController extends GetxController {
   var subscriptionStatus = 'created'.obs;
   var isPaymentInProgress = false.obs;
 
- Player? player;
+  Player? player;
   VideoController? videoController;
   var isVideoInitialized = false.obs;
-
 
   // App branding
   final String appName = 'Vibely';
@@ -130,23 +131,38 @@ class PaymentplanController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
     checkExistingSubscriptionStatus().then((hasActive) {
-      if (!hasActive) {
-        fetchSubscription();
-      } else {
+      // ✅ controller close ho chuka ho to navigate/setState mat karo
+      if (isClosed) return;
+
+      if (hasActive) {
         isLoading.value = false;
+
+        // ✅ authenticated/active user directly Profile Setup
+        Get.offAll(() => const ProfilesetupView());
+      } else {
+        // ❌ created/pending user ko payment screen dikhao
         fetchSubscription();
+      }
+    }).catchError((e) {
+      print('Error during onInit subscription check: $e');
+      if (!isClosed) {
+        isLoading.value = false;
+        errorMessage.value = 'Something went wrong. Please try again.';
       }
     });
   }
-Future<void> forceMuteMediaStream() async {
-  try {
-    final result = await platform.invokeMethod('muteMediaStream');
-    print('✅ Native media stream muted, result: $result');
-  } catch (e) {
-    print('⚠️ Native mute failed: $e');
+
+  Future<void> forceMuteMediaStream() async {
+    try {
+      final result = await platform.invokeMethod('muteMediaStream');
+      print('✅ Native media stream muted, result: $result');
+    } catch (e) {
+      print('⚠️ Native mute failed: $e');
+    }
   }
-}
+
   Future<void> forceUnmuteMediaStream() async {
     try {
       await platform.invokeMethod('unmuteMediaStream');
@@ -157,6 +173,11 @@ Future<void> forceMuteMediaStream() async {
   }
 
   Future<void> initializeVideo(String videoUrl) async {
+    if (videoUrl.isEmpty) {
+      isVideoInitialized.value = false;
+      return;
+    }
+
     try {
       // Purana player dispose karo agar hai
       await player?.dispose();
@@ -173,7 +194,9 @@ Future<void> forceMuteMediaStream() async {
       // Double safety
       await player!.setVolume(0.0);
 
-      isVideoInitialized.value = true;
+      if (!isClosed) {
+        isVideoInitialized.value = true;
+      }
     } catch (e) {
       print('Network video error: $e');
 
@@ -188,10 +211,14 @@ Future<void> forceMuteMediaStream() async {
         await player!.setPlaylistMode(PlaylistMode.loop);
         await player!.setVolume(0.0);
 
-        isVideoInitialized.value = true;
+        if (!isClosed) {
+          isVideoInitialized.value = true;
+        }
       } catch (localError) {
         print('Local video also failed: $localError');
-        isVideoInitialized.value = false;
+        if (!isClosed) {
+          isVideoInitialized.value = false;
+        }
       }
     }
   }
@@ -199,12 +226,12 @@ Future<void> forceMuteMediaStream() async {
   bool isVideoAvailable() {
     return isVideoInitialized.value && videoController != null;
   }
+
   @override
   void onClose() {
     player?.dispose();
     super.onClose();
   }
-
 
   Future<bool> checkExistingSubscriptionStatus() async {
     try {
@@ -221,38 +248,29 @@ Future<void> forceMuteMediaStream() async {
         },
       );
 
-      print('Check Subscription Status Response: ${response.statusCode} ${response.body}');
+      print(
+          'Check Subscription Status Response: ${response.statusCode} ${response.body}');
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
         if (jsonData['success'] == true && jsonData['data'] != null) {
           final status = jsonData['data']['status'] ?? 'created';
           subscriptionStatus.value = status;
-          
+
           // Store subscription details even for created status
-          pendingRazorpaySubscriptionId = jsonData['data']['razorpaySubscriptionId'];
+          pendingRazorpaySubscriptionId =
+              jsonData['data']['razorpaySubscriptionId'];
           pendingUserSubscriptionId = jsonData['data']['_id'];
-          
-          if (status == 'active' || status == 'verified' || status == 'completed') {
+
+          if (status == 'active' ||
+              status == 'verified' ||
+              status == 'completed' ||
+              status == 'authenticated') {
             isExistingSubscription = true;
             // Store the plan data if available
             if (jsonData['data']['subscriptionPlan'] != null) {
               final planData = jsonData['data']['subscriptionPlan'];
-              final subData = SubscriptionData(
-                id: planData['_id'] ?? '',
-                backgroundVideo: planData['backgroundVideo'] ?? '',
-                mainTitle: planData['mainTitle'] ?? 'Unlock Premium',
-                highlightText: planData['highlightText'] ?? 'Most Popular',
-                planName: planData['planName'] ?? 'Premium Monthly',
-                trialPrice: planData['trialPrice'] ?? '0',
-                trialText: planData['trialText'] ?? 'free trial',
-                trialDuration: planData['trialDuration'] ?? '7',
-                priceAfterTrial: planData['priceAfterTrial'] ?? '499',
-                afterTrialText: planData['afterTrialText'] ?? 'then ₹499/month',
-                isDeleted: planData['isDeleted'] ?? false,
-                createdAt: planData['createdAt'] ?? '',
-                updatedAt: planData['updatedAt'] ?? '',
-              );
+              final subData = SubscriptionData.fromJson(planData);
               subscription.value = subData;
               await initializeVideo(subData.backgroundVideo);
             }
@@ -261,26 +279,13 @@ Future<void> forceMuteMediaStream() async {
             // Subscription exists but payment not completed
             isExistingSubscription = true;
             hasTriedPayment = true;
-            print('⚠️ Subscription exists with status: $status - need to complete payment');
-            
+            print(
+                '⚠️ Subscription exists with status: $status - need to complete payment');
+
             // Fetch the plan details if available
             if (jsonData['data']['subscriptionPlan'] != null) {
               final planData = jsonData['data']['subscriptionPlan'];
-              final subData = SubscriptionData(
-                id: planData['_id'] ?? '',
-                backgroundVideo: planData['backgroundVideo'] ?? '',
-                mainTitle: planData['mainTitle'] ?? 'Unlock Premium',
-                highlightText: planData['highlightText'] ?? 'Most Popular',
-                planName: planData['planName'] ?? 'Premium Monthly',
-                trialPrice: planData['trialPrice'] ?? '0',
-                trialText: planData['trialText'] ?? 'free trial',
-                trialDuration: planData['trialDuration'] ?? '7',
-                priceAfterTrial: planData['priceAfterTrial'] ?? '499',
-                afterTrialText: planData['afterTrialText'] ?? 'then ₹499/month',
-                isDeleted: planData['isDeleted'] ?? false,
-                createdAt: planData['createdAt'] ?? '',
-                updatedAt: planData['updatedAt'] ?? '',
-              );
+              final subData = SubscriptionData.fromJson(planData);
               subscription.value = subData;
               await initializeVideo(subData.backgroundVideo);
             }
@@ -330,16 +335,15 @@ Future<void> forceMuteMediaStream() async {
       print('Error fetching subscription: $e');
       subscription.value = defaultData;
     } finally {
-      isLoading.value = false;
+      if (!isClosed) {
+        isLoading.value = false;
+      }
     }
   }
-
 
   SubscriptionData getSubscription() {
     return subscription.value ?? defaultData;
   }
-
-
 
   void retryLoading() {
     fetchSubscription();
@@ -357,7 +361,10 @@ Future<void> forceMuteMediaStream() async {
 
   bool isSubscriptionActive() {
     final status = subscriptionStatus.value;
-    return status == 'active' || status == 'verified' || status == 'completed';
+    return status == 'active' ||
+        status == 'verified' ||
+        status == 'completed' ||
+        status == 'authenticated';
   }
 
   bool shouldShowPayment() {
@@ -365,16 +372,16 @@ Future<void> forceMuteMediaStream() async {
     return status == 'created' || status == 'pending' || status == 'initiated';
   }
 
-  // FIXED: Get pay button text based on subscription status
+  // Get pay button text based on subscription status
   String getPayButtonText() {
     final data = getSubscription();
     final status = subscriptionStatus.value;
-    
+
     // If subscription is active, show "Go to Profile Setup"
     if (isSubscriptionActive()) {
       return 'Go to Profile Setup';
     }
-    
+
     // For created/pending status, show payment options
     if (status == 'created' || status == 'pending' || status == 'initiated') {
       if (isTrialFree()) {
@@ -382,7 +389,7 @@ Future<void> forceMuteMediaStream() async {
       }
       return 'Pay ₹${data.trialPrice}';
     }
-    
+
     // Default fallback
     return 'Pay ₹${data.trialPrice}';
   }
@@ -392,89 +399,92 @@ Future<void> forceMuteMediaStream() async {
     hasTriedPayment = false;
   }
 
-Future<bool> createSubscription() async {
-  try {
-    // Fallback: agar in-memory keyId nahi hai to local storage se le lo
-    pendingRazorpayKeyId ??= _storage.getRazorpayKeyId();
+  Future<bool> createSubscription() async {
+    try {
+      // Fallback: agar in-memory keyId nahi hai to local storage se le lo
+      pendingRazorpayKeyId ??= _storage.getRazorpayKeyId();
 
-    if (hasTriedPayment &&
-        pendingRazorpaySubscriptionId != null &&
-        pendingRazorpaySubscriptionId!.isNotEmpty &&
-        pendingRazorpayKeyId != null &&
-        pendingRazorpayKeyId!.isNotEmpty) {
-      print('🔄 Reusing existing subscription: $pendingRazorpaySubscriptionId');
-      return true;
-    }
+      if (hasTriedPayment &&
+          pendingRazorpaySubscriptionId != null &&
+          pendingRazorpaySubscriptionId!.isNotEmpty &&
+          pendingRazorpayKeyId != null &&
+          pendingRazorpayKeyId!.isNotEmpty) {
+        print(
+            '🔄 Reusing existing subscription: $pendingRazorpaySubscriptionId');
+        return true;
+      }
 
-    final data = getSubscription();
-    final token = _storage.getLoginToken() ?? _storage.getToken();
+      final data = getSubscription();
+      final token = _storage.getLoginToken() ?? _storage.getToken();
 
-    if (token == null || token.isEmpty) {
-      print('⚠️ No auth token found');
+      if (token == null || token.isEmpty) {
+        print('⚠️ No auth token found');
+        return false;
+      }
+
+      final response = await http.post(
+        Uri.parse('${ApiUrls.baseUrl}/v1/api/user-subscription/subscribe'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: json.encode({'subscriptionPlanId': data.id}),
+      );
+
+      print('Subscribe Response: ${response.statusCode} ${response.body}');
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        if (jsonData['success'] == true && jsonData['data'] != null) {
+          pendingRazorpaySubscriptionId =
+              jsonData['data']['razorpaySubscriptionId'];
+          pendingUserSubscriptionId = jsonData['data']['userSubscriptionId'];
+
+          // Sirf tab overwrite karo jab backend ne naya keyId bheja ho
+          final String? freshKeyId = jsonData['data']['keyId'];
+          if (freshKeyId != null && freshKeyId.isNotEmpty) {
+            pendingRazorpayKeyId = freshKeyId;
+            await _storage.saveRazorpayKeyId(freshKeyId); // <-- persist karo
+          }
+
+          subscriptionStatus.value = jsonData['data']['status'] ?? 'created';
+
+          final String message = (jsonData['message'] ?? '').toString();
+          isExistingSubscription =
+              message.toLowerCase().contains('existing subscription found');
+
+          if (isExistingSubscription) {
+            if (isSubscriptionActive()) {
+              return true;
+            } else {
+              hasTriedPayment = true;
+              // Ab local-storage fallback ke wajah se keyId mil chuka hoga
+              // agar pehle kabhi successfully fetch hua tha
+              if (pendingRazorpayKeyId == null ||
+                  pendingRazorpayKeyId!.isEmpty) {
+                print(
+                    '⚠️ Existing subscription but no keyId available (fresh install / cleared storage)');
+                return false;
+              }
+              return true;
+            }
+          }
+
+          if (pendingRazorpayKeyId == null || pendingRazorpayKeyId!.isEmpty) {
+            print('⚠️ Backend did not return keyId');
+            return false;
+          }
+          return pendingRazorpaySubscriptionId != null &&
+              pendingRazorpaySubscriptionId!.isNotEmpty;
+        }
+      }
+      return false;
+    } catch (e) {
+      print('Error creating subscription: $e');
       return false;
     }
-
-    final response = await http.post(
-      Uri.parse('${ApiUrls.baseUrl}/v1/api/user-subscription/subscribe'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-      body: json.encode({'subscriptionPlanId': data.id}),
-    );
-
-    print('Subscribe Response: ${response.statusCode} ${response.body}');
-
-    if (response.statusCode == 200) {
-      final jsonData = json.decode(response.body);
-      if (jsonData['success'] == true && jsonData['data'] != null) {
-        pendingRazorpaySubscriptionId =
-            jsonData['data']['razorpaySubscriptionId'];
-        pendingUserSubscriptionId = jsonData['data']['userSubscriptionId'];
-
-        // Sirf tab overwrite karo jab backend ne naya keyId bheja ho
-        final String? freshKeyId = jsonData['data']['keyId'];
-        if (freshKeyId != null && freshKeyId.isNotEmpty) {
-          pendingRazorpayKeyId = freshKeyId;
-          await _storage.saveRazorpayKeyId(freshKeyId); // <-- persist karo
-        }
-
-        subscriptionStatus.value = jsonData['data']['status'] ?? 'created';
-
-        final String message = (jsonData['message'] ?? '').toString();
-        isExistingSubscription =
-            message.toLowerCase().contains('existing subscription found');
-
-        if (isExistingSubscription) {
-          if (isSubscriptionActive()) {
-            return true;
-          } else {
-            hasTriedPayment = true;
-            // Ab local-storage fallback ke wajah se keyId mil chuka hoga
-            // agar pehle kabhi successfully fetch hua tha
-            if (pendingRazorpayKeyId == null || pendingRazorpayKeyId!.isEmpty) {
-              print('⚠️ Existing subscription but no keyId available (fresh install / cleared storage)');
-              return false;
-            }
-            return true;
-          }
-        }
-
-        if (pendingRazorpayKeyId == null || pendingRazorpayKeyId!.isEmpty) {
-          print('⚠️ Backend did not return keyId');
-          return false;
-        }
-        return pendingRazorpaySubscriptionId != null &&
-            pendingRazorpaySubscriptionId!.isNotEmpty;
-      }
-    }
-    return false;
-  } catch (e) {
-    print('Error creating subscription: $e');
-    return false;
   }
-}
- 
+
   Future<bool> verifyPayment({
     required String razorpayPaymentId,
     required String razorpaySignature,
@@ -504,17 +514,24 @@ Future<bool> createSubscription() async {
         body: json.encode(body),
       );
 
-      print('Verify Payment Response: ${response.statusCode} ${response.body}');
-      
+      print(
+        'Verify Payment Response: ${response.statusCode} ${response.body}',
+      );
+
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
-        if (jsonData['data'] != null && jsonData['data']['status'] != null) {
-          subscriptionStatus.value = jsonData['data']['status'];
+
+        if (jsonData['success'] == true) {
+          final status = jsonData['data']?['status'] ?? 'active';
+
+          subscriptionStatus.value = status;
           isExistingSubscription = true;
-          hasTriedPayment = false; // Reset after successful payment
+          hasTriedPayment = false;
+
+          return true;
         }
-        return true;
       }
+
       return false;
     } catch (e) {
       print('Error verifying payment: $e');

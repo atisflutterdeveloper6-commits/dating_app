@@ -24,16 +24,15 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
  MediaKit.ensureInitialized();
   await GetStorage.init();
-
-  await Firebase.initializeApp(
-    options: const FirebaseOptions(
-      apiKey: 'AIzaSyBFaYJ2MrK0KkI4WjyhB8e_Y4mec_E-QPU',
-      appId: '1:968762410313:android:049e10fe8e18e19b884698',
-      messagingSenderId: '968762410313',
-      projectId: 'datingappproject-ef535',
-      storageBucket: 'datingappproject-ef535.firebasestorage.app',
-    ),
-  );
+await Firebase.initializeApp(
+  options: const FirebaseOptions(
+    apiKey: 'AIzaSyAfddQOFG2ctmji4Nb5Z6XdougfRKsdoYI',
+    appId: '1:130292384793:android:7da8c99dc79ba1ce241688',
+    messagingSenderId: '130292384793',
+    projectId: 'dating-app-f1271',
+    storageBucket: 'dating-app-f1271.firebasestorage.app',
+  ),
+);
 
   // ✅ FIX: background handler ko Firebase init ke turant baad, top-level par register karo
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);

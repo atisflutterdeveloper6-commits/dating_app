@@ -10,22 +10,43 @@ import 'package:media_kit_video/media_kit_video.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
-class PaymentplanView extends StatelessWidget {
+class PaymentplanView extends StatefulWidget {
   const PaymentplanView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final PaymentplanController controller = Get.put(PaymentplanController());
+  State<PaymentplanView> createState() => _PaymentplanViewState();
+}
 
-    // Initialize Razorpay
-    final Razorpay razorpay = Razorpay();
+class _PaymentplanViewState extends State<PaymentplanView> {
+  late final PaymentplanController controller;
+  late final Razorpay razorpay;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = Get.put(PaymentplanController());
+
+    // ✅ Razorpay ab StatefulWidget ki lifecycle ke sath ek hi baar banta hai
+    razorpay = Razorpay();
     razorpay.on(
       Razorpay.EVENT_PAYMENT_SUCCESS,
-      (PaymentSuccessResponse r) => _handlePaymentSuccess(r, controller),
+      _handlePaymentSuccess,
     );
     razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
     razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  }
 
+  @override
+  void dispose() {
+    // ✅ Listeners clear karna zaroori hai warna dispose hone ke baad
+    // bhi native callback fire ho sakta hai aur crash de sakta hai
+    razorpay.clear();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       body: Obx(() {
         // Loading State with Shimmer
@@ -92,21 +113,19 @@ class PaymentplanView extends StatelessWidget {
         return Stack(
           children: [
             // Background Video
-          Positioned.fill(
-       child: controller.isVideoAvailable()
-      ? Video(
-          controller: controller.videoController!,
-          controls: NoVideoControls, // koi default controls na dikhein
-          fit: BoxFit.cover,
-        )
-      : Image.asset(
-          "assets/images/bg.jpg",
-          fit: BoxFit.cover,
-          alignment: Alignment.topCenter,
-        ),
-),
-  
-  
+            Positioned.fill(
+              child: controller.isVideoAvailable()
+                  ? Video(
+                      controller: controller.videoController!,
+                      controls: NoVideoControls, // koi default controls na dikhein
+                      fit: BoxFit.cover,
+                    )
+                  : Image.asset(
+                      "assets/images/bg.jpg",
+                      fit: BoxFit.cover,
+                      alignment: Alignment.topCenter,
+                    ),
+            ),
 
             // Overlay
             Positioned.fill(
@@ -331,9 +350,9 @@ class PaymentplanView extends StatelessWidget {
                         ],
                       ),
                       child: ElevatedButton(
-                        onPressed: () {
-                          _handlePayButtonTap(controller, razorpay, data);
-                        },
+                        onPressed: controller.isPaymentInProgress.value
+                            ? null // ✅ double-tap se duplicate payment/crash na ho
+                            : () => _handlePayButtonTap(data),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
@@ -341,15 +360,24 @@ class PaymentplanView extends StatelessWidget {
                             borderRadius: BorderRadius.circular(30),
                           ),
                         ),
-                        child: Text(
-                          controller.getPayButtonText(),
-                          style: const TextStyle(
-                            letterSpacing: 1.8,
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16,
-                          ),
-                        ),
+                        child: controller.isPaymentInProgress.value
+                            ? const SizedBox(
+                                height: 20,
+                                width: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : Text(
+                                controller.getPayButtonText(),
+                                style: const TextStyle(
+                                  letterSpacing: 1.8,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 16,
+                                ),
+                              ),
                       ),
                     ),
 
@@ -395,53 +423,63 @@ class PaymentplanView extends StatelessWidget {
     );
   }
 
-  // FIXED: Decides the flow after the button is tapped
-  void _handlePayButtonTap(
-    PaymentplanController controller,
-    Razorpay razorpay,
-    dynamic data,
-  ) async {
-    CustomToast.info('Preparing your subscription...');
+  // Decides the flow after the button is tapped
+  void _handlePayButtonTap(dynamic data) async {
+    if (controller.isPaymentInProgress.value) return; // ✅ guard against double tap
+    controller.isPaymentInProgress.value = true;
 
-    final created = await controller.createSubscription();
-    if (!created) {
-      CustomToast.error('Could not start subscription. Please try again.');
-      return;
-    }
+    try {
+      CustomToast.info('Preparing your subscription...');
 
-    // 🔥 FIX: Check if subscription is actually ACTIVE before navigating
-    if (controller.isSubscriptionActive()) {
-      // Only navigate if subscription is truly active/verified/completed
-      Get.to(() => const ProfilesetupView());
-      return;
-    }
-
-    // 🔥 FIX: Even if isExistingSubscription is true, if it's not active,
-    // we should still show Razorpay for payment
-    if (controller.isTrialFree()) {
-      // ₹0 trial — no Razorpay charge needed, subscription already active.
-      CustomToast.success('Trial activated! 🎉');
-      Get.to(() => const PaymentsuccessView());
-    } else {
-      if (controller.pendingRazorpayKeyId == null ||
-          controller.pendingRazorpayKeyId!.isEmpty) {
-        CustomToast.error(
-            'Payment configuration error. Please contact support.');
+      final created = await controller.createSubscription();
+      if (!created) {
+        CustomToast.error('Could not start subscription. Please try again.');
         return;
       }
 
-      _startPayment(
-        razorpay,
-        data,
-        controller.pendingRazorpaySubscriptionId!,
-        controller.pendingRazorpayKeyId!,
-      );
+      // Check if subscription is actually ACTIVE before navigating
+      if (controller.isSubscriptionActive()) {
+        // ✅ Already authenticated/active — Razorpay open nahi hoga
+        if (mounted) Get.offAll(() => const ProfilesetupView());
+        return;
+      }
+
+      // Even if isExistingSubscription is true, if it's not active,
+      // we should still show Razorpay for payment
+      if (controller.isTrialFree()) {
+        // ₹0 trial — no Razorpay charge needed, subscription already active.
+        CustomToast.success('Trial activated! 🎉');
+        if (mounted) Get.to(() => const PaymentsuccessView());
+      } else {
+        if (controller.pendingRazorpayKeyId == null ||
+            controller.pendingRazorpayKeyId!.isEmpty) {
+          CustomToast.error(
+              'Payment configuration error. Please contact support.');
+          return;
+        }
+
+        _startPayment(
+          data,
+          controller.pendingRazorpaySubscriptionId!,
+          controller.pendingRazorpayKeyId!,
+        );
+      }
+    } catch (e) {
+      print('Error in _handlePayButtonTap: $e');
+      CustomToast.error('Something went wrong. Please try again.');
+    } finally {
+      // Note: agar Razorpay checkout khul gaya hai to isPaymentInProgress
+      // ko yahin false mat karo — checkout callback (success/error) mein karo.
+      if (!_razorpayCheckoutOpened) {
+        controller.isPaymentInProgress.value = false;
+      }
     }
   }
 
+  bool _razorpayCheckoutOpened = false;
+
   // Opens Razorpay checkout for a Razorpay Subscription
   void _startPayment(
-    Razorpay razorpay,
     dynamic data,
     String subscriptionId,
     String keyId,
@@ -460,7 +498,8 @@ class PaymentplanView extends StatelessWidget {
     }
 
     // Debug-only: what the trial price / paise amount would be
-    final int amountInPaise = int.parse(data.trialPrice) * 100;
+    // ✅ safe parse — malformed price se crash nahi hoga
+    final int amountInPaise = (int.tryParse(data.trialPrice) ?? 0) * 100;
     print('========================================');
     print('💰 RAZORPAY SUBSCRIPTION CHECKOUT');
     print('Trial Price (raw): ${data.trialPrice}');
@@ -472,7 +511,7 @@ class PaymentplanView extends StatelessWidget {
 
     var options = {
       'key': keyId,
-      'subscription_id':subscriptionId,
+      'subscription_id': subscriptionId,
       'name': 'Dating App Subscription',
       'description': data.planName,
       'prefill': {
@@ -488,18 +527,18 @@ class PaymentplanView extends StatelessWidget {
     print('========================================');
 
     try {
+      _razorpayCheckoutOpened = true;
       razorpay.open(options);
     } catch (e) {
       print("Error: $e");
+      _razorpayCheckoutOpened = false;
+      controller.isPaymentInProgress.value = false;
       CustomToast.error('Failed to open payment gateway');
     }
   }
 
   // Called by Razorpay after a successful checkout
-  void _handlePaymentSuccess(
-    PaymentSuccessResponse response,
-    PaymentplanController controller,
-  ) async {
+  void _handlePaymentSuccess(PaymentSuccessResponse response) async {
     print('========================================');
     print('✅ RAZORPAY SUCCESS CALLBACK');
     print('Payment ID: ${response.paymentId}');
@@ -507,19 +546,37 @@ class PaymentplanView extends StatelessWidget {
     print('Signature: ${response.signature}');
     print('========================================');
 
+    _razorpayCheckoutOpened = false;
+
+    // ✅ Widget/controller disposed ho chuka ho to aage kuch mat karo
+    if (!mounted || !Get.isRegistered<PaymentplanController>()) return;
+
     CustomToast.info('Verifying your payment...');
 
-    final verified = await controller.verifyPayment(
-      razorpayPaymentId: response.paymentId ?? '',
-      razorpaySignature: response.signature ?? '',
-      razorpaySubscriptionId: controller.pendingRazorpaySubscriptionId,
-    );
+    try {
+      final verified = await controller.verifyPayment(
+        razorpayPaymentId: response.paymentId ?? '',
+        razorpaySignature: response.signature ?? '',
+        razorpaySubscriptionId: controller.pendingRazorpaySubscriptionId,
+      );
 
-    if (verified) {
-      CustomToast.success('Payment Successful! 🎉');
-      Get.to(() => const PaymentsuccessView());
-    } else {
-      CustomToast.error('Payment verification failed. Please contact support.');
+      if (!mounted) return;
+
+      if (verified) {
+        CustomToast.success('Payment Successful! 🎉');
+        Get.to(() => const PaymentsuccessView());
+      } else {
+        CustomToast.error('Payment verification failed. Please contact support.');
+      }
+    } catch (e) {
+      print('Error verifying payment: $e');
+      if (mounted) {
+        CustomToast.error('Payment verification failed. Please contact support.');
+      }
+    } finally {
+      if (Get.isRegistered<PaymentplanController>()) {
+        controller.isPaymentInProgress.value = false;
+      }
     }
   }
 
@@ -530,6 +587,11 @@ class PaymentplanView extends StatelessWidget {
     print('Message: ${response.message}');
     print('Error (raw): ${response.error}');
     print('========================================');
+
+    _razorpayCheckoutOpened = false;
+    if (Get.isRegistered<PaymentplanController>()) {
+      controller.isPaymentInProgress.value = false;
+    }
 
     String errorMessage = 'Payment failed. Please try again.';
 
