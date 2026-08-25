@@ -400,13 +400,13 @@ class _PaymentplanViewState extends State<PaymentplanView> {
                           children: [
                             const TextSpan(
                                 text: 'Privacy Policy and Terms of Service of '),
-                            TextSpan(
-                              text: controller.appName,
-                              style: const TextStyle(
-                                color: Color(0xffFF9A44),
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
+                           TextSpan(
+  text: data.appName,
+  style: const TextStyle(
+    color: Color(0xffFF9A44),
+    fontWeight: FontWeight.w700,
+  ),
+),
                           ],
                         ),
                       ),

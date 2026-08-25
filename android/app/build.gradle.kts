@@ -18,7 +18,7 @@ plugins {
 android {
     // ✅ apna real package name daalo — jaise com.tumhari_company.dating_app
     namespace = "com.atis.dating_app"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -36,7 +36,7 @@ android {
         applicationId = "com.atis.dating_app"
 
         minSdk = 28
-        targetSdk = 34
+        targetSdk = 36
 
         versionCode = flutter.versionCode
         versionName = flutter.versionName

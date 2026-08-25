@@ -34,7 +34,6 @@ class SubscriptionResponse {
     );
   }
 }
-
 class SubscriptionData {
   final String id;
   final String backgroundVideo;
@@ -49,6 +48,7 @@ class SubscriptionData {
   final bool isDeleted;
   final String createdAt;
   final String updatedAt;
+  final String appName; // ✅ ADD
 
   SubscriptionData({
     required this.id,
@@ -64,6 +64,7 @@ class SubscriptionData {
     required this.isDeleted,
     required this.createdAt,
     required this.updatedAt,
+    required this.appName, // ✅ ADD
   });
 
   factory SubscriptionData.fromJson(Map<String, dynamic> json) {
@@ -81,6 +82,7 @@ class SubscriptionData {
       isDeleted: json['isDeleted'] ?? false,
       createdAt: json['createdAt'] ?? '',
       updatedAt: json['updatedAt'] ?? '',
+      appName: json['appName']?.toString() ?? 'Vibely', // ✅ ADD
     );
   }
 }
@@ -102,7 +104,7 @@ class PaymentplanController extends GetxController {
   var isVideoInitialized = false.obs;
 
   // App branding
-  final String appName = 'Vibely';
+
 
   // Subscription details
   String? pendingRazorpaySubscriptionId;
@@ -126,6 +128,7 @@ class PaymentplanController extends GetxController {
     isDeleted: false,
     createdAt: '',
     updatedAt: '',
+    appName: 'Vibely',
   );
 
   @override

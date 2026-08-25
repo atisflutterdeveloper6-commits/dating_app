@@ -91,19 +91,51 @@ class LoginconfirmationView extends GetView<LoginconfirmationController> {
                       // Icon + Text Row
                       Row(
                         children: [
-                          Container(
-                            height: 48.h,
-                            width: 48.h,
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFDECEF),
-                              borderRadius: BorderRadius.circular(14.r),
-                            ),
-                            child: const Icon(
-                              Icons.favorite,
-                              color: Color(0xFFE61E45),
-                              size: 24,
-                            ),
-                          ),
+                     Container(
+  height: 48.h,
+  width: 48.h,
+  decoration: BoxDecoration(
+    color: const Color(0xFFFDECEF),
+    borderRadius: BorderRadius.circular(14.r),
+  ),
+  child: ClipRRect(
+    borderRadius: BorderRadius.circular(14.r),
+    child: Obx(() {
+      if (controller.isSplashLogoLoading.value) {
+        return const Center(
+          child: SizedBox(
+            height: 20,
+            width: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Color(0xFFE61E45),
+            ),
+          ),
+        );
+      }
+
+      if (controller.splashImageUrl.value.isEmpty) {
+        return const Icon(
+          Icons.favorite,
+          color: Color(0xFFE61E45),
+          size: 24,
+        );
+      }
+
+      return Image.network(
+        controller.splashImageUrl.value,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const Icon(
+            Icons.favorite,
+            color: Color(0xFFE61E45),
+            size: 24,
+          );
+        },
+      );
+    }),
+  ),
+),
                           SizedBox(width: 12.w),
                           Expanded(
                             child: Column(

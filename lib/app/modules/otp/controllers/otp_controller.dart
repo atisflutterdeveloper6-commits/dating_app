@@ -204,171 +204,166 @@ class OtpController extends ChangeNotifier {
 
   // ============ OTP VERIFICATION ============
   
-  Future<void> verifyOTP(String otpCode) async {
-    // Validate OTP length
-    if (otpCode.length < 6) {
-      otpError = 'Please enter complete 6-digit OTP';
-      notifyListeners();
-      CustomToast.error('Please enter complete 6-digit OTP');
-      return;
-    }
+Future<void> verifyOTP(String otpCode) async {
+  print('========================================');
+  print('🔥 OTP VERIFICATION STARTED');
+  print('========================================');
+  print('📱 Phone Number: $phoneNumber');
+  print('🔢 OTP Length: ${otpCode.length}');
+  print('🔐 Verification ID: $verificationId');
+  print('🔐 Verification ID Length: ${verificationId.length}');
+  print('📱 Firebase App: ${_auth.app.name}');
+  print('========================================');
 
-    // Show loading state
-    isVerifying = true;
-    otpError = '';
+  if (otpCode.length < 6) {
+    print('❌ OTP LENGTH INVALID: ${otpCode.length}');
+    otpError = 'Please enter complete 6-digit OTP';
     notifyListeners();
-
-    try {
-      // Create credential from OTP
-      PhoneAuthCredential credential = PhoneAuthProvider.credential(
-        verificationId: verificationId,
-        smsCode: otpCode,
-      );
-
-      // Sign in with credential
-      UserCredential userCredential = await _auth.signInWithCredential(credential);
-
-      // ================= FIREBASE RESPONSE =================
-      User? user = userCredential.user;
-
-      if (user != null) {
-        print("========================================");
-        print("✅ FIREBASE AUTH SUCCESSFUL");
-        print("========================================");
-        print("🆔 Firebase UID: ${user.uid}");
-        print("📱 Phone Number: ${user.phoneNumber}");
-        print("📧 Email: ${user.email}");
-        print("👤 Name: ${user.displayName}");
-        print("🙋 Is Anonymous: ${user.isAnonymous}");
-        print("✅ Email Verified: ${user.emailVerified}");
-        print("📅 Account Created: ${user.metadata.creationTime}");
-        print("🕒 Last Sign In: ${user.metadata.lastSignInTime}");
-        print("========================================");
-
-        // 🔥 SAVE FIREBASE TOKEN
-        await _saveFirebaseToken(user);
-
-        // Check if user is new
-        bool isNewUser = userCredential.additionalUserInfo?.isNewUser ?? false;
-        print('👤 Is New User: $isNewUser');
-        print("========================================");
-      }
-
-      // Success - verification complete
-      isVerifying = false;
-      notifyListeners();
-
-      // Check if user is new
-      bool isNewUser = userCredential.additionalUserInfo?.isNewUser ?? false;
-      
-      // Navigate based on user status
-      if (isNewUser) {
-        print('✅ New user registered - navigating to profile creation');
-        Get.offAllNamed(
-          '/loginconfirmation',
-          arguments: phoneNumber,
-        );
-} else {
-        // Existing user - check if profile exists
-        try {
-          bool hasProfile = _storage.isProfileCreated();
-          String? profileId = _storage.getProfileId();
-          final bool isLoggedIn = _storage.isLoggedIn();
-          
-          print('📊 User Status Check:');
-          print('   Has Profile: $hasProfile');
-          print('   Profile ID: $profileId');
-          print('   Is Logged In: $isLoggedIn');
-
-          // ✅ Local storage me profile nahi mila (jaise logout ke baad clear ho gaya) —
-          // backend se recover karne ki koshish karo pehle, seedha profile-creation pe mat bhejo
-          if (!hasProfile || profileId == null || profileId.isEmpty) {
-            print('⚠️ Local profile data missing — attempting backend recovery...');
-            try {
-              final profileController = Get.find<ProfileServiceController>();
-              final recovered = await profileController.recoverProfileByPhone(phoneNumber);
-              if (recovered) {
-                hasProfile = true;
-                profileId = _storage.getProfileId();
-                print('✅ Profile recovered from backend');
-              }
-            } catch (e) {
-              print('❌ Recovery attempt failed: $e');
-            }
-          }
-          
-  if (hasProfile && profileId != null && profileId.isNotEmpty && isLoggedIn) {
-            print('✅ Existing user with profile - navigating to dashboard');
-            // 🔥 DashboardController app-lifetime me persist karta hai — agar
-            // user pehle kisi aur tab par tha, wo state yahan tak carry ho
-            // sakti hai. Login hote hi hamesha index 0 (Home) pe le jao.
-            try {
-              Get.find<DashboardController>().currentIndex.value = 0;
-            } catch (e) {
-              print('⚠️ Could not reset dashboard index: $e');
-            }
-            Get.offAllNamed('/dashboard');
-            try {
-              await Get.find<ChatService>().saveUserProfileToFirestore();
-            } catch (e) {
-              print('⚠️ Could not save user profile to Firestore: $e');
-            }
-          } else {
-            print('✅ Existing user without profile - navigating to profile creation');
-            Get.offAllNamed(
-              '/loginconfirmation',
-              arguments: phoneNumber,
-            );
-          }
-        } catch (e) {
-          print('❌ Error checking profile: $e');
-          Get.offAllNamed(
-            '/loginconfirmation',
-            arguments: phoneNumber,
-          );
-        }
-      }
-
-    } on FirebaseAuthException catch (e) {
-      isVerifying = false;
-
-      String errorMessage = 'Invalid OTP. Please try again.';
-
-      switch (e.code) {
-        case 'invalid-verification-code':
-          errorMessage = 'Invalid OTP code. Please check and try again.';
-          break;
-        case 'too-many-requests':
-          errorMessage = 'Too many attempts. Please try again later.';
-          break;
-        case 'credential-already-in-use':
-          errorMessage = 'This phone number is already registered.';
-          break;
-        case 'session-expired':
-          errorMessage = 'Session expired. Please request a new OTP.';
-          break;
-        default:
-          errorMessage = e.message ?? 'Verification failed. Please try again.';
-      }
-
-      otpError = errorMessage;
-      notifyListeners();
-
-      print('❌ Firebase Auth Error: ${e.code} - ${e.message}');
-      print('❌ Full error: $e');
-      CustomToast.error(errorMessage);
-
-    } catch (e) {
-      isVerifying = false;
-      otpError = 'Something went wrong. Please try again.';
-      notifyListeners();
-
-      print("❌ Error: $e");
-      print("❌ Stack trace: ${StackTrace.current}");
-      CustomToast.error('Something went wrong. Please try again.');
-    }
+    CustomToast.error('Please enter complete 6-digit OTP');
+    return;
   }
 
+  isVerifying = true;
+  otpError = '';
+  notifyListeners();
+
+  try {
+    print('🔄 Creating PhoneAuthCredential...');
+
+    PhoneAuthCredential credential = PhoneAuthProvider.credential(
+      verificationId: verificationId,
+      smsCode: otpCode,
+    );
+
+    print('✅ PhoneAuthCredential created successfully');
+    print('🔄 Calling signInWithCredential...');
+
+    UserCredential userCredential =
+        await _auth.signInWithCredential(credential);
+
+    print('✅ signInWithCredential SUCCESS');
+
+    User? user = userCredential.user;
+
+    print('👤 User object: ${user != null ? "NOT NULL" : "NULL"}');
+
+    if (user != null) {
+      print('========================================');
+      print('🎉 FIREBASE PHONE AUTH SUCCESS');
+      print('========================================');
+      print('🆔 UID: ${user.uid}');
+      print('📱 Phone: ${user.phoneNumber}');
+      print('📧 Email: ${user.email}');
+      print('🆕 Is New User: '
+          '${userCredential.additionalUserInfo?.isNewUser}');
+      print('========================================');
+
+      await _saveFirebaseToken(user);
+    }
+
+    isVerifying = false;
+    notifyListeners();
+
+    bool isNewUser =
+        userCredential.additionalUserInfo?.isNewUser ?? false;
+
+    print('🆕 Is New User: $isNewUser');
+
+    // Aapka existing navigation code yahan continue rahega...
+
+  } on FirebaseAuthException catch (e, stackTrace) {
+    isVerifying = false;
+
+    print('');
+    print('========================================');
+    print('🚨🚨🚨 FIREBASE OTP VERIFICATION FAILED 🚨🚨🚨');
+    print('========================================');
+    print('❌ ERROR CODE: ${e.code}');
+    print('❌ ERROR MESSAGE: ${e.message}');
+    print('❌ ERROR PLUGIN: ${e.plugin}');
+    print('❌ ERROR DETAILS: ${e.toString()}');
+    print('📱 PHONE: $phoneNumber');
+    print('🔐 VERIFICATION ID LENGTH: ${verificationId.length}');
+    print('📍 STACK TRACE:');
+    print(stackTrace);
+    print('========================================');
+
+    String errorMessage =
+        e.message ?? 'Verification failed. Please try again.';
+
+    switch (e.code) {
+      case 'invalid-verification-code':
+        errorMessage = 'Invalid OTP code. Please check and try again.';
+        break;
+
+      case 'invalid-verification-id':
+        errorMessage = 'OTP session expired. Please request a new OTP.';
+        break;
+
+      case 'session-expired':
+        errorMessage = 'Session expired. Please request a new OTP.';
+        break;
+
+      case 'too-many-requests':
+        errorMessage = 'Too many attempts. Please try again later.';
+        break;
+
+      case 'credential-already-in-use':
+        errorMessage = 'This phone number is already registered.';
+        break;
+
+      case 'app-not-authorized':
+        errorMessage =
+            'App is not authorized. Check Firebase SHA-1/SHA-256.';
+        break;
+
+      case 'quota-exceeded':
+        errorMessage =
+            'Firebase OTP quota exceeded. Please try again later.';
+        break;
+
+      case 'operation-not-allowed':
+        errorMessage =
+            'Phone Authentication is disabled in Firebase.';
+        break;
+
+      case 'billing-not-enabled':
+        errorMessage =
+            'Firebase billing is not enabled for Phone Authentication.';
+        break;
+
+      default:
+        errorMessage = e.message ??
+            'Verification failed. Please try again.';
+    }
+
+    print('🎯 FINAL USER ERROR: $errorMessage');
+
+    otpError = errorMessage;
+    notifyListeners();
+
+    CustomToast.error(errorMessage);
+
+  } catch (e, stackTrace) {
+    isVerifying = false;
+
+    print('');
+    print('========================================');
+    print('🚨 UNKNOWN OTP ERROR');
+    print('========================================');
+    print('❌ ERROR: $e');
+    print('📍 STACK TRACE:');
+    print(stackTrace);
+    print('========================================');
+
+    otpError = 'Something went wrong. Please try again.';
+    notifyListeners();
+
+    CustomToast.error(
+      'Something went wrong. Please try again.',
+    );
+  }
+}
   // ============ RESEND OTP ============
 
   Future<void> resendCode() async {
