@@ -12,7 +12,6 @@ import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class OtpController extends ChangeNotifier {
-
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   final String verificationId;
@@ -24,10 +23,24 @@ class OtpController extends ChangeNotifier {
   String otpError = '';
   Timer? _timer;
 
+  // 🔥 FIX: guard flag so we never call notifyListeners() after dispose().
+  // Calling notifyListeners() on a disposed ChangeNotifier throws in debug
+  // mode and can crash release builds too if it happens after the widget
+  // that owns this controller (OtpView) has already navigated away.
+  bool _disposed = false;
+
+  // 🔥 AUTOFILL HOOK — set by OtpView.initState(), cleared in dispose().
+  // Firebase Auth's OWN SMS auto-retrieval (started by verifyPhoneNumber()
+  // in LoginView) is the only SMS listener in the app; when it fires, its
+  // `credential.smsCode` is forwarded here so whichever OtpView is
+  // currently on screen can fill its pin field and verify — without ever
+  // registering a second/competing SMS listener (that's what crashed
+  // before, see otp_view.dart for details).
+  static void Function(String smsCode)? onAutoRetrievedCode;
+
   // Storage service instance
   final StorageService _storage = StorageService();
 
-  // Constructor with required parameters
   OtpController({
     required this.verificationId,
     required this.phoneNumber,
@@ -36,24 +49,36 @@ class OtpController extends ChangeNotifier {
     print('🔑 Verification ID: $verificationId');
   }
 
+  // 🔥 FIX: safe wrapper — every notifyListeners() call in this file now
+  // goes through here.
+  void _safeNotify() {
+    if (!_disposed) {
+      notifyListeners();
+    }
+  }
+
   // ============ TIMER METHODS ============
-  
+
   void startTimer() {
     print('⏰ Starting timer...');
     secondsRemaining = 60;
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_disposed) {
+        timer.cancel();
+        return;
+      }
       if (secondsRemaining > 0) {
         secondsRemaining--;
         print('⏱️ Timer: $secondsRemaining seconds remaining');
-        notifyListeners();
+        _safeNotify();
       } else {
         _timer?.cancel();
         print('⏰ Timer finished!');
-        notifyListeners();
+        _safeNotify();
       }
     });
-    notifyListeners();
+    _safeNotify();
   }
 
   String get formattedTime {
@@ -63,30 +88,30 @@ class OtpController extends ChangeNotifier {
   }
 
   // ============ SAVE FIREBASE TOKEN ============
-  
+
   Future<void> _saveFirebaseToken(User user) async {
     try {
       print('========================================');
       print('🔑 SAVING FIREBASE TOKEN');
       print('========================================');
-      
-      // Get Firebase ID Token - TRUE means force refresh
+
       String? idToken = await user.getIdToken(true);
-      
+
       if (idToken != null && idToken.isNotEmpty) {
-        // ============================================
-        // 🔥 PRINT FULL TOKEN
-        // ============================================
         print('✅ FIREBASE TOKEN OBTAINED');
         print('========================================');
-        print('🔑 FULL TOKEN:');
-        print(idToken);
-        print('========================================');
         print('📝 Token Length: ${idToken.length} characters');
-        print('📝 Token Prefix: ${idToken.substring(0, 50)}...');
-        print('📝 Token Suffix: ...${idToken.substring(idToken.length - 50)}');
+
+        // 🔥 FIX: guard substring() so a short/unexpected token can't
+        // throw a RangeError here.
+        if (idToken.length > 50) {
+          print('📝 Token Prefix: ${idToken.substring(0, 50)}...');
+          print('📝 Token Suffix: ...${idToken.substring(idToken.length - 50)}');
+        } else {
+          print('📝 Token (short, printing full): $idToken');
+        }
         print('========================================');
-        
+
         // Get token details
         IdTokenResult tokenResult = await user.getIdTokenResult();
         print('📄 TOKEN DETAILS:');
@@ -96,21 +121,18 @@ class OtpController extends ChangeNotifier {
         print('   Sign-in Provider: ${tokenResult.signInProvider}');
         print('   Claims: ${tokenResult.claims}');
         print('========================================');
-        
+
         // Parse token to get payload (JWT parts)
         final parts = idToken.split('.');
         if (parts.length == 3) {
-          // Header
           String header = _decodeBase64Url(parts[0]);
           print('📋 TOKEN HEADER:');
           print(header);
-          
-          // Payload
+
           String payload = _decodeBase64Url(parts[1]);
           print('📋 TOKEN PAYLOAD:');
           print(payload);
-          
-          // Parse payload to get user info
+
           try {
             Map<String, dynamic> payloadData = jsonDecode(payload);
             print('👤 USER INFO FROM TOKEN:');
@@ -119,13 +141,17 @@ class OtpController extends ChangeNotifier {
             print('   Email: ${payloadData['email']}');
             print('   Issuer: ${payloadData['iss']}');
             print('   Audience: ${payloadData['aud']}');
-            print('   Expires: ${DateTime.fromMillisecondsSinceEpoch(payloadData['exp'] * 1000)}');
+            // 🔥 FIX: guard against missing/null 'exp' claim before using it
+            final exp = payloadData['exp'];
+            if (exp != null) {
+              print('   Expires: ${DateTime.fromMillisecondsSinceEpoch((exp as int) * 1000)}');
+            }
           } catch (e) {
             print('⚠️ Could not parse payload: $e');
           }
         }
         print('========================================');
-        
+
         // Save login session
         await _storage.saveLoginSession(
           token: idToken,
@@ -139,62 +165,64 @@ class OtpController extends ChangeNotifier {
             'lastSignInTime': user.metadata.lastSignInTime?.toIso8601String(),
           },
         );
-        
-        // Save phone number
+
         if (user.phoneNumber != null) {
           await _storage.savePhoneNumber(user.phoneNumber!);
         }
-        
-        // Save user ID
+
         await _storage.saveUserId(user.uid);
-        
-        // Also save token in legacy location for compatibility
         await _storage.saveToken(idToken);
-        
-        
-        // Set logged in status
         await _storage.setLoggedIn(true);
-            // ✅ Init ZegoCloud call service so this user can send/receive calls
-      final existingProfileId = _storage.getProfileId();
-        if (existingProfileId != null && existingProfileId.isNotEmpty) {
-          await CallInvitationService.ensureInit(
-            userId: existingProfileId,
-            userName: user.phoneNumber ?? existingProfileId,
-          );
+
+        // 🔥 FIX: this native SDK (ZegoCloud) init is the most likely real
+        // crash source — a native-layer crash here bypasses Dart's
+        // try/catch entirely. Isolating it in its own try/catch at least
+        // stops any *Dart-side* exception from aborting token save/login.
+        // If crashes persist after this fix, check adb logcat for a
+        // FATAL EXCEPTION / SIGSEGV coming from Zego — that means the
+        // native SDK itself is crashing (e.g. bad appID/appSign, or
+        // double-init) and must be fixed in CallInvitationService.
+        try {
+          final existingProfileId = _storage.getProfileId();
+          if (existingProfileId != null && existingProfileId.isNotEmpty) {
+            await CallInvitationService.ensureInit(
+              userId: existingProfileId,
+              userName: user.phoneNumber ?? existingProfileId,
+            );
+          }
+        } catch (e, st) {
+          print('⚠️ CallInvitationService.ensureInit failed (non-fatal): $e');
+          print(st);
         }
+
         print('✅ Firebase token and user data saved successfully');
-        print('✅ Token saved in storage: ${_storage.getToken() != null ? "Yes" : "No"}');
-        print('✅ Login token saved: ${_storage.getLoginToken() != null ? "Yes" : "No"}');
-        print('✅ Phone saved: ${_storage.getPhoneNumber()}');
-        print('✅ User ID saved: ${_storage.getUserId()}');
-        print('✅ Logged in status: ${_storage.isLoggedIn()}');
         print('========================================');
-        await NotificationService.instance.saveFCMToken(); 
-        // Debug: Print all stored dataR
+
+        // 🔥 FIX: FCM save also isolated so a failure here can't take
+        // down the whole login flow.
+        try {
+          await NotificationService.instance.saveFCMToken();
+        } catch (e, st) {
+          print('⚠️ saveFCMToken failed (non-fatal): $e');
+          print(st);
+        }
+
         _storage.debugPrintAllData();
-        
-        // 🔥 Also print the stored token to verify
-        print('📂 STORED TOKEN:');
-        print(_storage.getToken());
-        print('========================================');
-        
       } else {
         print('⚠️ No Firebase ID token received');
       }
-    } catch (e) {
+    } catch (e, st) {
       print('❌ Error saving Firebase token: $e');
+      print(st);
     }
   }
 
-  // Helper to decode Base64Url
   String _decodeBase64Url(String input) {
     try {
-      // Add padding if needed
       String normalized = input.replaceAll('-', '+').replaceAll('_', '/');
       while (normalized.length % 4 != 0) {
         normalized += '=';
       }
-      // Decode from base64
       List<int> bytes = base64Decode(normalized);
       return utf8.decode(bytes);
     } catch (e) {
@@ -203,199 +231,161 @@ class OtpController extends ChangeNotifier {
   }
 
   // ============ OTP VERIFICATION ============
-  
-Future<void> verifyOTP(String otpCode) async {
-  print('========================================');
-  print('🔥 OTP VERIFICATION STARTED');
-  print('========================================');
-  print('📱 Phone Number: $phoneNumber');
-  print('🔢 OTP Length: ${otpCode.length}');
-  print('🔐 Verification ID: $verificationId');
-  print('🔐 Verification ID Length: ${verificationId.length}');
-  print('📱 Firebase App: ${_auth.app.name}');
-  print('========================================');
 
-  if (otpCode.length < 6) {
-    print('❌ OTP LENGTH INVALID: ${otpCode.length}');
-    otpError = 'Please enter complete 6-digit OTP';
-    notifyListeners();
-    CustomToast.error('Please enter complete 6-digit OTP');
-    return;
-  }
-
-  isVerifying = true;
-  otpError = '';
-  notifyListeners();
-
-  try {
-    print('🔄 Creating PhoneAuthCredential...');
-
-    PhoneAuthCredential credential = PhoneAuthProvider.credential(
-      verificationId: verificationId,
-      smsCode: otpCode,
-    );
-
-    print('✅ PhoneAuthCredential created successfully');
-    print('🔄 Calling signInWithCredential...');
-
-    UserCredential userCredential =
-        await _auth.signInWithCredential(credential);
-
-    print('✅ signInWithCredential SUCCESS');
-
-    User? user = userCredential.user;
-
-    print('👤 User object: ${user != null ? "NOT NULL" : "NULL"}');
-
-    if (user != null) {
-      print('========================================');
-      print('🎉 FIREBASE PHONE AUTH SUCCESS');
-      print('========================================');
-      print('🆔 UID: ${user.uid}');
-      print('📱 Phone: ${user.phoneNumber}');
-      print('📧 Email: ${user.email}');
-      print('🆕 Is New User: '
-          '${userCredential.additionalUserInfo?.isNewUser}');
-      print('========================================');
-
-      await _saveFirebaseToken(user);
+  Future<void> verifyOTP(String otpCode) async {
+    if (otpCode.length < 6) {
+      otpError = 'Please enter complete 6-digit OTP';
+      _safeNotify();
+      CustomToast.error('Please enter complete 6-digit OTP');
+      return;
     }
 
-    isVerifying = false;
-    notifyListeners();
+    isVerifying = true;
+    otpError = '';
+    _safeNotify();
 
-    bool isNewUser =
-        userCredential.additionalUserInfo?.isNewUser ?? false;
+    try {
+      PhoneAuthCredential credential = PhoneAuthProvider.credential(
+        verificationId: verificationId,
+        smsCode: otpCode,
+      );
 
-    print('🆕 Is New User: $isNewUser');
+      UserCredential userCredential = await _auth.signInWithCredential(credential);
 
-    // Aapka existing navigation code yahan continue rahega...
+      User? user = userCredential.user;
 
-  } on FirebaseAuthException catch (e, stackTrace) {
-    isVerifying = false;
+      if (user != null) {
+        print('✅ FIREBASE AUTH SUCCESSFUL — UID: ${user.uid}');
+        await _saveFirebaseToken(user);
+      }
 
-    print('');
-    print('========================================');
-    print('🚨🚨🚨 FIREBASE OTP VERIFICATION FAILED 🚨🚨🚨');
-    print('========================================');
-    print('❌ ERROR CODE: ${e.code}');
-    print('❌ ERROR MESSAGE: ${e.message}');
-    print('❌ ERROR PLUGIN: ${e.plugin}');
-    print('❌ ERROR DETAILS: ${e.toString()}');
-    print('📱 PHONE: $phoneNumber');
-    print('🔐 VERIFICATION ID LENGTH: ${verificationId.length}');
-    print('📍 STACK TRACE:');
-    print(stackTrace);
-    print('========================================');
+      isVerifying = false;
+      _safeNotify();
 
-    String errorMessage =
-        e.message ?? 'Verification failed. Please try again.';
+      bool isNewUser = userCredential.additionalUserInfo?.isNewUser ?? false;
+      print('👤 Is New User: $isNewUser');
 
-    switch (e.code) {
-      case 'invalid-verification-code':
-        errorMessage = 'Invalid OTP code. Please check and try again.';
-        break;
+      if (isNewUser) {
+        print('✅ New user registered - navigating to profile creation');
+        Get.offAllNamed('/loginconfirmation', arguments: phoneNumber);
+      } else {
+        try {
+          bool hasProfile = _storage.isProfileCreated();
+          String? profileId = _storage.getProfileId();
+          final bool isLoggedIn = _storage.isLoggedIn();
 
-      case 'invalid-verification-id':
-        errorMessage = 'OTP session expired. Please request a new OTP.';
-        break;
+          print('📊 User Status Check: hasProfile=$hasProfile, profileId=$profileId, isLoggedIn=$isLoggedIn');
 
-      case 'session-expired':
-        errorMessage = 'Session expired. Please request a new OTP.';
-        break;
+          if (!hasProfile || profileId == null || profileId.isEmpty) {
+            print('⚠️ Local profile data missing — attempting backend recovery...');
+            try {
+              final profileController = Get.find<ProfileServiceController>();
+              final recovered = await profileController.recoverProfileByPhone(phoneNumber);
+              if (recovered) {
+                hasProfile = true;
+                profileId = _storage.getProfileId();
+                print('✅ Profile recovered from backend');
+              }
+            } catch (e) {
+              print('❌ Recovery attempt failed: $e');
+            }
+          }
 
-      case 'too-many-requests':
-        errorMessage = 'Too many attempts. Please try again later.';
-        break;
+          if (hasProfile && profileId != null && profileId.isNotEmpty && isLoggedIn) {
+            print('✅ Existing user with profile - navigating to dashboard');
+            try {
+              Get.find<DashboardController>().currentIndex.value = 0;
+            } catch (e) {
+              print('⚠️ Could not reset dashboard index: $e');
+            }
 
-      case 'credential-already-in-use':
-        errorMessage = 'This phone number is already registered.';
-        break;
+            // 🔥 FIX: do the Firestore save *before* navigating away, not
+            // after. Firing an await after Get.offAllNamed() means this
+            // code keeps running against a route/controller tree that may
+            // already be torn down — safer to finish all work first, then
+            // navigate last.
+            try {
+              await Get.find<ChatService>().saveUserProfileToFirestore();
+            } catch (e) {
+              print('⚠️ Could not save user profile to Firestore: $e');
+            }
 
-      case 'app-not-authorized':
-        errorMessage =
-            'App is not authorized. Check Firebase SHA-1/SHA-256.';
-        break;
+            Get.offAllNamed('/dashboard');
+          } else {
+            print('✅ Existing user without profile - navigating to profile creation');
+            Get.offAllNamed('/loginconfirmation', arguments: phoneNumber);
+          }
+        } catch (e) {
+          print('❌ Error checking profile: $e');
+          Get.offAllNamed('/loginconfirmation', arguments: phoneNumber);
+        }
+      }
+    } on FirebaseAuthException catch (e) {
+      isVerifying = false;
 
-      case 'quota-exceeded':
-        errorMessage =
-            'Firebase OTP quota exceeded. Please try again later.';
-        break;
+      String errorMessage = 'Invalid OTP. Please try again.';
 
-      case 'operation-not-allowed':
-        errorMessage =
-            'Phone Authentication is disabled in Firebase.';
-        break;
+      switch (e.code) {
+        case 'invalid-verification-code':
+          errorMessage = 'Invalid OTP code. Please check and try again.';
+          break;
+        case 'too-many-requests':
+          errorMessage = 'Too many attempts. Please try again later.';
+          break;
+        case 'credential-already-in-use':
+          errorMessage = 'This phone number is already registered.';
+          break;
+        case 'session-expired':
+          errorMessage = 'Session expired. Please request a new OTP.';
+          break;
+        default:
+          errorMessage = e.message ?? 'Verification failed. Please try again.';
+      }
 
-      case 'billing-not-enabled':
-        errorMessage =
-            'Firebase billing is not enabled for Phone Authentication.';
-        break;
+      otpError = errorMessage;
+      _safeNotify();
 
-      default:
-        errorMessage = e.message ??
-            'Verification failed. Please try again.';
+      print('❌ Firebase Auth Error: ${e.code} - ${e.message}');
+      CustomToast.error(errorMessage);
+    } catch (e, st) {
+      isVerifying = false;
+      otpError = 'Something went wrong. Please try again.';
+      _safeNotify();
+
+      print('❌ Error: $e');
+      print('❌ Stack trace: $st');
+      CustomToast.error('Something went wrong. Please try again.');
     }
-
-    print('🎯 FINAL USER ERROR: $errorMessage');
-
-    otpError = errorMessage;
-    notifyListeners();
-
-    CustomToast.error(errorMessage);
-
-  } catch (e, stackTrace) {
-    isVerifying = false;
-
-    print('');
-    print('========================================');
-    print('🚨 UNKNOWN OTP ERROR');
-    print('========================================');
-    print('❌ ERROR: $e');
-    print('📍 STACK TRACE:');
-    print(stackTrace);
-    print('========================================');
-
-    otpError = 'Something went wrong. Please try again.';
-    notifyListeners();
-
-    CustomToast.error(
-      'Something went wrong. Please try again.',
-    );
   }
-}
+
   // ============ RESEND OTP ============
 
   Future<void> resendCode() async {
-    // Only allow resend if timer has finished
     if (secondsRemaining != 0) {
       CustomToast.warning('Please wait $secondsRemaining seconds');
       return;
     }
 
     isResending = true;
-    notifyListeners();
+    _safeNotify();
 
     try {
       await _auth.verifyPhoneNumber(
         phoneNumber: phoneNumber,
         timeout: const Duration(seconds: 60),
         verificationCompleted: (PhoneAuthCredential credential) async {
-          // Auto-verification
           isResending = false;
-          notifyListeners();
-          
+          _safeNotify();
+
           try {
             UserCredential userCredential = await _auth.signInWithCredential(credential);
             User? user = userCredential.user;
-            
+
             if (user != null) {
               print('✅ Auto-verification successful');
-              // 🔥 SAVE TOKEN ON AUTO-VERIFICATION
               await _saveFirebaseToken(user);
             }
-            
-       // Navigate based on user status
+
             bool isNewUser = userCredential.additionalUserInfo?.isNewUser ?? false;
             if (isNewUser) {
               Get.offAllNamed('/loginconfirmation', arguments: phoneNumber);
@@ -411,7 +401,7 @@ Future<void> verifyOTP(String otpCode) async {
                 }
               }
 
-             if (hasProfile) {
+              if (hasProfile) {
                 try {
                   await Get.find<ChatService>().saveUserProfileToFirestore();
                 } catch (e) {
@@ -429,54 +419,47 @@ Future<void> verifyOTP(String otpCode) async {
         },
         verificationFailed: (FirebaseAuthException e) {
           isResending = false;
-          notifyListeners();
+          _safeNotify();
           String errorMessage = e.message ?? 'Failed to resend OTP';
           print('❌ Resend failed: ${e.code} - ${e.message}');
-          print('❌ Full error: $e');
           CustomToast.error(errorMessage);
         },
         codeSent: (String newVerificationId, int? resendToken) {
           isResending = false;
-          // 🔥 Restart timer when OTP is resent
           startTimer();
           print('✅ OTP resent successfully to: $phoneNumber');
-          print('📱 New Verification ID: $newVerificationId');
           CustomToast.success('OTP resent successfully 📨');
-          notifyListeners();
+          _safeNotify();
         },
         codeAutoRetrievalTimeout: (String verificationId) {
           isResending = false;
-          notifyListeners();
+          _safeNotify();
           print('⏰ Auto-retrieval timeout for: $verificationId');
         },
       );
-    } catch (e) {
+    } catch (e, st) {
       isResending = false;
-      notifyListeners();
+      _safeNotify();
       print('❌ Error resending code: $e');
-      print('❌ Stack trace: ${StackTrace.current}');
+      print('❌ Stack trace: $st');
       CustomToast.error('Failed to resend OTP. Please try again.');
     }
   }
 
   // ============ HELPER METHODS ============
-  
-  // Clear OTP error
+
   void clearError() {
     otpError = '';
-    notifyListeners();
+    _safeNotify();
   }
 
-  // Get current user
   User? get currentUser => _auth.currentUser;
 
-  // Get Firebase token (for debugging)
   Future<String?> getFirebaseToken() async {
     try {
       User? user = _auth.currentUser;
       if (user != null) {
         String? token = await user.getIdToken(true);
-        print('🔑 Token: $token');
         return token;
       }
     } catch (e) {
@@ -485,64 +468,10 @@ Future<void> verifyOTP(String otpCode) async {
     return null;
   }
 
-  // Debug method to print token
-  Future<void> debugPrintToken() async {
-    try {
-      User? user = _auth.currentUser;
-      if (user != null) {
-        String? token = await user.getIdToken(true);
-        print('========================================');
-        print('🔑 FIREBASE TOKEN DEBUG');
-        print('========================================');
-        print('firebasetoken');
-        print(token);
-        print('========================================');
-        print('Token Length: ${token?.length ?? 0}');
-        print('User UID: ${user.uid}');
-        print('Phone: ${user.phoneNumber}');
-        print('========================================');
-        
-        // Decode token parts
-        if (token != null) {
-          final parts = token.split('.');
-          if (parts.length == 3) {
-            print('HEADER:');
-            print(_decodeBase64Url(parts[0]));
-            print('========================================');
-            print('PAYLOAD:');
-            print(_decodeBase64Url(parts[1]));
-            print('========================================');
-          }
-        }
-      } else {
-        print('⚠️ No user logged in');
-      }
-    } catch (e) {
-      print('❌ Error getting token: $e');
-    }
-  }
+  String? getStoredToken() => _storage.getToken();
 
-  // Get stored token from storage
-  String? getStoredToken() {
-    return _storage.getToken();
-  }
+  String? getStoredLoginToken() => _storage.getLoginToken();
 
-  // Get stored login token
-  String? getStoredLoginToken() {
-    return _storage.getLoginToken();
-  }
-
-  // Print all stored tokens
-  void printStoredTokens() {
-    print('========================================');
-    print('📂 STORED TOKENS');
-    print('========================================');
-    print('Legacy Token: ${_storage.getToken() ?? 'Not found'}');
-    print('Login Token: ${_storage.getLoginToken() ?? 'Not found'}');
-    print('========================================');
-  }
-
-  // Sign out (optional)
   Future<void> signOut() async {
     try {
       await _auth.signOut();
@@ -555,6 +484,7 @@ Future<void> verifyOTP(String otpCode) async {
 
   @override
   void dispose() {
+    _disposed = true; // 🔥 FIX: set before cancelling timer / super.dispose()
     _timer?.cancel();
     super.dispose();
   }

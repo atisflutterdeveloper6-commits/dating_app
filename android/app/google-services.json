@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "130292384793",
-    "project_id": "dating-app-f1271",
-    "storage_bucket": "dating-app-f1271.firebasestorage.app"
+    "project_number": "807100737568",
+    "project_id": "dating-d7ec3",
+    "storage_bucket": "dating-d7ec3.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:130292384793:android:7da8c99dc79ba1ce241688",
+        "mobilesdk_app_id": "1:807100737568:android:12fff9e78d3df48cc9b445",
         "android_client_info": {
           "package_name": "com.atis.dating_app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAfddQOFG2ctmji4Nb5Z6XdougfRKsdoYI"
+          "current_key": "AIzaSyD7s8KYsDuyikhWDuRtSN7hBM3fo_QhczY"
         }
       ],
       "services": {

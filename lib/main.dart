@@ -26,11 +26,11 @@ void main() async {
   await GetStorage.init();
 await Firebase.initializeApp(
   options: const FirebaseOptions(
-    apiKey: 'AIzaSyAfddQOFG2ctmji4Nb5Z6XdougfRKsdoYI',
-    appId: '1:130292384793:android:7da8c99dc79ba1ce241688',
-    messagingSenderId: '130292384793',
-    projectId: 'dating-app-f1271',
-    storageBucket: 'dating-app-f1271.firebasestorage.app',
+    apiKey: 'AIzaSyD7s8KYsDuyikhWDuRtSN7hBM3fo_QhczY',
+    appId: '1:807100737568:android:12fff9e78d3df48cc9b445',
+    messagingSenderId: '807100737568',
+    projectId: 'dating-d7ec3',
+    storageBucket: 'dating-d7ec3.firebasestorage.app',
   ),
 );
 
@@ -61,7 +61,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      navigatorKey: callNavigatorKey,
+      navigatorKey: callNavigatorKey, 
       debugShowCheckedModeBanner: false,
       title: "Dating App",
       theme: ThemeData(

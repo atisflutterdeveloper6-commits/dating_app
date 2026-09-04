@@ -2474,10 +2474,7 @@ void updateWeight(String? weight) {
       return false;
     }
 
-    if (data.bio == null || data.bio!.isEmpty || data.bio!.length < 10) {
-      errorMessage.value = 'Bio must be at least 10 characters';
-      return false;
-    }
+
 
     return true;
   }

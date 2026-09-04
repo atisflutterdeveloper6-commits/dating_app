@@ -1,8 +1,11 @@
 import 'package:dating_app/app/custom_widget/custom_toast.dart';
+import 'package:dating_app/app/custom_widget/location_controller.dart';
 import 'package:dating_app/app/custom_widget/profile_service_controller.dart';
 import 'package:dating_app/app/modules/paymentsuccess/views/paymentsuccess_view.dart';
 import 'package:dating_app/app/modules/paymentplan/controllers/paymentplan_controller.dart';
+import 'package:dating_app/app/modules/privacypolicy/views/privacypolicy_view.dart';
 import 'package:dating_app/app/modules/profilesetup/views/profilesetup_view.dart';
+import 'package:dating_app/app/modules/termsandconditions/views/termsandconditions_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:media_kit_video/media_kit_video.dart';
@@ -26,7 +29,12 @@ class _PaymentplanViewState extends State<PaymentplanView> {
     super.initState();
 
     controller = Get.put(PaymentplanController());
-
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    final locationController = LocationController.to;
+    if (!locationController.locationFetched.value) {
+      locationController.getCurrentLocation();
+    }
+  });
     // ✅ Razorpay ab StatefulWidget ki lifecycle ke sath ek hi baar banta hai
     razorpay = Razorpay();
     razorpay.on(
@@ -165,6 +173,94 @@ class _PaymentplanViewState extends State<PaymentplanView> {
                         children: _buildMainTitle(data.mainTitle),
                       ),
                     ),
+                    // In the build method, where you have the location Row
+if (data.highlightText.isNotEmpty) ...[
+  const SizedBox(height: 12),
+  Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      const SizedBox(width: 6),
+      Text(
+        data.highlightText,
+        style: const TextStyle(
+          color: Colors.amber,
+          fontWeight: FontWeight.w700,
+          fontSize: 20,
+          letterSpacing: 1.0,
+        ),
+      ),
+    ],
+  ),
+  const SizedBox(height: 12),
+  // 🟢 UPDATED LOCATION ROW - CENTER ALIGNED WITH ICON
+  Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 16),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+      
+        const SizedBox(width: 6),
+        const Text(
+          "In ",
+          style: TextStyle(
+            color:Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Obx(() {
+          final locationController = LocationController.to;
+          if (locationController.isLoading.value) {
+            return const SizedBox(
+              height: 16,
+              width: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Color(0xffFF9A44),
+              ),
+            );
+          }
+          if (locationController.currentLocation.value.isNotEmpty) {
+            return Flexible(
+              child: Text(
+                locationController.currentLocation.value,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                softWrap: false,
+              ),
+            );
+          }
+          return TextButton(
+            onPressed: () async {
+              await locationController.getCurrentLocation();
+            },
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(0, 0),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            ),
+            child: const Text(
+              'Tap to get location',
+              style: TextStyle(
+                color: Color(0xffFF9A44),
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                decoration: TextDecoration.underline,
+                decorationColor: Color(0xffFF9A44),
+              ),
+            ),
+          );
+        }),
+      ],
+    ),
+  ),
+  const SizedBox(height: 20),
+],
 
                     const SizedBox(height: 40),
 
@@ -216,18 +312,9 @@ class _PaymentplanViewState extends State<PaymentplanView> {
                                   const Icon(
                                     Icons.workspace_premium,
                                     color: Colors.white,
-                                    size: 14,
+                                    size: 28,
                                   ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    data.highlightText,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 12,
-                                      letterSpacing: 1.0,
-                                    ),
-                                  ),
+                                
                                 ],
                               ),
                             ),
@@ -235,15 +322,7 @@ class _PaymentplanViewState extends State<PaymentplanView> {
                           ],
 
                           // Plan Name
-                          Text(
-                            data.planName,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
+                        
                           const SizedBox(height: 16),
 
                           // Trial Price
@@ -293,7 +372,7 @@ class _PaymentplanViewState extends State<PaymentplanView> {
                             ),
                             child: Text(
                               data.afterTrialText.isNotEmpty
-                                  ? data.afterTrialText
+                                  ? '₹${data.afterTrialText}'
                                   : '₹${data.priceAfterTrial} AFTER TRIAL',
                               style: const TextStyle(
                                 letterSpacing: 1.5,
@@ -333,85 +412,140 @@ class _PaymentplanViewState extends State<PaymentplanView> {
                     const Spacer(flex: 2),
 
                     // Pay Button with Razorpay
-                    Container(
-                      width: double.infinity,
-                      height: 54,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xffFF6A00), Color(0xffFF8C00)],
-                        ),
-                        borderRadius: BorderRadius.circular(30),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xffFF6A00).withOpacity(0.4),
-                            blurRadius: 16,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: ElevatedButton(
-                        onPressed: controller.isPaymentInProgress.value
-                            ? null // ✅ double-tap se duplicate payment/crash na ho
-                            : () => _handlePayButtonTap(data),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
-                        child: controller.isPaymentInProgress.value
-                            ? const SizedBox(
-                                height: 20,
-                                width: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                  color: Colors.white,
-                                ),
-                              )
-                            : Text(
-                                controller.getPayButtonText(),
-                                style: const TextStyle(
-                                  letterSpacing: 1.8,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 16,
-                                ),
-                              ),
-                      ),
-                    ),
-
+                Container(
+  width: double.infinity,
+  height: 54,
+  decoration: BoxDecoration(
+    gradient: const LinearGradient(
+      colors: [
+        Color(0xffFF6A00),
+        Color(0xffFF8C00),
+      ],
+    ),
+    borderRadius: BorderRadius.circular(30),
+    boxShadow: [
+      BoxShadow(
+        color: const Color(0xffFF6A00).withOpacity(0.4),
+        blurRadius: 16,
+        offset: const Offset(0, 6),
+      ),
+    ],
+  ),
+  child: ElevatedButton(
+    onPressed: controller.isPaymentInProgress.value
+        ? null
+        : () {
+            Get.to(() => const ProfilesetupView());
+          },
+    style: ElevatedButton.styleFrom(
+      backgroundColor: Colors.transparent,
+      disabledBackgroundColor: Colors.transparent,
+      shadowColor: Colors.transparent,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(30),
+      ),
+    ),
+    child: controller.isPaymentInProgress.value
+        ? const SizedBox(
+            height: 20,
+            width: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Colors.white,
+            ),
+          )
+        : Text(
+            controller.getPayButtonText(),
+            style: const TextStyle(
+              letterSpacing: 1.8,
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 16,
+            ),
+          ),
+  ),
+),
                     const SizedBox(height: 16),
 
                     // Privacy Policy — branded footer
-                    TextButton(
-                      onPressed: () {},
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        splashFactory: NoSplash.splashFactory,
-                      ),
-                      child: RichText(
-                        text: TextSpan(
-                          style: const TextStyle(
-                            letterSpacing: 0.5,
-                            fontSize: 12,
-                            color: Colors.white54,
-                          ),
-                          children: [
-                            const TextSpan(
-                                text: 'Privacy Policy and Terms of Service of '),
-                           TextSpan(
-  text: data.appName,
-  style: const TextStyle(
-    color: Color(0xffFF9A44),
-    fontWeight: FontWeight.w700,
-  ),
-),
-                          ],
-                        ),
-                      ),
-                    ),
-
+                 // Privacy Policy and Terms & Conditions - Separate Clickable TextButtons
+// Privacy Policy, Terms & Conditions with App Name
+Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    TextButton(
+      onPressed: () {
+        Get.to(PrivacypolicyView());
+      },
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+        splashFactory: NoSplash.splashFactory,
+        minimumSize: const Size(0, 0),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: Text(
+        'Privacy Policy',
+        style: TextStyle(
+          letterSpacing: 0.5,
+          fontSize: 12,
+          color:  Colors.white,
+          fontWeight: FontWeight.w600,
+          decoration: TextDecoration.underline,
+          decorationColor: const Color(0xffFF9A44),
+        ),
+      ),
+    ),
+    const Text(
+      ' And ',
+      style: TextStyle(
+        letterSpacing: 0.5,
+        fontSize: 12,
+        color: Colors.white54,
+      ),
+    ),
+    TextButton(
+      onPressed: () {
+        Get.to(TermsandconditionsView());
+      },
+      style: TextButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
+        splashFactory: NoSplash.splashFactory,
+        minimumSize: const Size(0, 0),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
+      child: Text(
+        'Terms & Conditions',
+        style: TextStyle(
+          letterSpacing: 0.5,
+          fontSize: 12,
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+          decoration: TextDecoration.underline,
+          decorationColor: const Color(0xffFF9A44),
+        ),
+      ),
+    ),
+    const Text(
+      ' of ',
+      style: TextStyle(
+        letterSpacing: 0.5,
+        fontSize: 12,
+        color: Colors.white54,
+      ),
+    ),
+    Text(
+      data.appName,
+      style: const TextStyle(
+        letterSpacing: 0.5,
+        fontSize: 12,
+        color: Color(0xffFF9A44),
+        fontWeight: FontWeight.w700,
+      ),
+    ),
+  ],
+),             
+                
                     const SizedBox(height: 8),
                   ],
                 ),

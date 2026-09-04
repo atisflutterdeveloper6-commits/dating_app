@@ -1,13 +1,32 @@
 import 'package:dating_app/app/custom_widget/custom_button.dart';
+import 'package:dating_app/app/custom_widget/custom_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pinput/pinput.dart';
 import '../controllers/otp_controller.dart';
 
+// ✅ AUTOFILL — no smart_auth, no custom SMS listener, zero crash risk.
+//
+// pinput >=5.0.0 removed its smart_auth-based androidSmsAutofillMethod
+// entirely (see pinput changelog: "Removed smart_auth dependency ...
+// it was causing some issues") — so that option no longer exists on
+// pinput 6.x, and isn't what we want anyway: ANY second SMS listener is
+// what raced with Firebase Auth's own internal SMS auto-retrieval
+// session and caused the earlier native crash
+// (com.google.android.gms.internal.firebase-auth-api.zzafs NPE).
+//
+// Instead: Firebase Auth already runs its OWN SMS auto-retrieval the
+// moment verifyPhoneNumber() is called (in LoginView). When it detects
+// the code, `verificationCompleted` fires with a PhoneAuthCredential
+// that exposes the raw code via `credential.smsCode`. We just read that
+// and drop it into this screen's pin field — see
+// `OtpController.onAutoRetrievedCode` and how LoginView forwards to it.
+// This uses ONLY Firebase's own listener; nothing extra is registered.
+
 class OtpView extends StatefulWidget {
   final String verificationId;
   final String phoneNumber;
-  
+
   const OtpView({
     super.key,
     required this.verificationId,
@@ -21,7 +40,9 @@ class OtpView extends StatefulWidget {
 class _OtpViewState extends State<OtpView> {
   late OtpController controller;
   late String phoneNumber;
-  
+
+  final TextEditingController pinController = TextEditingController();
+
   // State variables
   String otpError = '';
   String formattedTime = '';
@@ -37,19 +58,26 @@ class _OtpViewState extends State<OtpView> {
       verificationId: widget.verificationId,
       phoneNumber: widget.phoneNumber,
     );
-    
-    // Add listener to update UI when controller state changes
+
     controller.addListener(_updateUI);
-    
-    // Initial UI update
     _updateUI();
-    
-    // 🔥 START TIMER AUTOMATICALLY AS SOON AS SCREEN LOADS 🔥
+
+    // 🔥 AUTOFILL: if Firebase auto-retrieves the SMS code while this
+    // screen is open, LoginView's verificationCompleted forwards the raw
+    // code here via this static hook. We fill the boxes and verify —
+    // exact same code path as if the user typed it and it auto-submitted.
+    OtpController.onAutoRetrievedCode = (code) {
+      if (!mounted) return;
+      print('📩 Auto-retrieved SMS code: $code');
+      pinController.setText(code);
+      controller.clearError();
+      controller.verifyOTP(code);
+    };
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         print('🟢 Screen loaded - Starting timer automatically');
         controller.startTimer();
-        // Force UI update immediately
         _updateUI();
       }
     });
@@ -57,16 +85,18 @@ class _OtpViewState extends State<OtpView> {
 
   @override
   void dispose() {
+    // 🔥 Unregister so a later auto-retrieval (e.g. after leaving this
+    // screen) doesn't try to touch a disposed controller/pinController.
+    OtpController.onAutoRetrievedCode = null;
     controller.removeListener(_updateUI);
     controller.dispose();
+    pinController.dispose();
     super.dispose();
   }
 
-  // 🔥 This method updates all UI states with setState
   void _updateUI() {
     if (mounted) {
       setState(() {
-        // 🔥 FIXED: Removed .value from all variables
         otpError = controller.otpError;
         formattedTime = controller.formattedTime;
         secondsRemaining = controller.secondsRemaining;
@@ -112,7 +142,6 @@ class _OtpViewState extends State<OtpView> {
                     return SingleChildScrollView(
                       child: Column(
                         children: [
-                          // Image
                           Container(
                             width: double.infinity,
                             height: isKeyboardOpen ? 360.h : 450.h,
@@ -123,7 +152,6 @@ class _OtpViewState extends State<OtpView> {
                           ),
                           isKeyboardOpen ? const SizedBox.shrink() : SizedBox(height: 30.h),
 
-                          // Phone number display
                           Padding(
                             padding: EdgeInsets.symmetric(horizontal: 24.w),
                             child: Text(
@@ -136,13 +164,15 @@ class _OtpViewState extends State<OtpView> {
                             ),
                           ),
                           SizedBox(height: 16.h),
-
-              
                           SizedBox(height: 12.h),
 
-                          // OTP Input
+                          // OTP Input — plain Pinput, no SMS listener.
+                          // Autofill is handled separately (see initState)
+                          // by forwarding Firebase's own auto-retrieved
+                          // code into pinController + controller.verifyOTP.
                           Pinput(
                             length: 6,
+                            controller: pinController,
                             autofocus: true,
                             defaultPinTheme: PinTheme(
                               width: 40.w,
@@ -199,29 +229,29 @@ class _OtpViewState extends State<OtpView> {
                               }
                             },
                           ),
-                         
+
                           SizedBox(height: 16.h),
 
-                          // 🔥 TIMER DISPLAY - Updates every second with setState
+                          // Timer display
                           Container(
                             padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
                             decoration: BoxDecoration(
-                              color: secondsRemaining > 0 
-                                  ? Colors.orange.shade50 
+                              color: secondsRemaining > 0
+                                  ? Colors.orange.shade50
                                   : Colors.grey.shade50,
                               borderRadius: BorderRadius.circular(12.r),
                               border: Border.all(
-                                color: secondsRemaining > 0 
-                                    ? Colors.orange.shade200 
+                                color: secondsRemaining > 0
+                                    ? Colors.orange.shade200
                                     : Colors.grey.shade300,
                               ),
                             ),
                             child: Text(
                               formattedTime,
                               style: TextStyle(
-                                fontSize: 10.sp, 
-                                color: secondsRemaining > 0 
-                                    ? Colors.orange.shade700 
+                                fontSize: 10.sp,
+                                color: secondsRemaining > 0
+                                    ? Colors.orange.shade700
                                     : Colors.grey.shade600,
                                 fontWeight: FontWeight.bold,
                                 fontFeatures: [const FontFeature.tabularFigures()],
@@ -230,7 +260,6 @@ class _OtpViewState extends State<OtpView> {
                           ),
                           SizedBox(height: 12.h),
 
-                          // Text & Resend
                           if (!isKeyboardOpen)
                             Column(
                               children: [
@@ -281,7 +310,6 @@ class _OtpViewState extends State<OtpView> {
                   },
                 ),
               ),
-              // Bottom Verify Button
               if (!isKeyboardOpen)
                 Container(
                   padding: EdgeInsets.only(
@@ -291,10 +319,17 @@ class _OtpViewState extends State<OtpView> {
                   ),
                   child: CustomButton(
                     text: isVerifying ? "Verifying..." : "Verify",
-                    onPressed: isVerifying 
-                        ? () {} 
+                    onPressed: isVerifying
+                        ? () {}
                         : () {
-                            // Optional: Get pin from Pinput controller
+                            final pin = pinController.text;
+                            if (pin.length == 6) {
+                              controller.clearError();
+                              _updateUI();
+                              controller.verifyOTP(pin);
+                            } else {
+                              CustomToast.error('Please enter complete 6-digit OTP');
+                            }
                           },
                     isLoading: isVerifying,
                     backgroundColor: const Color(0xffFF6B00),
@@ -304,8 +339,8 @@ class _OtpViewState extends State<OtpView> {
                     fontSize: 14.sp,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.5,
-                    prefixIcon: isVerifying 
-                        ? null 
+                    prefixIcon: isVerifying
+                        ? null
                         : Icon(
                             Icons.verified,
                             color: Colors.white,
