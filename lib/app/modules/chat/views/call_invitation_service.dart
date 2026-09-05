@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:zego_uikit/zego_uikit.dart';
 import 'package:zego_uikit_prebuilt_call/zego_uikit_prebuilt_call.dart';
@@ -10,7 +11,10 @@ class CallInvitationService {
 
   static bool _isInitialized = false;
   static String? _initializedForUserId;
-  static bool _isFullyReady = false;  // ✅ NAYA — signaling ready confirm karne ke liye
+  static bool _isFullyReady = false;
+
+  // ✅ CRITICAL FIX: Lock — ek waqt mein sirf ek hi init/uninit cycle chale
+  static Completer<bool>? _initCompleter;
 
   static final Map<String, String> userAvatars = {};
 
@@ -23,16 +27,44 @@ class CallInvitationService {
       return false;
     }
 
-    // ✅ Agar already init + fully ready hai, turant true return karo
+    // Already ready hai isi user ke liye — turant return karo
     if (_isInitialized && _initializedForUserId == userId && _isFullyReady) {
       return true;
     }
 
-    if (_isInitialized && _initializedForUserId != userId) {
-      await uninit();
+    // ✅ Agar ek init already chal raha hai, uska result wait karo —
+    // dobara uninit/init cycle mat chalao, warna race condition hoga
+    if (_initCompleter != null) {
+      print('⏳ Zego init already in progress, waiting for it...');
+      return _initCompleter!.future;
     }
 
+    _initCompleter = Completer<bool>();
+
     try {
+      // ✅ Sirf tab uninit karo jab pehle kisi doosre user ke liye init tha
+      if (_isInitialized && _initializedForUserId != userId) {
+        try {
+          await ZegoUIKitPrebuiltCallInvitationService().uninit();
+          print('🔄 Uninit for previous user: $_initializedForUserId');
+        } catch (e) {
+          print('⚠️ uninit failed (safe to ignore): $e');
+        }
+        _isInitialized = false;
+        _initializedForUserId = null;
+        _isFullyReady = false;
+      }
+
+      // ✅ Agar bilkul fresh state hai lekin pehle kabhi fail ho chuka tha,
+      // ek safety uninit() karo (SDK ka internal _isInit flag reset karne ke liye)
+      if (!_isInitialized) {
+        try {
+          await ZegoUIKitPrebuiltCallInvitationService().uninit();
+        } catch (e) {
+          print('⚠️ Safety uninit failed (safe to ignore): $e');
+        }
+      }
+
       print('📤 Attempting Zego login for userId: $userId, userName: $userName');
 
       await ZegoUIKitPrebuiltCallInvitationService().init(
@@ -75,13 +107,12 @@ class CallInvitationService {
       _isInitialized = true;
       _initializedForUserId = userId;
 
-      // ✅ FIX: init() Future resolve hone ke baad bhi Zego ka internal
-      // pageManager/signaling connection background me settle ho raha hota hai.
-      // Isliye ek chhota settle-delay do taaki turant send() call fail na ho.
       await Future.delayed(const Duration(milliseconds: 2000));
 
       _isFullyReady = true;
-      print('✅ ZEGO LOGIN CONFIRMED aur signaling settle ho gaya — user "$userId" (${DateTime.now()})');
+      print('✅ ZEGO LOGIN CONFIRMED — user "$userId" (${DateTime.now()})');
+
+      _initCompleter!.complete(true);
       return true;
 
     } catch (e, stack) {
@@ -90,20 +121,28 @@ class CallInvitationService {
       _isFullyReady = false;
       print('❌ ZEGO LOGIN FAILED for $userId: $e');
       print('❌ Stack trace: $stack');
+
+      _initCompleter!.complete(false);
       return false;
+    } finally {
+      _initCompleter = null;
     }
   }
 
   static Future<void> uninit() async {
     if (!_isInitialized) return;
-    await ZegoUIKitPrebuiltCallInvitationService().uninit();
+    try {
+      await ZegoUIKitPrebuiltCallInvitationService().uninit();
+    } catch (e) {
+      print('⚠️ Error during uninit: $e');
+    }
     _isInitialized = false;
     _initializedForUserId = null;
-    _isFullyReady = false;  // ✅ reset karo
+    _isFullyReady = false;
     print('🔄 Zego uninit — user ka data ab Zego signaling se hata diya gaya');
   }
 
   static bool isCurrentUserRegisteredWithZego(String userId) {
-    return _isInitialized && _initializedForUserId == userId && _isFullyReady;  // ✅ _isFullyReady bhi check karo
+    return _isInitialized && _initializedForUserId == userId && _isFullyReady;
   }
 }

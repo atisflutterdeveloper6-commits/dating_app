@@ -93,7 +93,6 @@ class _ChatViewState extends State<ChatView> {
       ),
     );
   }
-
 void _startCall(bool isVideoCall, {int retryCount = 0}) async {
   if (currentUserId == null || currentUserId!.isEmpty) {
     CustomToast.error('You must be logged in to start a call');
@@ -104,15 +103,22 @@ void _startCall(bool isVideoCall, {int retryCount = 0}) async {
     return;
   }
 
+  // ✅ ADD: Button dabate hi sabse pehle turant check karo — agar service
+  // already "not ready" pata chal chuka hai (jaise account suspended/expired),
+  // to bina permission dialog ya kuch aur try kiye seedha turant toast dikhao.
+  final dashboardController = Get.find<DashboardController>();
+  if (!dashboardController.isCallServiceReady.value) {
+    CustomToast.error('Call service is currently unavailable. Please try again later.');
+    return;
+  }
+
   final bool granted = await _checkCallPermissions(isVideoCall);
   if (!granted) return;
 
-  // ✅ FIX: DashboardController ke through check karo (ek jagah state manage hoti hai)
-  final dashboardController = Get.find<DashboardController>();
   final ready = await dashboardController.ensureCallServiceReady();
 
   if (!ready) {
-    CustomToast.error('Call service not ready. Please try again in a moment.');
+    CustomToast.error('Call service is currently unavailable. Please try again later.');
     return;
   }
 
@@ -124,7 +130,11 @@ void _startCall(bool isVideoCall, {int retryCount = 0}) async {
     );
 
     if (!success) {
-      CustomToast.error('$otherUserName is currently unavailable. They may not have opened the app yet.');
+      if (!dashboardController.isCallServiceReady.value) {
+        CustomToast.error('Call service is currently unavailable. Please try again later.');
+      } else {
+        CustomToast.error('Zegocloud Plan Expried');
+      }
       return;
     }
 
@@ -141,7 +151,12 @@ void _startCall(bool isVideoCall, {int retryCount = 0}) async {
       return;
     }
 
-    if (errorStr.contains('107026') || errorStr.contains('not registered')) {
+    if (errorStr.contains('signaling is not connected') ||
+        errorStr.contains('signaling plugin is null') ||
+        errorStr.contains('suspended') ||
+        errorStr.contains('expired')) {
+      CustomToast.error('Call service is currently unavailable. Please try again later.');
+    } else if (errorStr.contains('107026') || errorStr.contains('not registered')) {
       CustomToast.error('$otherUserName is currently unavailable.');
     } else if (errorStr.contains('_pageManager')) {
       CustomToast.error('Call service still starting up. Please try again.');
@@ -150,7 +165,6 @@ void _startCall(bool isVideoCall, {int retryCount = 0}) async {
     }
   }
 }
-
  Future<bool> _checkCallPermissions(bool isVideoCall) async {
     // Mic hamesha chahiye (voice + video dono ke liye)
     final micStatus = await Permission.microphone.status;

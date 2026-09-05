@@ -76,7 +76,7 @@ dependencies:
   media_kit: ^1.2.6
   media_kit_video: ^2.0.1
   flutter_launcher_icons: ^0.14.4
-  # smart_auth: ^3.2.0
+  
   
  
 
