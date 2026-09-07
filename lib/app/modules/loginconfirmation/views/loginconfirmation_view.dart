@@ -5,26 +5,45 @@ import 'package:dating_app/app/custom_widget/location_controller.dart';
 import 'package:dating_app/app/custom_widget/profile_service_controller.dart';
 import 'package:dating_app/app/custom_widget/storage_services.dart';
 import 'package:dating_app/app/modules/primiumplan/views/primiumplan_view.dart';
-import 'package:dating_app/app/modules/dashboard/views/dashboard_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 import '../controllers/loginconfirmation_controller.dart';
 
 class LoginconfirmationView extends GetView<LoginconfirmationController> {
   final String phoneNumber;
-  
+
   const LoginconfirmationView({
     super.key,
     required this.phoneNumber,
   });
 
-  // Don't put final fields here with initialization
-  // Use StatefulWidget or initialize in initState
+  // ============================================================
+  // COLORS - 1ST UI KE SAME COLORS
+  // ============================================================
+
+  static const Color bgColor = Color(0xFFFFF0E6);
+  static const Color orange = Color(0xFFFF6B00);
+  static const Color orangeLight = Color(0xFFFFA23A);
+  static const Color darkText = Color(0xFF172033);
+  static const Color greyText = Color(0xFF85858F);
+
+  TextStyle poppins({
+    double size = 14,
+    FontWeight weight = FontWeight.w400,
+    Color color = darkText,
+  }) {
+    return GoogleFonts.poppins(
+      fontSize: size.sp,
+      fontWeight: weight,
+      color: color,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Initialize ScreenUtil
     ScreenUtil.init(
       context,
       designSize: const Size(375, 812),
@@ -32,349 +51,960 @@ class LoginconfirmationView extends GetView<LoginconfirmationController> {
       splitScreenMode: true,
     );
 
-    // Get controller
-    final LoginconfirmationController loginconfirmationController = Get.put(
-      LoginconfirmationController(phoneNumber: phoneNumber), // Pass phone number
+    // ============================================================
+    // CONTROLLER - SAME AS 1ST CODE
+    // ============================================================
+
+    final LoginconfirmationController loginconfirmationController =
+    Get.put(
+      LoginconfirmationController(
+        phoneNumber: phoneNumber,
+      ),
     );
 
-    final StorageService _storage = StorageService();
-    final LocationController _locationController = Get.isRegistered<LocationController>()
+    // ============================================================
+    // STORAGE
+    // ============================================================
+
+    final StorageService storage = StorageService();
+
+    // ============================================================
+    // LOCATION CONTROLLER
+    // ============================================================
+
+    final LocationController locationController =
+    Get.isRegistered<LocationController>()
         ? Get.find<LocationController>()
         : Get.put(LocationController());
 
-    // Start fetching location when build is called
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _fetchLocation(_locationController, _storage);
+      _fetchLocation(
+        locationController,
+        storage,
+      );
     });
 
+    // ============================================================
+    // SCREEN SIZE
+    // ============================================================
+
+    final size = MediaQuery.sizeOf(context);
+    final screenHeight = size.height;
+
+    final keyboardHeight =
+        MediaQuery.of(context).viewInsets.bottom;
+
+    final bool isKeyboardOpen = keyboardHeight > 0;
+
+    final double topSectionHeight = isKeyboardOpen
+        ? screenHeight * 0.34
+        : screenHeight * 0.43;
+
     return Scaffold(
-      body: SafeArea(
-        child: Container(
-          height: double.infinity,
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFFFFFBFB), Color(0xFFFFE4E7)],
-            ),
-          ),
-          child: Stack(
-            children: [
-              // Background Image
-              Positioned(
-                top: 0.h,
-                left: 0,
-                right: 0,
-                height: 460.h,
-                child: Image.asset(
-                  'assets/images/loginBack.png',
-                  fit: BoxFit.cover,
-                  alignment: Alignment.topCenter,
-                ),
-              ),
+      backgroundColor: bgColor,
+      resizeToAvoidBottomInset: true,
 
-              // Bottom White Card
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Container(
-                  height: 300.h,
-                  width: double.infinity,
-                  padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 15.h),
+      body: Stack(
+        children: [
+          // ======================================================
+          // BACKGROUND
+          // ======================================================
+
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/LoginBack2.png',
+              fit: BoxFit.cover,
+              errorBuilder: (
+                  context,
+                  error,
+                  stackTrace,
+                  ) {
+                return Container(
                   decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Color(0xFFFFF0E6),
+                        Color(0xFFFFF8F3),
+                      ],
+                    ),
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Icon + Text Row
-                      Row(
-                        children: [
-                     Container(
-  height: 48.h,
-  width: 48.h,
-  decoration: BoxDecoration(
-    color: const Color(0xFFFDECEF),
-    borderRadius: BorderRadius.circular(14.r),
-  ),
-  child: ClipRRect(
-    borderRadius: BorderRadius.circular(14.r),
-    child: Obx(() {
-      if (controller.isSplashLogoLoading.value) {
-        return const Center(
-          child: SizedBox(
-            height: 20,
-            width: 20,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: Color(0xFFE61E45),
+                );
+              },
             ),
           ),
-        );
-      }
 
-      if (controller.splashImageUrl.value.isEmpty) {
-        return const Icon(
-          Icons.favorite,
-          color: Color(0xFFE61E45),
-          size: 24,
-        );
-      }
+          // ======================================================
+          // SOFT ORANGE OVERLAY
+          // ======================================================
 
-      return Image.network(
-        controller.splashImageUrl.value,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return const Icon(
-            Icons.favorite,
-            color: Color(0xFFE61E45),
-            size: 24,
-          );
-        },
-      );
-    }),
-  ),
-),
-                          SizedBox(width: 12.w),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+          Positioned.fill(
+            child: Container(
+              color: bgColor.withOpacity(0.10),
+            ),
+          ),
+
+          // ======================================================
+          // MAIN CONTENT
+          // ======================================================
+
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (
+                  BuildContext context,
+                  BoxConstraints constraints,
+                  ) {
+                return SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight,
+                    ),
+                    child: Column(
+                      children: [
+                        // ==================================================
+                        // TOP SECTION
+                        // ==================================================
+
+                        SizedBox(
+                          width: double.infinity,
+                          height: topSectionHeight,
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 14.w,
+                              vertical: 10.h,
+                            ),
+                            child: Row(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  'Login To Dating',
-                                  style: TextStyle(
-                                    letterSpacing: 1.2.w,
-                                    fontSize: 15.sp,
-                                    fontWeight: FontWeight.w700,
+                                // ==================================================
+                                // LEFT CONTENT
+                                // ==================================================
+
+                                Expanded(
+                                  flex: 50,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                      left: 8.w,
+                                      top: isKeyboardOpen
+                                          ? screenHeight * 0.025
+                                          : screenHeight * 0.060,
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                      MainAxisAlignment.start,
+                                      children: [
+                                        // TITLE
+
+                                        Text(
+                                          "Welcome back",
+                                          style: poppins(
+                                            size: 20,
+                                            weight: FontWeight.w700,
+                                          ),
+                                        ),
+
+                                        SizedBox(height: 2.h),
+
+                                        // ORANGE TITLE
+
+                                        Row(
+                                          mainAxisSize:
+                                          MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              "to Dating",
+                                              style: poppins(
+                                                size: 20,
+                                                weight:
+                                                FontWeight.w700,
+                                                color: orange,
+                                              ),
+                                            ),
+
+                                            SizedBox(width: 6.w),
+
+                                            Icon(
+                                              Icons.favorite_rounded,
+                                              color: orange,
+                                              size: 19.sp,
+                                            ),
+                                          ],
+                                        ),
+
+                                        SizedBox(height: 8.h),
+
+                                        // DESCRIPTION
+
+                                        Text(
+                                          "You are securely logged in\n"
+                                              "with your mobile number.",
+                                          style: poppins(
+                                            size: 8.5,
+                                            color: greyText,
+                                          ).copyWith(
+                                            height: 1.45,
+                                          ),
+                                        ),
+
+                                        SizedBox(height: 12.h),
+
+                                        // ==================================================
+                                        // PHONE NUMBER
+                                        // ==================================================
+
+
+                                      ],
+                                    ),
                                   ),
                                 ),
-                                SizedBox(height: 4.h),
-                                Text(
-                                  phoneNumber,
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14.sp,
-                                    color: Colors.black87,
+
+                                // ==================================================
+                                // RIGHT IMAGE
+                                // ==================================================
+
+                                Expanded(
+                                  flex: 50,
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                      top: isKeyboardOpen
+                                          ? screenHeight * 0.025
+                                          : screenHeight * 0.017,
+                                    ),
+                                    child: Image.asset(
+                                      'assets/images/loginback.jpeg',
+                                      height: isKeyboardOpen
+                                          ? screenHeight * 0.30
+                                          : screenHeight * 0.40,
+                                      width: double.infinity,
+                                      fit: BoxFit.contain,
+                                      alignment:
+                                      Alignment.topCenter,
+                                    ),
                                   ),
                                 ),
                               ],
                             ),
                           ),
-                        ],
-                      ),
-
-                      SizedBox(height: 12.h),
-
-                      // // 🔥 Location Status Indicator
-                      // Obx(() {
-                      //   if (_locationController.isLoading.value) {
-                      //     return Container(
-                      //       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                      //       decoration: BoxDecoration(
-                      //         color: Colors.orange.withOpacity(0.1),
-                      //         borderRadius: BorderRadius.circular(12.r),
-                      //         border: Border.all(color: Colors.orange.withOpacity(0.3)),
-                      //       ),
-                      //       child: Row(
-                      //         mainAxisSize: MainAxisSize.min,
-                      //         children: [
-                      //           SizedBox(
-                      //             width: 16,
-                      //             height: 16,
-                      //             child: const CircularProgressIndicator(
-                      //               strokeWidth: 2,
-                      //               color: Colors.orange,
-                      //             ),
-                      //           ),
-                      //           SizedBox(width: 8.w),
-                      //           Text(
-                      //             'Getting location...',
-                      //             style: TextStyle(
-                      //               color: Colors.orange[700],
-                      //               fontSize: 12.sp,
-                      //               fontWeight: FontWeight.w500,
-                      //             ),
-                      //           ),
-                      //         ],
-                      //       ),
-                      //     );
-                      //   } else if (_locationController.locationFetched.value) {
-                      //     return Container(
-                      //       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                      //       decoration: BoxDecoration(
-                      //         color: Colors.green.withOpacity(0.1),
-                      //         borderRadius: BorderRadius.circular(12.r),
-                      //         border: Border.all(color: Colors.green.withOpacity(0.3)),
-                      //       ),
-                      //       child: Row(
-                      //         mainAxisSize: MainAxisSize.min,
-                      //         children: [
-                      //           const Icon(
-                      //             Icons.location_on,
-                      //             color: Colors.green,
-                      //             size: 16,
-                      //           ),
-                      //           SizedBox(width: 8.w),
-                      //           Text(
-                      //             'Location detected',
-                      //             style: TextStyle(
-                      //               color: Colors.green,
-                      //               fontSize: 12.sp,
-                      //               fontWeight: FontWeight.w500,
-                      //             ),
-                      //           ),
-                      //         ],
-                      //       ),
-                      //     );
-                      //   } else if (_locationController.errorMessage.value.isNotEmpty) {
-                      //     return Container(
-                      //       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                      //       decoration: BoxDecoration(
-                      //         color: Colors.red.withOpacity(0.1),
-                      //         borderRadius: BorderRadius.circular(12.r),
-                      //         border: Border.all(color: Colors.red.withOpacity(0.3)),
-                      //       ),
-                      //       child: Row(
-                      //         mainAxisSize: MainAxisSize.min,
-                      //         children: [
-                      //           const Icon(
-                      //             Icons.warning,
-                      //             color: Colors.red,
-                      //             size: 16,
-                      //           ),
-                      //           SizedBox(width: 8.w),
-                      //           Text(
-                      //             'Location not available',
-                      //             style: TextStyle(
-                      //               color: Colors.red,
-                      //               fontSize: 12.sp,
-                      //               fontWeight: FontWeight.w500,
-                      //             ),
-                      //           ),
-                      //         ],
-                      //       ),
-                      //     );
-                      //   }
-                      //   return const SizedBox.shrink();
-                      // }),
-
-                      SizedBox(height: 15.h),
-
-                      // Continue Button
-                      CustomButton(
-                        text: "Continue",
-                        onPressed: () {
-                          _handleContinue(_storage);
-                        },
-                      ),
-
-                      SizedBox(height: 12.h),
-
-                      // Change Number
-                      TextButton(
-                        onPressed: () {
-                          loginconfirmationController.onChangeNumberTap();
-                        },
-                        style: TextButton.styleFrom(
-                          padding: EdgeInsets.zero,
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        child: Text(
-                          'Use Another Mobile Number',
-                          style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 13.sp,
-                            letterSpacing: 0.8.w,
-                          ),
+
+                        // ==================================================
+                        // SMALL GAP
+                        // ==================================================
+
+                        SizedBox(
+                          height:
+                          isKeyboardOpen ? 8.h : 5.h,
                         ),
-                      ),
 
-                      SizedBox(height: 8.h),
+                        // ==================================================
+                        // WHITE CARD
+                        // ==================================================
 
-                      // Terms Text
-                      RichText(
-                        textAlign: TextAlign.center,
-                        text: TextSpan(
-                          style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 10.5.sp,
-                            height: 1.4,
-                            letterSpacing: 0.3.w,
-                          ),
-                          children: const [
-                            TextSpan(
-                              text: 'By continuing you accept to share your Truecaller ',
+                        Transform.translate(
+                          offset: Offset(0, -12.h),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 14.w,
                             ),
-                            TextSpan(
-                              text: 'Profile Information',
-                              style: TextStyle(
-                                color: Color(0xffFF6B00),
-                                decoration: TextDecoration.underline,
+                            child: Container(
+                              width: double.infinity,
+                              padding: EdgeInsets.fromLTRB(
+                                14.w,
+                                20.h,
+                                14.w,
+                                18.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius:
+                                BorderRadius.circular(20.r),
+                                border: Border.all(
+                                  color:
+                                  Colors.grey.shade300,
+                                  width: 0.7,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color:
+                                    orange.withOpacity(0.10),
+                                    blurRadius: 25,
+                                    spreadRadius: 2,
+                                    offset:
+                                    const Offset(0, 7),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                mainAxisSize:
+                                MainAxisSize.min,
+                                children: [
+                                  // ==================================================
+                                  // TOP CARD ROW
+                                  // ==================================================
+
+                                  Row(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.center,
+                                    children: [
+                                      // ==================================================
+                                      // LOGO
+                                      // ==================================================
+
+                                      Container(
+                                        width: 53.w,
+                                        height: 53.w,
+                                        decoration:
+                                        BoxDecoration(
+                                          color: const Color(
+                                            0xFFFFF0E6,
+                                          ),
+                                          borderRadius:
+                                          BorderRadius
+                                              .circular(
+                                            14.r,
+                                          ),
+                                        ),
+                                        alignment:
+                                        Alignment.center,
+                                        child: ClipRRect(
+                                          borderRadius:
+                                          BorderRadius
+                                              .circular(
+                                            12.r,
+                                          ),
+                                          child: Image.asset(
+                                            'assets/icons/app_icon.jpeg',
+                                            width: 48.w,
+                                            height: 48.w,
+                                            fit: BoxFit.contain,
+                                          ),
+                                        ),
+                                      ),
+
+                                      SizedBox(width: 14.w),
+
+                                      // ==================================================
+                                      // LOGIN TEXT
+                                      // ==================================================
+
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment
+                                              .start,
+                                          children: [
+                                            Text(
+                                              'Login to Dating',
+                                              maxLines: 1,
+                                              overflow:
+                                              TextOverflow
+                                                  .ellipsis,
+                                              style: poppins(
+                                                size: 12,
+                                                weight:
+                                                FontWeight.w600,
+                                                color:
+                                                darkText,
+                                              ).copyWith(
+                                                height: 1.25,
+                                              ),
+                                            ),
+
+                                            SizedBox(height: 5.h),
+
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons
+                                                      .phone_android_rounded,
+                                                  size: 15.sp,
+                                                  color: orange,
+                                                ),
+
+                                                SizedBox(
+                                                    width: 3.w),
+
+                                                Flexible(
+                                                  child: Text(
+                                                    phoneNumber,
+                                                    maxLines: 1,
+                                                    overflow:
+                                                    TextOverflow
+                                                        .ellipsis,
+                                                    style: poppins(
+                                                      size: 11,
+                                                      weight:
+                                                      FontWeight
+                                                          .w400,
+                                                      color:
+                                                      const Color(
+                                                        0xFF4B4B4B,
+                                                      ),
+                                                    ).copyWith(
+                                                      height: 1.2,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  SizedBox(height: 15.h),
+
+                                  // ==================================================
+                                  // CONTINUE BUTTON
+                                  // ==================================================
+
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 40.h,
+                                    child: Container(
+                                      decoration:
+                                      BoxDecoration(
+                                        gradient:
+                                        const LinearGradient(
+                                          begin: Alignment
+                                              .centerLeft,
+                                          end: Alignment
+                                              .centerRight,
+                                          colors: [
+                                            orange,
+                                            orange,
+                                            orangeLight,
+                                          ],
+                                          stops: [
+                                            0.0,
+                                            0.72,
+                                            1.0,
+                                          ],
+                                        ),
+                                        borderRadius:
+                                        BorderRadius.circular(
+                                          30.r,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: orange
+                                                .withOpacity(
+                                                0.20),
+                                            blurRadius: 12,
+                                            offset:
+                                            const Offset(
+                                              0,
+                                              5,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      child: ElevatedButton(
+                                        onPressed: () {
+                                          _handleContinue(
+                                            storage,
+                                          );
+                                        },
+                                        style: ElevatedButton
+                                            .styleFrom(
+                                          backgroundColor:
+                                          Colors.transparent,
+                                          foregroundColor:
+                                          Colors.white,
+                                          disabledBackgroundColor:
+                                          Colors.transparent,
+                                          shadowColor:
+                                          Colors.transparent,
+                                          elevation: 0,
+                                          padding:
+                                          EdgeInsets.zero,
+                                          shape:
+                                          RoundedRectangleBorder(
+                                            borderRadius:
+                                            BorderRadius
+                                                .circular(
+                                              30.r,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                          MainAxisAlignment
+                                              .center,
+                                          children: [
+                                            Icon(
+                                              Icons
+                                                  .arrow_forward_rounded,
+                                              color:
+                                              Colors.white,
+                                              size: 18.sp,
+                                            ),
+
+                                            SizedBox(
+                                                width: 10.w),
+
+                                            Container(
+                                              height: 20.h,
+                                              width: 0.7.w,
+                                              color: Colors
+                                                  .white
+                                                  .withOpacity(
+                                                0.45,
+                                              ),
+                                            ),
+
+                                            SizedBox(
+                                                width: 11.w),
+
+                                            Text(
+                                              "Continue",
+                                              style: poppins(
+                                                size: 12,
+                                                weight:
+                                                FontWeight.w700,
+                                                color:
+                                                Colors.white,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+
+                                  SizedBox(height: 13.h),
+
+                                  // ==================================================
+                                  // DIVIDER
+                                  // ==================================================
+
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Divider(
+                                          color: const Color(
+                                            0xFFE4E4E7,
+                                          ),
+                                          thickness: 1,
+                                        ),
+                                      ),
+
+                                      Padding(
+                                        padding:
+                                        EdgeInsets.symmetric(
+                                          horizontal: 10.w,
+                                        ),
+                                        child: Text(
+                                          "or continue with",
+                                          style: poppins(
+                                            size: 9.5,
+                                            color:
+                                            greyText,
+                                          ),
+                                        ),
+                                      ),
+
+                                      Expanded(
+                                        child: Divider(
+                                          color: const Color(
+                                            0xFFE4E4E7,
+                                          ),
+                                          thickness: 1,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+
+                                  SizedBox(height: 12.h),
+
+                                  // ==================================================
+                                  // CHANGE NUMBER
+                                  // ==================================================
+
+                                  GestureDetector(
+                                    onTap: () {
+                                      loginconfirmationController
+                                          .onChangeNumberTap();
+                                    },
+                                    child: SizedBox(
+                                      width:
+                                      double.infinity,
+                                      height: 20.h,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment
+                                            .center,
+                                        children: [
+                                          Icon(
+                                            Icons
+                                                .phone_android_rounded,
+                                            size: 17.sp,
+                                            color: orange,
+                                          ),
+
+                                          SizedBox(
+                                              width: 9.w),
+
+                                          Text(
+                                            'Use Another Mobile Number',
+                                            style: poppins(
+                                              size: 11,
+                                              weight:
+                                              FontWeight
+                                                  .w600,
+                                              color: orange,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+
+                                  SizedBox(height: 13.h),
+
+                                  // ==================================================
+                                  // SECURITY / PRIVACY BOX
+                                  // ==================================================
+
+                                  Container(
+                                    width: double.infinity,
+                                    padding:
+                                    EdgeInsets.fromLTRB(
+                                      10.w,
+                                      10.h,
+                                      10.w,
+                                      15.h,
+                                    ),
+                                    decoration:
+                                    BoxDecoration(
+                                      color: const Color(
+                                        0xFFFFF7F2,
+                                      ),
+                                      borderRadius:
+                                      BorderRadius.circular(
+                                        5.r,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment
+                                          .start,
+                                      children: [
+                                        Container(
+                                          width: 36.w,
+                                          height: 36.w,
+                                          decoration:
+                                          BoxDecoration(
+                                            color: Colors.white,
+                                            shape:
+                                            BoxShape.circle,
+                                            border:
+                                            Border.all(
+                                              color: orange
+                                                  .withOpacity(
+                                                0.20,
+                                              ),
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            Icons
+                                                .verified_user_outlined,
+                                            size: 21.sp,
+                                            color: orange,
+                                          ),
+                                        ),
+
+                                        SizedBox(width: 9.w),
+
+                                        Expanded(
+                                          child: RichText(
+                                            textAlign:
+                                            TextAlign.left,
+                                            text:
+                                            TextSpan(
+                                              style:
+                                              GoogleFonts
+                                                  .poppins(
+                                                fontSize:
+                                                8.sp,
+                                                fontWeight:
+                                                FontWeight
+                                                    .w400,
+                                                color:
+                                                const Color(
+                                                  0xFF686868,
+                                                ),
+                                                height:
+                                                1.45,
+                                              ),
+                                              children: [
+                                                const TextSpan(
+                                                  text:
+                                                  'By continuing you accept to share your Truecaller ',
+                                                ),
+
+                                                TextSpan(
+                                                  text:
+                                                  'profile information',
+                                                  style:
+                                                  GoogleFonts
+                                                      .poppins(
+                                                    fontSize:
+                                                    8.sp,
+                                                    color:
+                                                    orange,
+                                                    decoration:
+                                                    TextDecoration
+                                                        .underline,
+                                                  ),
+                                                ),
+
+                                                const TextSpan(
+                                                  text:
+                                                  ' with Dating, and agree to the ',
+                                                ),
+
+                                                TextSpan(
+                                                  text:
+                                                  'privacy policy',
+                                                  style:
+                                                  GoogleFonts
+                                                      .poppins(
+                                                    fontSize:
+                                                    8.sp,
+                                                    color:
+                                                    orange,
+                                                    decoration:
+                                                    TextDecoration
+                                                        .underline,
+                                                  ),
+                                                ),
+
+                                                const TextSpan(
+                                                  text:
+                                                  ' and ',
+                                                ),
+
+                                                TextSpan(
+                                                  text:
+                                                  'terms of service',
+                                                  style:
+                                                  GoogleFonts
+                                                      .poppins(
+                                                    fontSize:
+                                                    8.sp,
+                                                    color:
+                                                    orange,
+                                                    decoration:
+                                                    TextDecoration
+                                                        .underline,
+                                                  ),
+                                                ),
+
+                                                const TextSpan(
+                                                  text:
+                                                  ' of Dating',
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            TextSpan(
-                              text:
-                                  ' with Dating, and agree to the privacy policy and terms of service of Dating',
-                            ),
-                          ],
+                          ),
                         ),
-                      ),
-                    ],
+
+                        SizedBox(height: 8.h),
+
+                        // ==================================================
+                        // BOTTOM SECURITY TEXT
+                        // ==================================================
+
+                        Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 25.w,
+                          ),
+                          child: Row(
+                            crossAxisAlignment:
+                            CrossAxisAlignment.start,
+                            mainAxisAlignment:
+                            MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.verified_user_outlined,
+                                size: 14.sp,
+                                color: orange,
+                              ),
+
+                              SizedBox(width: 5.w),
+
+                              Flexible(
+                                child: Text(
+                                  "Your number is safe with us. "
+                                      "We never share it with anyone.",
+                                  textAlign:
+                                  TextAlign.center,
+                                  style: poppins(
+                                    size: 8,
+                                    color: Colors.black,
+                                  ).copyWith(
+                                    height: 1.35,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(height: 15.h),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+
+          // ============================================================
+          // BACK BUTTON
+          // ============================================================
+
+          Positioned(
+            top: 75.h,
+            left: 25.w,
+            child: Material(
+              color: Colors.white,
+              shape: const CircleBorder(),
+              elevation: 1,
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: () {
+                  Get.back();
+                },
+                child: SizedBox(
+                  width: 31.w,
+                  height: 31.w,
+                  child: Icon(
+                    Icons.arrow_back_ios_new_rounded,
+                    size: 14.sp,
+                    color: darkText,
                   ),
                 ),
               ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  // 🔥 FETCH LOCATION
-  Future<void> _fetchLocation(LocationController locationController, StorageService storage) async {
+  // ============================================================
+  // FETCH LOCATION - SAME AS 1ST CODE
+  // ============================================================
+
+  Future<void> _fetchLocation(
+      LocationController locationController,
+      StorageService storage,
+      ) async {
     try {
-      print('📍 LoginConfirmation: Fetching location...');
-      
-      bool success = await locationController.getCurrentLocation();
-      
+      print(
+        '📍 LoginConfirmation: Fetching location...',
+      );
+
+      bool success =
+      await locationController.getCurrentLocation();
+
       if (success) {
-        String location = locationController.getLocationString();
-        print('✅ LoginConfirmation: Location fetched: $location');
-        
-        // Save location to storage
-        await storage.saveData('user_location', location);
-        
-        // Update profile controller if it exists
+        String location =
+        locationController.getLocationString();
+
+        print(
+          '✅ LoginConfirmation: Location fetched: $location',
+        );
+
+        await storage.saveData(
+          'user_location',
+          location,
+        );
+
         try {
-          final profileController = Get.find<ProfileServiceController>();
+          final profileController =
+          Get.find<ProfileServiceController>();
+
           profileController.updateLocation(location);
-          print('✅ Location saved to profile controller: $location');
+
+          print(
+            '✅ Location saved to profile controller: $location',
+          );
         } catch (e) {
-          print('⚠️ Profile controller not found yet');
+          print(
+            '⚠️ Profile controller not found yet',
+          );
         }
       } else {
-        print('❌ LoginConfirmation: Location fetch failed: ${locationController.errorMessage.value}');
+        print(
+          '❌ LoginConfirmation: Location fetch failed: '
+              '${locationController.errorMessage.value}',
+        );
       }
     } catch (e) {
-      print('❌ LoginConfirmation: Location error: $e');
+      print(
+        '❌ LoginConfirmation: Location error: $e',
+      );
     }
   }
 
-  // ✅ Handle Continue Button Logic
-  void _handleContinue(StorageService storage) {
-    final isProfileCreated = storage.isProfileCreated();
-    final isLoggedIn = storage.isLoggedIn();
-    final hasToken = storage.hasLoginToken();
+  // ============================================================
+  // CONTINUE - SAME AS 1ST CODE
+  // ============================================================
 
-    print('🔍 Login Confirmation Status:');
-    print('  Is Logged In: $isLoggedIn');
-    print('  Has Token: $hasToken');
-    print('  Is Profile Created: $isProfileCreated');
+  void _handleContinue(
+      StorageService storage,
+      ) {
+    final isProfileCreated =
+    storage.isProfileCreated();
 
-    // Always go to Premium Plan
-    print('🟡 Navigating to Premium Plan');
-    Get.to(() => const PrimiumplanView());
+    final isLoggedIn =
+    storage.isLoggedIn();
+
+    final hasToken =
+    storage.hasLoginToken();
+
+    print(
+      '🔍 Login Confirmation Status:',
+    );
+
+    print(
+      '  Is Logged In: $isLoggedIn',
+    );
+
+    print(
+      '  Has Token: $hasToken',
+    );
+
+    print(
+      '  Is Profile Created: $isProfileCreated',
+    );
+
+    print(
+      '🟡 Navigating to Premium Plan',
+    );
+
+    Get.to(
+          () => const PrimiumplanView(),
+    );
   }
 }

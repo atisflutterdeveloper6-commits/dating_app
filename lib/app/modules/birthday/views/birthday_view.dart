@@ -1,3 +1,4 @@
+
 import 'package:dating_app/app/custom_widget/custom_appbar.dart';
 import 'package:dating_app/app/custom_widget/custom_button.dart';
 import 'package:flutter/material.dart';
@@ -7,287 +8,451 @@ import 'package:get/get.dart';
 import '../controllers/birthday_controller.dart';
 
 class BirthdayView extends GetView<BirthdayController> {
-  const BirthdayView({super.key});
+const BirthdayView({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    Get.put(BirthdayController());
-    
-    ScreenUtil.init(
-      context,
-      designSize: const Size(375, 812),
-      minTextAdapt: true,
-      splitScreenMode: true,
-    );
+@override
+Widget build(BuildContext context) {
+Get.put(BirthdayController());
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFFAFAFA),
-      appBar: const CustomAppBar(title: ""),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: 24.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(height: 25.h),
+ScreenUtil.init(
+context,
+designSize: const Size(375, 812),
+minTextAdapt: true,
+splitScreenMode: true,
+);
 
-                    Text(
-                      "Your Birthday",
-                      style: TextStyle(
-                        letterSpacing: 1.5,
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+final isKeyboardOpen =
+MediaQuery.of(context).viewInsets.bottom > 0;
 
-                    SizedBox(height: 8.h),
+return Scaffold(
+extendBodyBehindAppBar: true,
+backgroundColor: Colors.transparent,
 
-                    Text(
-                      "This Helps Us Show Your Age Accurately.",
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 14.sp,
-                      ),
-                    ),
+// ============================================================
+// APP BAR
+// ============================================================
+  appBar: const CustomAppBar(
+    title: "Your Birthday",
+    subtitle: "Let’s get to know you a little better",
+    useIllustration: true,
+  ),
 
-                    SizedBox(height: 20.h),
+body: Stack(
+children: [
+// ============================================================
+// BACKGROUND
+// ============================================================
+Positioned.fill(
+child: Image.asset(
+'assets/images/LoginBack2.png',
+fit: BoxFit.cover,
+),
+),
 
-                    Row(
-                      children: [
-                        SizedBox(width: 80.w, child: _dayDropdown()),
-                        SizedBox(width: 12.w),
-                        Expanded(child: _monthDropdown()),
-                        SizedBox(width: 12.w),
-                        Expanded(child: _yearDropdown()),
-                      ],
-                    ),
+// ============================================================
+// LIGHT OVERLAY
+// ============================================================
+Positioned.fill(
+child: Container(
+color: const Color(0xFFFFF0E6).withOpacity(0.10),
+),
+),
 
-                    SizedBox(height: 15.h),
+// ============================================================
+// MAIN CONTENT
+// ============================================================
+SafeArea(
+child: Padding(
+padding: EdgeInsets.symmetric(horizontal: 28.w),
+child: Column(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+SizedBox(height: 20.h),
 
-                    Text(
-                      "Your Profile Shows Your Age, Not Your Date Of Birth.",
-                      style: TextStyle(
-                        color: Colors.grey.shade600,
-                        fontSize: 13.sp,
-                      ),
-                    ),
+// ======================================================
+// BIRTHDAY TITLE
+// ======================================================
+Text(
+"Your Birthday",
+style: TextStyle(
+fontSize: 18.sp,
+fontWeight: FontWeight.w700,
+letterSpacing: 1.2,
+),
+),
 
-                    SizedBox(height: 45.h),
+SizedBox(height: 8.h),
 
-                    Text(
-                      "Do You Have A Place To Meet?",
-                      style: TextStyle(
-                        letterSpacing: 1,
-                        fontSize: 20.sp,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
+Text(
+"This Helps Us Show Your Age Accurately.",
+style: TextStyle(
+fontSize: 9.sp,
+color: Colors.black54,
+letterSpacing: 0.5,
+),
+),
 
-                    SizedBox(height: 8.h),
+SizedBox(height: 25.h),
 
-                    Text(
-                      "This Helps Us Match You Better.",
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 13.sp,
-                      ),
-                    ),
+// ======================================================
+// DATE DROPDOWNS
+// ======================================================
+Row(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+SizedBox(
+width: 78.w,
+child: _dayDropdown(),
+),
 
-                    SizedBox(height: 20.h),
+SizedBox(width: 10.w),
 
-                    Obx(
-                      () => Column(
-                        children: [
-                          _meetButton("Yes"),
-                          SizedBox(height: 15.h),
-                          _meetButton("No"),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+Expanded(
+child: _monthDropdown(),
+),
 
-            // Bottom Button
-            Padding(
-              padding: EdgeInsets.fromLTRB(24.w, 0, 24.w, 10.h),
-              child: CustomButton(
-                text: "Continue",
-                onPressed: () {
-                  controller.next(context);
-                },
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
+SizedBox(width: 10.w),
 
-  // ==================== Dropdowns ====================
-  Widget _dayDropdown() {
-    return Obx(
-      () => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            "Day",
-            style: TextStyle(fontSize: 12.sp),
-          ),
-          SizedBox(height: 6.h),
-          Container(
-            height: 40.h,
-            padding: EdgeInsets.symmetric(horizontal: 12.w),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(color: Colors.black), // 🔥 border black
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<int>(
-                value: controller.selectedDay.value,
-                isExpanded: true,
-                style: TextStyle(fontSize: 14.sp, color: Colors.black), // 🔥 selected text black
-                items: List.generate(
-                  31,
-                  (index) => DropdownMenuItem(
-                    value: index + 1,
-                    child: Text(
-                      (index + 1).toString().padLeft(2, '0'),
-                      style: TextStyle(color: Colors.black), // 🔥 dropdown list item text black
-                    ),
-                  ),
-                ),
-                onChanged: (value) {
-                  controller.selectedDay.value = value!;
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _monthDropdown() {
-    return Obx(
-      () => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Month", style: TextStyle(fontSize: 12.sp)),
-          SizedBox(height: 6.h),
-          Container(
-            height: 40.h,
-            padding: EdgeInsets.symmetric(horizontal: 12.w),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(color: Colors.black), // 🔥 border black
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: controller.selectedMonth.value,
-                isExpanded: true,
-                style: TextStyle(fontSize: 14.sp, color: Colors.black), // 🔥 selected text black
-                items: controller.months
-                    .map((e) => DropdownMenuItem(
-                          value: e,
-                          child: Text(
-                            e,
-                            style: TextStyle(color: Colors.black), // 🔥 list item text black
-                          ),
-                        ))
-                    .toList(),
-                onChanged: (value) {
-                  controller.selectedMonth.value = value!;
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-   Widget _yearDropdown() {
-    return Obx(
-      () => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Year", style: TextStyle(fontSize: 12.sp)),
-          SizedBox(height: 6.h),
-          Container(
-            height: 40.h,
-            padding: EdgeInsets.symmetric(horizontal: 12.w),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(color: Colors.black),
-            ),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<int>(
-                value: controller.selectedYear.value,
-                isExpanded: true,
-                style: TextStyle(fontSize: 14.sp, color: Colors.black), // 🔥 selected text black
-                items: List.generate(
-                  70,
-                  (index) {
-                    final year = DateTime.now().year - index;
-                    return DropdownMenuItem(
-                      value: year,
-                      child: Text(
-                        year.toString(),
-                        style: TextStyle(color: Colors.black), // 🔥 list item text black
-                      ),
-                    );
-                  },
-                ),
-                onChanged: (value) {
-                  controller.selectedYear.value = value!;
-                },
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  // ==================== Meet Button ====================
-  Widget _meetButton(String value) {
-    final selected = controller.meetPlace.value == value;
+Expanded(
+child: _yearDropdown(),
+),
+],
+),
 
-    return GestureDetector(
-      onTap: () => controller.toggleMeetPlace(value),
-      child: Container(
-        height: 55.h,
-        padding: EdgeInsets.symmetric(horizontal: 14.w),
-        decoration: BoxDecoration(
-          color: selected ? const Color(0xffFFF2E8) : Colors.white,
-          borderRadius: BorderRadius.circular(10.r),
-          border: Border.all(
-            color: selected ? const Color(0xffFF6B00) : Colors.grey.shade300,
-            width: selected ? 2 : 1,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              selected ? Icons.radio_button_checked : Icons.radio_button_off,
-              size: 16.sp,
-              color: selected ? const Color(0xffFF6B00) : Colors.grey,
-            ),
-            SizedBox(width: 8.w),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: selected ? Colors.black : Colors.grey.shade700,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+SizedBox(height: 12.h),
+
+Text(
+"Your Profile Shows Your Age, Not Your Date Of Birth.",
+style: TextStyle(
+color: Colors.black54,
+fontSize: 9.sp,
+letterSpacing: 0.3,
+),
+),
+
+SizedBox(height: 35.h),
+
+// ======================================================
+// MEETING PLACE
+// ======================================================
+Text(
+"Do You Have A Place To Meet?",
+style: TextStyle(
+fontSize: 18.sp,
+fontWeight: FontWeight.w700,
+letterSpacing: 1.0,
+),
+),
+
+SizedBox(height: 8.h),
+
+Text(
+"This Helps Us Match You Better.",
+style: TextStyle(
+color: Colors.black54,
+fontSize: 9.sp,
+letterSpacing: 0.5,
+),
+),
+
+SizedBox(height: 18.h),
+
+Obx(
+() => Column(
+children: [
+_meetButton("Yes"),
+
+SizedBox(height: 12.h),
+
+_meetButton("No"),
+],
+),
+),
+
+// ======================================================
+// BUTTON
+// ======================================================
+if (!isKeyboardOpen) ...[
+const Spacer(),
+
+CustomButton(
+text: "Continue",
+onPressed: () {
+controller.next(context);
+},
+),
+
+  SizedBox(height: 150.h),
+],
+],
+),
+),
+),
+],
+),
+);
 }
+
+// ================================================================
+// DAY DROPDOWN
+// ================================================================
+Widget _dayDropdown() {
+return Obx(
+() => Column(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+Text(
+"Day",
+style: TextStyle(
+fontSize: 11.sp,
+fontWeight: FontWeight.w500,
+),
+),
+
+SizedBox(height: 6.h),
+
+Container(
+height: 42.h,
+padding: EdgeInsets.symmetric(horizontal: 10.w),
+decoration: BoxDecoration(
+color: Colors.white,
+borderRadius: BorderRadius.circular(10.r),
+border: Border.all(
+color: Colors.grey.shade300,
+),
+),
+child: DropdownButtonHideUnderline(
+child: DropdownButton<int>(
+value: controller.selectedDay.value,
+isExpanded: true,
+icon: Icon(
+Icons.keyboard_arrow_down_rounded,
+size: 18.sp,
+color: Colors.black54,
+),
+style: TextStyle(
+fontSize: 11.sp,
+color: Colors.black,
+),
+items: List.generate(
+31,
+(index) => DropdownMenuItem(
+value: index + 1,
+child: Text(
+(index + 1).toString().padLeft(2, '0'),
+style: TextStyle(
+color: Colors.black,
+fontSize: 11.sp,
+),
+),
+),
+),
+onChanged: (value) {
+if (value != null) {
+controller.selectedDay.value = value;
+}
+},
+),
+),
+),
+],
+),
+);
+}
+
+// ================================================================
+// MONTH DROPDOWN
+// ================================================================
+Widget _monthDropdown() {
+return Obx(
+() => Column(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+Text(
+"Month",
+style: TextStyle(
+fontSize: 11.sp,
+fontWeight: FontWeight.w500,
+),
+),
+
+SizedBox(height: 6.h),
+
+Container(
+height: 42.h,
+padding: EdgeInsets.symmetric(horizontal: 10.w),
+decoration: BoxDecoration(
+color: Colors.white,
+borderRadius: BorderRadius.circular(10.r),
+border: Border.all(
+color: Colors.grey.shade300,
+),
+),
+child: DropdownButtonHideUnderline(
+child: DropdownButton<String>(
+value: controller.selectedMonth.value,
+isExpanded: true,
+icon: Icon(
+Icons.keyboard_arrow_down_rounded,
+size: 18.sp,
+color: Colors.black54,
+),
+style: TextStyle(
+fontSize: 11.sp,
+color: Colors.black,
+),
+items: controller.months
+    .map(
+(month) => DropdownMenuItem(
+value: month,
+child: Text(
+month,
+style: TextStyle(
+color: Colors.black,
+fontSize: 11.sp,
+),
+),
+),
+)
+    .toList(),
+onChanged: (value) {
+if (value != null) {
+controller.selectedMonth.value = value;
+}
+},
+),
+),
+),
+],
+),
+);
+}
+
+// ================================================================
+// YEAR DROPDOWN
+// ================================================================
+Widget _yearDropdown() {
+return Obx(
+() => Column(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+Text(
+"Year",
+style: TextStyle(
+fontSize: 11.sp,
+fontWeight: FontWeight.w500,
+),
+),
+
+SizedBox(height: 6.h),
+
+Container(
+height: 42.h,
+padding: EdgeInsets.symmetric(horizontal: 10.w),
+decoration: BoxDecoration(
+color: Colors.white,
+borderRadius: BorderRadius.circular(10.r),
+border: Border.all(
+color: Colors.grey.shade300,
+),
+),
+child: DropdownButtonHideUnderline(
+child: DropdownButton<int>(
+value: controller.selectedYear.value,
+isExpanded: true,
+icon: Icon(
+Icons.keyboard_arrow_down_rounded,
+size: 18.sp,
+color: Colors.black54,
+),
+style: TextStyle(
+fontSize: 11.sp,
+color: Colors.black,
+),
+items: List.generate(
+70,
+(index) {
+final year = DateTime.now().year - index;
+
+return DropdownMenuItem(
+value: year,
+child: Text(
+year.toString(),
+style: TextStyle(
+color: Colors.black,
+fontSize: 11.sp,
+),
+),
+);
+},
+),
+onChanged: (value) {
+if (value != null) {
+controller.selectedYear.value = value;
+}
+},
+),
+),
+),
+],
+),
+);
+}
+
+// ================================================================
+// MEET PLACE BUTTON
+// ================================================================
+Widget _meetButton(String value) {
+final selected = controller.meetPlace.value == value;
+
+return GestureDetector(
+onTap: () {
+controller.toggleMeetPlace(value);
+},
+child: AnimatedContainer(
+duration: const Duration(milliseconds: 180),
+height: 50.h,
+padding: EdgeInsets.symmetric(horizontal: 14.w),
+decoration: BoxDecoration(
+color: selected
+? const Color(0xFFFFF2E8)
+    : Colors.white,
+borderRadius: BorderRadius.circular(10.r),
+border: Border.all(
+color: selected
+? const Color(0xffFF6B00)
+    : Colors.grey.shade300,
+width: selected ? 1.5 : 1,
+),
+),
+child: Row(
+children: [
+Icon(
+selected
+? Icons.radio_button_checked
+    : Icons.radio_button_off,
+size: 17.sp,
+color: selected
+? const Color(0xffFF6B00)
+    : Colors.grey,
+),
+
+SizedBox(width: 9.w),
+
+Text(
+value,
+style: TextStyle(
+fontSize: 12.sp,
+fontWeight: FontWeight.w500,
+color: selected
+? Colors.black
+    : Colors.grey.shade700,
+),
+),
+],
+),
+),
+);
+}
+}
+

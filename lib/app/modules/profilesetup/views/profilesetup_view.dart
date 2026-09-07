@@ -2,18 +2,31 @@
 
 import 'dart:io';
 import 'dart:math' as math;
-import 'package:dating_app/app/custom_widget/custom_appbar.dart';
-import 'package:dating_app/app/custom_widget/custom_button.dart';
 import 'package:dating_app/app/custom_widget/custom_toast.dart';
 import 'package:dating_app/app/custom_widget/profile_service_controller.dart';
 import 'package:dating_app/app/modules/tellmeaboutyou/views/tellmeaboutyou_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../../custom_widget/custom_appbar.dart';
 import '../controllers/profilesetup_controller.dart';
 
-// ========== Shimmer Widget ==========
+// ============================================================
+// COLORS
+// ============================================================
+
+const Color orange = Color(0xFFFF6B00);
+const Color orangeLight = Color(0xFFFF8A3D);
+const Color darkText = Color(0xFF172033);
+const Color greyText = Color(0xFF85858F);
+const Color lightOrange = Color(0xFFFFF4EE);
+
+// ============================================================
+// SHIMMER
+// ============================================================
+
 class ShimmerEffect extends StatefulWidget {
   final Widget child;
   final Duration duration;
@@ -40,12 +53,16 @@ class _ShimmerEffectState extends State<ShimmerEffect>
   @override
   void initState() {
     super.initState();
+
     _controller = AnimationController(
       vsync: this,
       duration: widget.duration,
     )..repeat();
-    
-    _animation = Tween<double>(begin: -1.0, end: 1.0).animate(
+
+    _animation = Tween<double>(
+      begin: -1.0,
+      end: 1.0,
+    ).animate(
       CurvedAnimation(
         parent: _controller,
         curve: Curves.easeInOut,
@@ -93,11 +110,10 @@ class ShimmerMask extends StatelessWidget {
   Widget build(BuildContext context) {
     return ShaderMask(
       shaderCallback: (bounds) {
-        // Create a gradient that moves across the widget
         final double width = bounds.width;
         final double start = animationValue * width;
         final double end = start + width * 0.5;
-        
+
         return LinearGradient(
           colors: [
             baseColor,
@@ -126,7 +142,10 @@ class ShimmerMask extends StatelessWidget {
   }
 }
 
-// ========== DottedBorder Widget ==========
+// ============================================================
+// DOTTED BORDER
+// ============================================================
+
 class DottedBorder extends StatelessWidget {
   final Widget child;
   final double strokeWidth;
@@ -138,10 +157,10 @@ class DottedBorder extends StatelessWidget {
   const DottedBorder({
     super.key,
     required this.child,
-    this.strokeWidth = 1.5,
+    this.strokeWidth = 1.0,
     this.color = Colors.grey,
-    this.radius = 16,
-    this.dashWidth = 6,
+    this.radius = 14,
+    this.dashWidth = 5,
     this.dashSpace = 4,
   });
 
@@ -182,25 +201,51 @@ class _DottedBorderPainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke;
 
-    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
-    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(radius));
+    final rect = Rect.fromLTWH(
+      0,
+      0,
+      size.width,
+      size.height,
+    );
+
+    final rrect = RRect.fromRectAndRadius(
+      rect,
+      Radius.circular(radius),
+    );
+
     final path = Path()..addRRect(rrect);
 
     final metrics = path.computeMetrics();
-    for (var metric in metrics) {
-      double length = metric.length;
+
+    for (final metric in metrics) {
+      final length = metric.length;
       double start = 0;
+
       while (start < length) {
-        final end = math.min(start + dashWidth, length);
-        final segment = metric.extractPath(start, end);
-        canvas.drawPath(segment, paint);
+        final end = math.min(
+          start + dashWidth,
+          length,
+        );
+
+        final segment = metric.extractPath(
+          start,
+          end,
+        );
+
+        canvas.drawPath(
+          segment,
+          paint,
+        );
+
         start += dashWidth + dashSpace;
       }
     }
   }
 
   @override
-  bool shouldRepaint(covariant _DottedBorderPainter oldDelegate) {
+  bool shouldRepaint(
+      covariant _DottedBorderPainter oldDelegate,
+      ) {
     return oldDelegate.color != color ||
         oldDelegate.strokeWidth != strokeWidth ||
         oldDelegate.radius != radius ||
@@ -209,47 +254,305 @@ class _DottedBorderPainter extends CustomPainter {
   }
 }
 
-// ========== Main ProfilesetupView ==========
-class ProfilesetupView extends StatefulWidget {
-  const ProfilesetupView({super.key});
+// ============================================================
+// DECORATIVE BOTTOM WAVE
+// ============================================================
+
+class BottomDecoration extends StatelessWidget {
+  const BottomDecoration({super.key});
 
   @override
-  State<ProfilesetupView> createState() => _ProfilesetupViewState();
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: SizedBox(
+        height: 105.h,
+        width: double.infinity,
+        child: CustomPaint(
+          painter: _BottomDecorationPainter(),
+        ),
+      ),
+    );
+  }
 }
 
-class _ProfilesetupViewState extends State<ProfilesetupView> {
+class _BottomDecorationPainter extends CustomPainter {
+  @override
+  void paint(
+      Canvas canvas,
+      Size size,
+      ) {
+    final path = Path();
+
+    path.moveTo(0, size.height * 0.58);
+
+    path.cubicTo(
+      size.width * 0.18,
+      size.height * 0.80,
+      size.width * 0.30,
+      size.height * 0.70,
+      size.width * 0.45,
+      size.height * 0.84,
+    );
+
+    path.cubicTo(
+      size.width * 0.62,
+      size.height * 1.02,
+      size.width * 0.76,
+      size.height * 0.68,
+      size.width,
+      size.height * 0.82,
+    );
+
+    path.lineTo(
+      size.width,
+      size.height,
+    );
+
+    path.lineTo(
+      0,
+      size.height,
+    );
+
+    path.close();
+
+    final paint = Paint()
+      ..color = const Color(0xFFFFDCC8)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawPath(path, paint);
+
+    // Inner lighter wave
+    final path2 = Path();
+
+    path2.moveTo(0, size.height * 0.73);
+
+    path2.cubicTo(
+      size.width * 0.20,
+      size.height * 0.92,
+      size.width * 0.32,
+      size.height * 0.73,
+      size.width * 0.47,
+      size.height * 0.86,
+    );
+
+    path2.cubicTo(
+      size.width * 0.65,
+      size.height * 1.00,
+      size.width * 0.80,
+      size.height * 0.76,
+      size.width,
+      size.height * 0.86,
+    );
+
+    path2.lineTo(
+      size.width,
+      size.height,
+    );
+
+    path2.lineTo(
+      0,
+      size.height,
+    );
+
+    path2.close();
+
+    final paint2 = Paint()
+      ..color = const Color(0xFFFFF1E9)
+      ..style = PaintingStyle.fill;
+
+    canvas.drawPath(
+      path2,
+      paint2,
+    );
+  }
+
+  @override
+  bool shouldRepaint(
+      covariant CustomPainter oldDelegate,
+      ) {
+    return false;
+  }
+}
+
+// ============================================================
+// LEAF DECORATION (bottom-left / bottom-right branch with leaves)
+// ============================================================
+
+class LeafDecoration extends StatelessWidget {
+  final bool flip;
+  final double width;
+  final double height;
+
+  const LeafDecoration({
+    super.key,
+    this.flip = false,
+    this.width = 70,
+    this.height = 95,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    Widget painter = CustomPaint(
+      size: Size(width.w, height.h),
+      painter: _LeafPainter(),
+    );
+
+    if (flip) {
+      painter = Transform(
+        alignment: Alignment.center,
+        transform: Matrix4.rotationY(math.pi),
+        child: painter,
+      );
+    }
+
+    return IgnorePointer(child: painter);
+  }
+}
+
+class _LeafPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final stemPaint = Paint()
+      ..color = const Color(0xFFF3B489)
+      ..strokeWidth = 1.6
+      ..style = PaintingStyle.stroke;
+
+    final leafPaintDark = Paint()
+      ..color = const Color(0xFFFFC9A0)
+      ..style = PaintingStyle.fill;
+
+    final leafPaintLight = Paint()
+      ..color = const Color(0xFFFFE1C7)
+      ..style = PaintingStyle.fill;
+
+    // Curved stem rising from bottom-left corner of the box.
+    final stem = Path()
+      ..moveTo(size.width * 0.08, size.height)
+      ..quadraticBezierTo(
+        size.width * 0.55,
+        size.height * 0.55,
+        size.width * 0.85,
+        size.height * 0.02,
+      );
+
+    canvas.drawPath(stem, stemPaint);
+
+    final metric = stem.computeMetrics().first;
+
+    void drawLeaf(double t, double angleOffset, double scale, Paint paint) {
+      final tangent = metric.getTangentForOffset(metric.length * t);
+      if (tangent == null) return;
+
+      canvas.save();
+      canvas.translate(tangent.position.dx, tangent.position.dy);
+      canvas.rotate(tangent.angle + angleOffset);
+
+      final leafPath = Path()
+        ..moveTo(0, 0)
+        ..quadraticBezierTo(9 * scale, -7 * scale, 18 * scale, 0)
+        ..quadraticBezierTo(9 * scale, 7 * scale, 0, 0)
+        ..close();
+
+      canvas.drawPath(leafPath, paint);
+      canvas.restore();
+    }
+
+    drawLeaf(0.15, -1.0, 1.0, leafPaintDark);
+    drawLeaf(0.32, 1.1, 0.85, leafPaintLight);
+    drawLeaf(0.50, -0.9, 0.95, leafPaintDark);
+    drawLeaf(0.68, 1.0, 0.8, leafPaintLight);
+    drawLeaf(0.85, -0.85, 0.75, leafPaintDark);
+    drawLeaf(0.97, 0.9, 0.6, leafPaintLight);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// ============================================================
+// MAIN VIEW
+// ============================================================
+
+class ProfilesetupView extends StatefulWidget {
+  const ProfilesetupView({
+    super.key,
+  });
+
+  @override
+  State<ProfilesetupView> createState() =>
+      _ProfilesetupViewState();
+}
+
+class _ProfilesetupViewState
+    extends State<ProfilesetupView> {
   late ProfilesetupController controller;
-  
-  List<File?> photos = List<File?>.filled(6, null);
+
+  List<File?> photos =
+  List<File?>.filled(6, null);
+
   bool isLoading = false;
+
   int uploadedCount = 0;
-  final ImagePicker picker = ImagePicker();
+
+  final ImagePicker picker =
+  ImagePicker();
+
+  // ============================================================
+  // INIT
+  // ============================================================
 
   @override
   void initState() {
     super.initState();
-    controller = Get.isRegistered<ProfilesetupController>()
+
+    controller =
+    Get.isRegistered<ProfilesetupController>()
         ? Get.find<ProfilesetupController>()
-        : Get.put(ProfilesetupController());
+        : Get.put(
+      ProfilesetupController(),
+    );
+
     _loadPhotos();
   }
+
+  // ============================================================
+  // LOAD PHOTOS
+  // ============================================================
 
   void _loadPhotos() {
     if (controller.photos.isNotEmpty) {
       setState(() {
-        photos = List<File?>.from(controller.photos);
-        uploadedCount = photos.where((file) => file != null).length;
+        photos =
+        List<File?>.from(
+          controller.photos,
+        );
+
+        uploadedCount =
+            photos
+                .where(
+                  (file) => file != null,
+            )
+                .length;
       });
     }
   }
 
-  Future<void> pickImage(int index) async {
+  // ============================================================
+  // PICK IMAGE
+  // ============================================================
+
+  Future<void> pickImage(
+      int index,
+      ) async {
     if (isLoading) return;
 
-    setState(() => isLoading = true);
+    setState(() {
+      isLoading = true;
+    });
 
     try {
-      final XFile? image = await picker.pickImage(
+      final XFile? image =
+      await picker.pickImage(
         source: ImageSource.gallery,
         maxWidth: 1024,
         maxHeight: 1024,
@@ -258,234 +561,944 @@ class _ProfilesetupViewState extends State<ProfilesetupView> {
 
       if (image != null) {
         setState(() {
-          photos[index] = File(image.path);
-          controller.photos[index] = File(image.path);
-          uploadedCount = photos.where((file) => file != null).length;
+          photos[index] =
+              File(image.path);
+
+          controller.photos[index] =
+              File(image.path);
+
+          uploadedCount =
+              photos
+                  .where(
+                    (file) => file != null,
+              )
+                  .length;
         });
-        CustomToast.success("Image added successfully!");
+
+        CustomToast.success(
+          "Image added successfully!",
+        );
       }
     } catch (e) {
-      CustomToast.error("Failed to pick image");
+      CustomToast.error(
+        "Failed to pick image",
+      );
     } finally {
-      setState(() => isLoading = false);
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
-  void removeImage(int index) {
+  // ============================================================
+  // REMOVE IMAGE
+  // ============================================================
+
+  void removeImage(
+      int index,
+      ) {
     if (isLoading) return;
+
     setState(() {
       photos[index] = null;
+
       controller.photos[index] = null;
-      uploadedCount = photos.where((file) => file != null).length;
+
+      uploadedCount =
+          photos
+              .where(
+                (file) => file != null,
+          )
+              .length;
     });
   }
 
-  bool get hasMinimumPhotos => uploadedCount >= 1;
+  // ============================================================
+  // MINIMUM PHOTO
+  // ============================================================
+
+  bool get hasMinimumPhotos =>
+      uploadedCount >= 1;
 
   // ============================================================
-  // UPLOAD PHOTOS - FIXED
+  // UPLOAD PHOTOS
   // ============================================================
-  
+
   Future<bool> uploadPhotos() async {
     try {
-      setState(() => isLoading = true);
+      setState(() {
+        isLoading = true;
+      });
 
-      // Get list of File objects (not paths)
       final imageFiles = photos
-          .where((file) => file != null)
-          .map((file) => file!)
+          .where(
+            (file) => file != null,
+      )
+          .map(
+            (file) => file!,
+      )
           .toList();
 
       if (imageFiles.isEmpty) {
-        CustomToast.error("Please add at least one photo");
-        setState(() => isLoading = false);
+        CustomToast.error(
+          "Please add at least one photo",
+        );
+
+        setState(() {
+          isLoading = false;
+        });
+
         return false;
       }
 
-      // Get ProfileServiceController
-      final profileController = Get.find<ProfileServiceController>();
-      
-      // Option 1: Send as List<File> (Recommended - uses updatePhotos)
-      profileController.updatePhotos(imageFiles);
-      
-      // Option 2: Also set paths directly (backup)
-      final imagePaths = imageFiles.map((file) => file.path).toList();
-      profileController.setPhotoPaths(imagePaths);
-      
-      print('✅ Photos uploaded: ${imageFiles.length} photos');
-      print('📸 Photo paths: $imagePaths');
+      final profileController =
+      Get.find<
+          ProfileServiceController>();
+
+      profileController.updatePhotos(
+        imageFiles,
+      );
+
+      final imagePaths = imageFiles
+          .map(
+            (file) => file.path,
+      )
+          .toList();
+
+      profileController.setPhotoPaths(
+        imagePaths,
+      );
+
+      print(
+        '✅ Photos uploaded: '
+            '${imageFiles.length} photos',
+      );
+
+      print(
+        '📸 Photo paths: $imagePaths',
+      );
 
       return true;
     } catch (e) {
-      CustomToast.error("Failed to upload photos: $e");
+      CustomToast.error(
+        "Failed to upload photos: $e",
+      );
+
       return false;
     } finally {
-      setState(() => isLoading = false);
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
     }
   }
 
-  Future<void> continueToTellmeabout() async {
+  // ============================================================
+  // CONTINUE
+  // ============================================================
+
+  Future<void>
+  continueToTellmeabout() async {
     if (isLoading) return;
 
     if (!hasMinimumPhotos) {
-      CustomToast.warning("Please add at least 1 photo to continue");
+      CustomToast.warning(
+        "Please add at least 1 photo to continue",
+      );
       return;
     }
 
-    final success = await uploadPhotos();
+    final success =
+    await uploadPhotos();
+
     if (success) {
-      // Debug print before navigating
-      final profileController = Get.find<ProfileServiceController>();
-      profileController.debugPrintProfile();
-      
-      Get.to(() => const TellmeaboutyouView());
+      final profileController =
+      Get.find<
+          ProfileServiceController>();
+
+      profileController
+          .debugPrintProfile();
+
+      Get.to(
+            () =>
+        const TellmeaboutyouView(),
+      );
     }
   }
 
+  // ============================================================
+  // POPPINS
+  // ============================================================
+
+  TextStyle poppins({
+    double size = 14,
+    FontWeight weight =
+        FontWeight.w400,
+    Color color = darkText,
+  }) {
+    return GoogleFonts.poppins(
+      fontSize: size.sp,
+      fontWeight: weight,
+      color: color,
+    );
+  }
+
+  // ============================================================
+  // BUILD
+  // ============================================================
+
   @override
-  Widget build(BuildContext context) {
-    ScreenUtil.init(context, designSize: const Size(375, 812), minTextAdapt: true);
+  Widget build(
+      BuildContext context,
+      ) {
+    ScreenUtil.init(
+      context,
+      designSize:
+      const Size(375, 812),
+      minTextAdapt: true,
+      splitScreenMode: true,
+    );
+
+    final screenHeight =
+        MediaQuery.sizeOf(
+          context,
+        ).height;
 
     return Scaffold(
-      backgroundColor: const Color(0xffFAFAFA),
-      appBar: const CustomAppBar(title: ""),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 28.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 25.h),
-              Text(
-                "Great Choice! The More Photos You Have, The Better",
-                style: TextStyle(
-                  letterSpacing: 1.5,
-                  fontSize: 22.sp,
-                  fontWeight: FontWeight.bold,
-                  height: 1.4,
-                ),
-              ),
-              SizedBox(height: 10.h),
-              Text(
-                "$uploadedCount/6 photos uploaded",
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  color: hasMinimumPhotos ? Colors.green : Colors.grey,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              SizedBox(height: 20.h),
+      extendBodyBehindAppBar: true,
+      backgroundColor: Colors.transparent,
 
-              Expanded(
-                child: GridView.builder(
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: 6,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 12.w,
-                    mainAxisSpacing: 12.h,
-                    childAspectRatio: 0.75,
+
+      appBar: const CustomAppBar(
+        title: 'Add Photos',
+        subtitle: 'Help others get to know you better',
+        rightImage: 'assets/icons/app_icon.jpeg',
+      ),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              'assets/images/LoginBack2.png',
+              fit: BoxFit.cover,
+            ),
+          ),
+          // ========================================================
+          // MAIN CONTENT
+          // ========================================================
+          Positioned.fill(
+            child: Container(
+              color: const Color(0xFFFFF0E6)
+                  .withOpacity(0.10),
+            ),
+          ),
+
+          // ========================================================
+          // BOTTOM DECORATION (wave)
+          // ========================================================
+          const Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: BottomDecoration(),
+          ),
+
+          // ========================================================
+          // LEFT LEAVES
+          // ========================================================
+          Positioned(
+            left: 2.w,
+            bottom: 26.h,
+            child: const LeafDecoration(),
+          ),
+
+          // ========================================================
+          // RIGHT LEAVES
+          // ========================================================
+          Positioned(
+            right: 2.w,
+            bottom: 26.h,
+            child: const LeafDecoration(flip: true),
+          ),
+
+          Padding(
+            padding:
+            EdgeInsets.symmetric(
+              horizontal: 22.w,
+            ),
+            child: Column(
+              children: [
+                // ==================================================
+                // TOP ICON
+                // ==================================================
+
+                SizedBox(
+                  height: 150.h,
+                ),
+
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      height: 43.w,
+                      width: 43.w,
+                      decoration:
+                      BoxDecoration(
+                        color:
+                        const Color(
+                          0xFFFFF0E8,
+                        ),
+                        borderRadius:
+                        BorderRadius
+                            .circular(
+                          12.r,
+                        ),
+                      ),
+                      child: Stack(
+                        alignment:
+                        Alignment.center,
+                        children: [
+                          Container(
+                            height: 28.w,
+                            width: 28.w,
+                            decoration:
+                            BoxDecoration(
+                              color:
+                              Colors.white,
+                              borderRadius:
+                              BorderRadius
+                                  .circular(
+                                6.r,
+                              ),
+                            ),
+                            child:
+                            Icon(
+                              Icons
+                                  .image_outlined,
+                              color:
+                              orange,
+                              size: 19.sp,
+                            ),
+                          ),
+
+                          Positioned(
+                            right: 1.w,
+                            top: 2.h,
+                            child:
+                            Text(
+                              "✦",
+                              style:
+                              TextStyle(
+                                color:
+                                orange,
+                                fontSize:
+                                11.sp,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    // ============================================
+                    // SMALL DOTS (top-right of icon)
+                    // ============================================
+                    Positioned(
+                      right: -34.w,
+                      top: 2.h,
+                      child: const _Dots(),
+                    ),
+                  ],
+                ),
+
+                SizedBox(
+                  height: 9.h,
+                ),
+
+                // ==================================================
+                // TITLE
+                // ==================================================
+
+                RichText(
+                  textAlign:
+                  TextAlign.center,
+                  text:
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text:
+                        "Great choice!\n",
+                        style:
+                        poppins(
+                          size: 16,
+                          weight:
+                          FontWeight
+                              .w700,
+                        ),
+                      ),
+                      TextSpan(
+                        text:
+                        "The more photos you have,\n",
+                        style:
+                        poppins(
+                          size: 15,
+                          weight:
+                          FontWeight
+                              .w700,
+                          color:
+                          orange,
+                        ),
+                      ),
+                      TextSpan(
+                        text:
+                        "the better",
+                        style:
+                        poppins(
+                          size: 15,
+                          weight:
+                          FontWeight
+                              .w700,
+                        ),
+                      ),
+                    ],
                   ),
-                  itemBuilder: (context, index) {
-                    final File? imageFile = photos[index];
-                    
-                    // If loading, show shimmer effect on the grid item
-                    if (isLoading) {
-                      return ShimmerEffect(
-                        baseColor: Colors.grey[300]!,
-                        highlightColor: Colors.grey[100]!,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(16.r),
+                ),
+
+                SizedBox(
+                  height: 9.h,
+                ),
+
+                // ==================================================
+                // DESCRIPTION
+                // ==================================================
+
+                Text(
+                  "Add more photos so people can get\n"
+                      "to know you better.",
+                  textAlign:
+                  TextAlign.center,
+                  style:
+                  poppins(
+                    size: 8,
+                    color:
+                    greyText,
+                  ).copyWith(
+                    height: 1.45,
+                  ),
+                ),
+
+                SizedBox(
+                  height: 40.h,
+                ),
+
+                // ==================================================
+                // PHOTO CARD
+                // ==================================================
+
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.fromLTRB(
+                    12.w,
+                    20, // 👈 top padding hata diya, height sirf upar se kam hogi
+                    12.w,
+                    20.h,
+                  ),
+                  decoration:
+                  BoxDecoration(
+                    color:
+                    Colors.white,
+                    borderRadius:
+                    BorderRadius
+                        .circular(
+                      14.r,
+                    ),
+                    border:
+                    Border.all(
+                      color:
+                      const Color(
+                        0xFFF1E8E4,
+                      ),
+                      width: 0.8,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors
+                            .black
+                            .withOpacity(
+                          0.035,
+                        ),
+                        blurRadius:
+                        12,
+                        offset:
+                        const Offset(
+                          0,
+                          3,
+                        ),
+                      ),
+                    ],
+                  ),
+                  child:
+                  GridView.builder(
+                    shrinkWrap:
+                    true,
+                    padding:
+                    EdgeInsets.zero,
+                    physics:
+                    const NeverScrollableScrollPhysics(),
+                    itemCount: 6,
+                    gridDelegate:
+                    SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount:
+                      3,
+                      crossAxisSpacing:
+                      9.w,
+                      mainAxisSpacing:
+                      10.h,
+                      childAspectRatio:
+                      0.85,
+                    ),
+                    itemBuilder:
+                        (
+                        context,
+                        index,
+                        ) {
+                      final File?
+                      imageFile =
+                      photos[
+                      index];
+
+                      // ==========================================
+                      // SHIMMER
+                      // ==========================================
+
+                      if (isLoading) {
+                        return ShimmerEffect(
+                          baseColor:
+                          const Color(
+                            0xFFF2F2F2,
+                          ),
+                          highlightColor:
+                          Colors
+                              .white,
+                          child:
+                          Container(
+                            decoration:
+                            BoxDecoration(
+                              color:
+                              const Color(
+                                0xFFF2F2F2,
+                              ),
+                              borderRadius:
+                              BorderRadius
+                                  .circular(
+                                13.r,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+
+                      // ==========================================
+                      // PHOTO BOX
+                      // ==========================================
+
+                      return GestureDetector(
+                        onTap: () =>
+                            pickImage(
+                              index,
+                            ),
+                        child:
+                        DottedBorder(
+                          color:
+                          imageFile !=
+                              null
+                              ? orange
+                              .withOpacity(
+                            0.35,
+                          )
+                              : const Color(
+                            0xFFECE3DE,
+                          ),
+                          strokeWidth:
+                          1,
+                          radius:
+                          13.r,
+                          dashWidth:
+                          5,
+                          dashSpace:
+                          4,
+                          child:
+                          Container(
+                            decoration:
+                            BoxDecoration(
+                              color:
+                              const Color(
+                                0xFFFFFCFA,
+                              ),
+                              borderRadius:
+                              BorderRadius
+                                  .circular(
+                                13.r,
+                              ),
+                            ),
+                            child:
+                            Stack(
+                              children: [
+                                // ==================================
+                                // IMAGE
+                                // ==================================
+
+                                if (imageFile !=
+                                    null)
+                                  ClipRRect(
+                                    borderRadius:
+                                    BorderRadius
+                                        .circular(
+                                      13.r,
+                                    ),
+                                    child:
+                                    Image.file(
+                                      imageFile,
+                                      fit:
+                                      BoxFit.cover,
+                                      width:
+                                      double.infinity,
+                                      height:
+                                      double.infinity,
+                                    ),
+                                  )
+                                else
+                                  Center(
+                                    child:
+                                    Icon(
+                                      Icons
+                                          .photo_camera_outlined,
+                                      size:
+                                      17.sp,
+                                      color:
+                                      const Color(
+                                        0xFFBDB8B5,
+                                      ),
+                                    ),
+                                  ),
+
+                                // ==================================
+                                // PLUS / REMOVE
+                                // ==================================
+
+                                Positioned(
+                                  right:
+                                  5.w,
+                                  bottom:
+                                  5.h,
+                                  child:
+                                  GestureDetector(
+                                    onTap:
+                                    isLoading
+                                        ? null
+                                        : () {
+                                      if (imageFile !=
+                                          null) {
+                                        removeImage(
+                                          index,
+                                        );
+                                      } else {
+                                        pickImage(
+                                          index,
+                                        );
+                                      }
+                                    },
+                                    child:
+                                    Container(
+                                      height:
+                                      23.w,
+                                      width:
+                                      23.w,
+                                      decoration:
+                                      BoxDecoration(
+                                        color:
+                                        Colors.white,
+                                        shape:
+                                        BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors
+                                                .black
+                                                .withOpacity(
+                                              0.08,
+                                            ),
+                                            blurRadius:
+                                            5,
+                                          ),
+                                        ],
+                                      ),
+                                      child:
+                                      Icon(
+                                        imageFile ==
+                                            null
+                                            ? Icons
+                                            .add
+                                            : Icons
+                                            .close,
+                                        size:
+                                        15.sp,
+                                        color:
+                                        orange,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+
+                                // ==================================
+                                // REMOVE ON IMAGE TOP
+                                // ==================================
+
+                                if (imageFile !=
+                                    null)
+                                  Positioned(
+                                    right:
+                                    3.w,
+                                    top:
+                                    3.h,
+                                    child:
+                                    GestureDetector(
+                                      onTap:
+                                          () =>
+                                          removeImage(
+                                            index,
+                                          ),
+                                      child:
+                                      Container(
+                                        height:
+                                        20.w,
+                                        width:
+                                        20.w,
+                                        decoration:
+                                        const BoxDecoration(
+                                          color:
+                                          Colors.white,
+                                          shape:
+                                          BoxShape.circle,
+                                        ),
+                                        child:
+                                        Icon(
+                                          Icons
+                                              .close,
+                                          size:
+                                          13.sp,
+                                          color:
+                                          orange,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
                           ),
                         ),
                       );
-                    }
-                    
-                    return GestureDetector(
-                      onTap: isLoading ? null : () => pickImage(index),
-                      child: DottedBorder(
-                        color: imageFile != null ? Colors.orange : Colors.grey,
-                        strokeWidth: imageFile != null ? 2.0 : 1.5,
-                        radius: 16.r,
-                        dashWidth: 6,
-                        dashSpace: 4,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: const Color.fromARGB(255, 245, 245, 245),
-                            borderRadius: BorderRadius.circular(16.r),
+                    },
+                  ),
+                ),
+
+                // ==================================================
+                // SPACE
+                // ==================================================
+
+                SizedBox(
+                  height: 20.h,
+                ),
+
+                // ==================================================
+                // CONTINUE BUTTON
+                // ==================================================
+
+                SizedBox(
+                  width:
+                  double.infinity,
+                  height:
+                  43.h,
+                  child:
+                  Container(
+                    decoration:
+                    BoxDecoration(
+                      gradient:
+                      const LinearGradient(
+                        begin:
+                        Alignment
+                            .centerLeft,
+                        end:
+                        Alignment
+                            .centerRight,
+                        colors: [
+                          orange,
+                          orange,
+                          orangeLight,
+                        ],
+                        stops: [
+                          0.0,
+                          0.72,
+                          1.0,
+                        ],
+                      ),
+                      borderRadius:
+                      BorderRadius
+                          .circular(
+                        30.r,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: orange
+                              .withOpacity(
+                            0.22,
                           ),
-                          child: Stack(
-                            children: [
-                              if (imageFile != null)
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(16.r),
-                                  child: Image.file(
-                                    imageFile,
-                                    fit: BoxFit.cover,
-                                    width: double.infinity,
-                                    height: double.infinity,
-                                  ),
-                                )
-                              else
-                                const Center(
-                                  child: Icon(
-                                    Icons.camera_alt_outlined,
-                                    size: 32, 
-                                    color: Colors.grey
-                                  ),
-                                ),
-                              Positioned(
-                                right: 8,
-                                bottom: 8,
-                                child: GestureDetector(
-                                  onTap: isLoading
-                                      ? null
-                                      : () => imageFile != null
-                                          ? removeImage(index)
-                                          : pickImage(index),
-                                  child: Container(
-                                    height: 28,
-                                    width: 28,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      shape: BoxShape.circle,
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black12, 
-                                          blurRadius: 4
-                                        )
-                                      ],
-                                    ),
-                                    child: Icon(
-                                      imageFile == null ? Icons.add : Icons.close,
-                                      size: 18,
-                                      color: Colors.orange,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                          blurRadius:
+                          12,
+                          offset:
+                          const Offset(
+                            0,
+                            5,
+                          ),
+                        ),
+                      ],
+                    ),
+                    child:
+                    ElevatedButton(
+                      onPressed:
+                      isLoading ||
+                          !hasMinimumPhotos
+                          ? null
+                          : continueToTellmeabout,
+                      style:
+                      ElevatedButton
+                          .styleFrom(
+                        backgroundColor:
+                        Colors
+                            .transparent,
+                        disabledBackgroundColor:
+                        Colors
+                            .transparent,
+                        shadowColor:
+                        Colors
+                            .transparent,
+                        elevation: 0,
+                        padding:
+                        EdgeInsets
+                            .zero,
+                        shape:
+                        RoundedRectangleBorder(
+                          borderRadius:
+                          BorderRadius
+                              .circular(
+                            30.r,
                           ),
                         ),
                       ),
-                    );
-                  },
+                      child:
+                      isLoading
+                          ? SizedBox(
+                        height:
+                        19.w,
+                        width:
+                        19.w,
+                        child:
+                        const CircularProgressIndicator(
+                          strokeWidth:
+                          2,
+                          color:
+                          Colors.white,
+                        ),
+                      )
+                          : Row(
+                        mainAxisAlignment:
+                        MainAxisAlignment
+                            .center,
+                        children: [
+                          Text(
+                            "Continue",
+                            style:
+                            poppins(
+                              size:
+                              11,
+                              weight:
+                              FontWeight
+                                  .w600,
+                              color:
+                              Colors.white,
+                            ),
+                          ),
+                          SizedBox(
+                            width:
+                            9.w,
+                          ),
+                          Icon(
+                            Icons
+                                .arrow_forward_rounded,
+                            color:
+                            Colors.white,
+                            size:
+                            16.sp,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-              ),
 
-              SizedBox(height: 20.h),
-              CustomButton(
-                text: "Continue",
-                onPressed: isLoading ? () {} : continueToTellmeabout,
-                isLoading: isLoading,
-                backgroundColor: hasMinimumPhotos ? const Color(0xffFF6B00) : Colors.grey,
-              ),
-              SizedBox(height: 15.h),
-            ],
+
+              ],
+            ),
           ),
-        ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================
+// DOTS
+// ============================================================
+
+class _Dots extends StatelessWidget {
+  const _Dots();
+
+  @override
+  Widget build(
+      BuildContext context,
+      ) {
+    return Column(
+      children: List.generate(
+        4,
+            (row) {
+          return Row(
+            children: List.generate(
+              3,
+                  (col) {
+                return Padding(
+                  padding:
+                  EdgeInsets.all(
+                    2.w,
+                  ),
+                  child: Container(
+                    height: 3.w,
+                    width: 3.w,
+                    decoration:
+                    const BoxDecoration(
+                      color:
+                      Color(
+                        0xFFFFC7AF,
+                      ),
+                      shape:
+                      BoxShape.circle,
+                    ),
+                  ),
+                );
+              },
+            ),
+          );
+        },
       ),
     );
   }

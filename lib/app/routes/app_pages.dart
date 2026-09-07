@@ -105,12 +105,12 @@ part 'app_routes.dart';
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.SPLASH;
+  static const INITIAL = Routes.PROFILESETUP;
 
   static final routes = [
     GetPage(
       name: _Paths.SPLASH,
-      page: () => const SplashView(),
+      page: () =>  SplashView(),
       binding: SplashBinding(),
     ),
     GetPage(
