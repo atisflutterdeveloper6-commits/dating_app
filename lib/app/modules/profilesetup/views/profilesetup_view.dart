@@ -775,7 +775,8 @@ class _ProfilesetupViewState
       appBar: const CustomAppBar(
         title: 'Add Photos',
         subtitle: 'Help others get to know you better',
-        rightImage: 'assets/icons/app_icon.jpeg',
+        // rightImage: 'assets/icons/app_icon.jpeg',
+        useIllustration: true,
       ),
       body: Stack(
         children: [
@@ -1397,21 +1398,7 @@ class _ProfilesetupViewState
                         ),
                       ),
                       child:
-                      isLoading
-                          ? SizedBox(
-                        height:
-                        19.w,
-                        width:
-                        19.w,
-                        child:
-                        const CircularProgressIndicator(
-                          strokeWidth:
-                          2,
-                          color:
-                          Colors.white,
-                        ),
-                      )
-                          : Row(
+                 Row(
                         mainAxisAlignment:
                         MainAxisAlignment
                             .center,

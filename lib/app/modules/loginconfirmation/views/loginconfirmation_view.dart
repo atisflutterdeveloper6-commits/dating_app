@@ -199,6 +199,7 @@ class LoginconfirmationView extends GetView<LoginconfirmationController> {
                                       MainAxisAlignment.start,
                                       children: [
                                         // TITLE
+                                        SizedBox(height: 80.h,),
 
                                         Text(
                                           "Welcome back",
@@ -696,7 +697,7 @@ class LoginconfirmationView extends GetView<LoginconfirmationController> {
                                     child: Row(
                                       crossAxisAlignment:
                                       CrossAxisAlignment
-                                          .start,
+                                          .center,
                                       children: [
                                         Container(
                                           width: 36.w,
@@ -718,7 +719,7 @@ class LoginconfirmationView extends GetView<LoginconfirmationController> {
                                           child: Icon(
                                             Icons
                                                 .verified_user_outlined,
-                                            size: 21.sp,
+                                            size: 18.sp,
                                             color: orange,
                                           ),
                                         ),
@@ -735,7 +736,7 @@ class LoginconfirmationView extends GetView<LoginconfirmationController> {
                                               GoogleFonts
                                                   .poppins(
                                                 fontSize:
-                                                8.sp,
+                                                6.sp,
                                                 fontWeight:
                                                 FontWeight
                                                     .w400,
@@ -883,7 +884,7 @@ class LoginconfirmationView extends GetView<LoginconfirmationController> {
           // ============================================================
 
           Positioned(
-            top: 75.h,
+            top: 55.h,
             left: 25.w,
             child: Material(
               color: Colors.white,

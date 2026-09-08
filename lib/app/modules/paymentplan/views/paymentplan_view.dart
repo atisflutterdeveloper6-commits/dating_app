@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:dating_app/app/custom_widget/custom_toast.dart';
 import 'package:dating_app/app/custom_widget/location_controller.dart';
 import 'package:dating_app/app/custom_widget/profile_service_controller.dart';
@@ -160,312 +162,385 @@ class _PaymentplanViewState extends State<PaymentplanView> {
                     const Spacer(flex: 2),
 
                     // Dynamic Main Tagline
-                    RichText(
-                      textAlign: TextAlign.center,
-                      text: TextSpan(
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 26,
-                          fontWeight: FontWeight.w700,
-                          height: 1.2,
-                          letterSpacing: 0.5,
-                        ),
-                        children: _buildMainTitle(data.mainTitle),
-                      ),
-                    ),
-                    // In the build method, where you have the location Row
-if (data.highlightText.isNotEmpty) ...[
-  const SizedBox(height: 12),
-  Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      const SizedBox(width: 6),
-      Text(
+
+        ClipRRect(
+        borderRadius: BorderRadius.circular(24),
+        child: BackdropFilter(
+        filter: ImageFilter.blur(
+        sigmaX: 10,
+        sigmaY: 10,
+        ),
+        child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 20,
+        ),
+        decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+        color: Colors.white.withOpacity(0.18),
+        width: 1,
+        ),
+        ),
+        child: Column(
+        children: [
+        // Dynamic Main Tagline
+        RichText(
+        textAlign: TextAlign.center,
+        text: TextSpan(
+        style: const TextStyle(
+        color: Colors.white,
+        fontSize: 26,
+        fontWeight: FontWeight.w700,
+        height: 1.2,
+        letterSpacing: 0.5,
+        ),
+        children: _buildMainTitle(data.mainTitle),
+        ),
+        ),
+
+        // Highlight + Location
+        if (data.highlightText.isNotEmpty) ...[
+        const SizedBox(height: 12),
+
+        Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+        const SizedBox(width: 6),
+        Text(
         data.highlightText,
         style: const TextStyle(
-          color: Colors.amber,
-          fontWeight: FontWeight.w700,
-          fontSize: 20,
-          letterSpacing: 1.0,
+        color: Colors.amber,
+        fontWeight: FontWeight.w700,
+        fontSize: 20,
+        letterSpacing: 1.0,
         ),
-      ),
-    ],
-  ),
-  const SizedBox(height: 12),
-  // 🟢 UPDATED LOCATION ROW - CENTER ALIGNED WITH ICON
-  Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 16),
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-      
+        ),
+        ],
+        ),
+
+        const SizedBox(height: 12),
+
+        // Location Row
+        Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
         const SizedBox(width: 6),
+
         const Text(
-          "In ",
-          style: TextStyle(
-            color:Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-          ),
+        "In ",
+        style: TextStyle(
+        color: Colors.white,
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
         ),
+        ),
+
         Obx(() {
-          final locationController = LocationController.to;
-          if (locationController.isLoading.value) {
-            return const SizedBox(
-              height: 16,
-              width: 16,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                color: Color(0xffFF9A44),
-              ),
-            );
-          }
-          if (locationController.currentLocation.value.isNotEmpty) {
-            return Flexible(
-              child: Text(
-                locationController.currentLocation.value,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                ),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-                softWrap: false,
-              ),
-            );
-          }
-          return TextButton(
-            onPressed: () async {
-              await locationController.getCurrentLocation();
-            },
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.zero,
-              minimumSize: const Size(0, 0),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            ),
-            child: const Text(
-              'Tap to get location',
-              style: TextStyle(
-                color: Color(0xffFF9A44),
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                decoration: TextDecoration.underline,
-                decorationColor: Color(0xffFF9A44),
-              ),
-            ),
-          );
+        final locationController =
+        LocationController.to;
+
+        if (locationController.isLoading.value) {
+        return const SizedBox(
+        height: 16,
+        width: 16,
+        child: CircularProgressIndicator(
+        strokeWidth: 2,
+        color: Color(0xffFF9A44),
+        ),
+        );
+        }
+
+        if (locationController
+            .currentLocation
+            .value
+            .isNotEmpty) {
+        return Flexible(
+        child: Text(
+        locationController
+            .currentLocation
+            .value,
+        style: const TextStyle(
+        color: Colors.white,
+        fontSize: 16,
+        fontWeight: FontWeight.w700,
+        ),
+        overflow: TextOverflow.ellipsis,
+        maxLines: 1,
+        softWrap: false,
+        ),
+        );
+        }
+
+        return TextButton(
+        onPressed: () async {
+        await locationController
+            .getCurrentLocation();
+        },
+        style: TextButton.styleFrom(
+        padding: EdgeInsets.zero,
+        minimumSize: const Size(0, 0),
+        tapTargetSize:
+        MaterialTapTargetSize.shrinkWrap,
+        ),
+        child: const Text(
+        'Tap to get location',
+        style: TextStyle(
+        color: Color(0xffFF9A44),
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+        decoration:
+        TextDecoration.underline,
+        decorationColor:
+        Color(0xffFF9A44),
+        ),
+        ),
+        );
         }),
-      ],
-    ),
-  ),
-  const SizedBox(height: 20),
-],
+        ],
+        ),
+        ),
 
-                    const SizedBox(height: 40),
+        const SizedBox(height: 20),
+        ],
 
-                    // Dynamic Plan Card
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 28,
-                      ),
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            const Color(0xff8B4A21).withOpacity(0.92),
-                            const Color(0xff6A3718).withOpacity(0.95),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(24),
-                        border: Border.all(
-                          color: const Color(0xffFF7A00).withOpacity(0.6),
-                          width: 1.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xffFF7A00).withOpacity(0.2),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          // Highlight Badge (if exists) — with a crown icon
-                          if (data.highlightText.isNotEmpty) ...[
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xffFFB000),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.workspace_premium,
-                                    color: Colors.white,
-                                    size: 28,
-                                  ),
-                                
-                                ],
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                          ],
+        // Dynamic Plan Card
+        Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(
+        horizontal: 24,
+        vertical: 28,
+        ),
+        decoration: BoxDecoration(
+        gradient: LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+        const Color(0xff8B4A21).withOpacity(0.92),
+        const Color(0xff6A3718).withOpacity(0.95),
+        ],
+        ),
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+        color:
+        const Color(0xffFF7A00).withOpacity(0.6),
+        width: 1.5,
+        ),
+        boxShadow: [
+        BoxShadow(
+        color:
+        const Color(0xffFF7A00).withOpacity(0.2),
+        blurRadius: 20,
+        offset: const Offset(0, 8),
+        ),
+        ],
+        ),
+        child: Column(
+        children: [
+        if (data.highlightText.isNotEmpty) ...[
+        Container(
+        padding: const EdgeInsets.symmetric(
+        horizontal: 16,
+        vertical: 6,
+        ),
+        decoration: BoxDecoration(
+        color: const Color(0xffFFB000),
+        borderRadius:
+        BorderRadius.circular(20),
+        ),
+        child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+        const Icon(
+        Icons.workspace_premium,
+        color: Colors.white,
+        size: 28,
+        ),
+        ],
+        ),
+        ),
+        const SizedBox(height: 12),
+        ],
 
-                          // Plan Name
-                        
-                          const SizedBox(height: 16),
+        const SizedBox(height: 16),
 
-                          // Trial Price
-                          RichText(
-                            text: TextSpan(
-                              style: const TextStyle(
-                                letterSpacing: 0.8,
-                              ),
-                              children: [
-                                TextSpan(
-                                  text: data.trialText,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w700,
-                                    fontSize: 18,
-                                  ),
-                                ),
-                                TextSpan(
-                                  text: controller.isTrialFree()
-                                      ? ' '
-                                      : ' ₹${data.trialPrice}',
-                                  style: const TextStyle(
-                                    color: Color(0xffFFB000),
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 22,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 20),
+        // Trial Price
+        RichText(
+        text: TextSpan(
+        style: const TextStyle(
+        letterSpacing: 0.8,
+        ),
+        children: [
+        TextSpan(
+        text: data.trialText,
+        style: const TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.w700,
+        fontSize: 18,
+        ),
+        ),
+        TextSpan(
+        text: controller.isTrialFree()
+        ? ' '
+            : ' ₹${data.trialPrice}',
+        style: const TextStyle(
+        color: Color(0xffFFB000),
+        fontWeight: FontWeight.w800,
+        fontSize: 22,
+        ),
+        ),
+        ],
+        ),
+        ),
 
-                          const Divider(
-                            color: Colors.white24,
-                            thickness: 1,
-                            height: 1,
-                          ),
-                          const SizedBox(height: 14),
+        const SizedBox(height: 20),
 
-                          // Price After Trial
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: const Color(0xffFF7A00).withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              data.afterTrialText.isNotEmpty
-                                  ? '₹${data.afterTrialText}'
-                                  : '₹${data.priceAfterTrial} AFTER TRIAL',
-                              style: const TextStyle(
-                                letterSpacing: 1.5,
-                                color: Color(0xffFF9A44),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+        const Divider(
+        color: Colors.white24,
+        thickness: 1,
+        height: 1,
+        ),
 
-                    const SizedBox(height: 20),
+        const SizedBox(height: 14),
 
-                    // Subtext
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.check_circle_outline,
-                          color: Color(0xffFF9A44),
-                          size: 16,
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          "Cancel Anytime · No Hidden Charges",
-                          style: TextStyle(
-                            fontSize: 13,
-                            letterSpacing: 0.6,
-                            color: Colors.white70,
-                          ),
-                        ),
-                      ],
-                    ),
+        // Price After Trial
+        Container(
+        padding: const EdgeInsets.symmetric(
+        horizontal: 12,
+        vertical: 6,
+        ),
+        decoration: BoxDecoration(
+        color:
+        const Color(0xffFF7A00).withOpacity(0.2),
+        borderRadius: BorderRadius.circular(20),
+        ),
+        child: Text(
+        data.afterTrialText.isNotEmpty
+        ? '₹${data.afterTrialText}'
+            : '₹${data.priceAfterTrial} AFTER TRIAL',
+        style: const TextStyle(
+        letterSpacing: 1.5,
+        color: Color(0xffFF9A44),
+        fontSize: 16,
+        fontWeight: FontWeight.w700,
+        ),
+        ),
+        ),
+        ],
+        ),
+        ),
+
+        const SizedBox(height: 20),
+
+        // Cancel Anytime
+        const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+        Icon(
+        Icons.check_circle_outline,
+        color: Color(0xffFF9A44),
+        size: 16,
+        ),
+        SizedBox(width: 8),
+        Text(
+        "Cancel Anytime · No Hidden Charges",
+        style: TextStyle(
+        fontSize: 13,
+        letterSpacing: 0.6,
+        color: Colors.white70,
+        ),
+        ),
+        ],
+        ),
+        ],
+        ),
+        ),
+        ),
+        ),
 
                     const Spacer(flex: 2),
 
                     // Pay Button with Razorpay
-                Container(
-  width: double.infinity,
-  height: 54,
-  decoration: BoxDecoration(
-    gradient: const LinearGradient(
-      colors: [
-        Color(0xffFF6A00),
-        Color(0xffFF8C00),
-      ],
-    ),
-    borderRadius: BorderRadius.circular(30),
-    boxShadow: [
-      BoxShadow(
-        color: const Color(0xffFF6A00).withOpacity(0.4),
-        blurRadius: 16,
-        offset: const Offset(0, 6),
-      ),
-    ],
-  ),
-  child: ElevatedButton(
-    onPressed: controller.isPaymentInProgress.value
-        ? null
-        : () {
-            Get.to(() => const ProfilesetupView());
-          },
-    style: ElevatedButton.styleFrom(
-      backgroundColor: Colors.transparent,
-      disabledBackgroundColor: Colors.transparent,
-      shadowColor: Colors.transparent,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(30),
-      ),
-    ),
-    child: controller.isPaymentInProgress.value
-        ? const SizedBox(
-            height: 20,
-            width: 20,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: Colors.white,
-            ),
-          )
-        : Text(
-            controller.getPayButtonText(),
-            style: const TextStyle(
-              letterSpacing: 1.8,
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-              fontSize: 16,
-            ),
-          ),
-  ),
-),
+                    Container(
+                      width: double.infinity,
+                      height: 54,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xffFF6A00),
+                            Color(0xffFF8C00),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(30),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xffFF6A00).withOpacity(0.4),
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: ElevatedButton(
+                        onPressed: controller.isPaymentInProgress.value
+                            ? null
+                            : () {
+                          Get.to(() => const ProfilesetupView());
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.transparent,
+                          disabledBackgroundColor: Colors.transparent,
+                          shadowColor: Colors.transparent,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          padding: EdgeInsets.zero,
+                        ),
+                        child: controller.isPaymentInProgress.value
+                            ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                            : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.arrow_forward_rounded,
+                              color: Colors.white,
+                              size: 22,
+                            ),
+
+                            const SizedBox(width: 10),
+
+                            Container(
+                              width: 1,
+                              height: 22,
+                              color: Colors.white.withOpacity(0.45),
+                            ),
+
+                            const SizedBox(width: 10),
+
+                            Text(
+                              controller.getPayButtonText(),
+                              style: const TextStyle(
+                                letterSpacing: 1.8,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 16),
 
                     // Privacy Policy — branded footer

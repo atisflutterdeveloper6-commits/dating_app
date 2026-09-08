@@ -85,15 +85,42 @@ padding: EdgeInsets.symmetric(horizontal: 28.w),
 child: Column(
 crossAxisAlignment: CrossAxisAlignment.start,
 children: [
-SizedBox(height: 20.h),
+SizedBox(height: 40.h),
 
 // ==================================================
-// TITLE
+// HEADER
+// SAME AS POSITION SCREEN
 // ==================================================
+Row(
+crossAxisAlignment: CrossAxisAlignment.center,
+children: [
+Container(
+padding: EdgeInsets.all(8.w),
+decoration: BoxDecoration(
+shape: BoxShape.circle,
+border: Border.all(
+color: const Color(0xFFFFE0CC),
+width: 1.2,
+),
+),
+child: Icon(
+Icons.person_outline,
+color: const Color(0xFFFF6B00),
+size: 22.sp,
+),
+),
+
+SizedBox(width: 20.w),
+
+Expanded(
+child: Column(
+crossAxisAlignment:
+CrossAxisAlignment.start,
+children: [
 Text(
 "What’s Your Gender?",
 style: TextStyle(
-fontSize: 18.sp,
+fontSize: 14.sp,
 fontWeight: FontWeight.w700,
 letterSpacing: 1.2,
 ),
@@ -109,13 +136,43 @@ color: Colors.black54,
 letterSpacing: 0.5,
 ),
 ),
+],
+),
+),
+],
+),
 
-SizedBox(height: 25.h),
+SizedBox(height: 30.h),
 
 // ==================================================
-// GENDER OPTIONS
+// WHITE CONTAINER
 // ==================================================
-Column(
+Container(
+width: double.infinity,
+padding: EdgeInsets.fromLTRB(
+16.w,
+40.h,
+16.w,
+40.h,
+),
+decoration: BoxDecoration(
+color: Colors.white,
+borderRadius: BorderRadius.circular(14.r),
+border: Border.all(
+color: const Color(0xFFF1E8E4),
+width: 0.8,
+),
+boxShadow: [
+BoxShadow(
+color:
+Colors.black.withOpacity(0.035),
+blurRadius: 12,
+offset: const Offset(0, 3),
+),
+],
+),
+
+child: Column(
 children: List.generate(
 genders.length,
 (index) {
@@ -125,12 +182,16 @@ selectedIndex == index;
 return GestureDetector(
 onTap: () {
 if (index == 2) {
-// Save Others
+// ==================================
+// SAVE OTHERS
+// ==================================
 profileController.updateGender(
 genders[index],
 );
 
-// Navigate directly
+// ==================================
+// NAVIGATE DIRECTLY
+// ==================================
 Get.toNamed(
 Routes.SEXUALORIENTAION,
 );
@@ -143,11 +204,20 @@ selectedIndex = index;
 child: AnimatedContainer(
 duration:
 const Duration(milliseconds: 180),
-height: 55.h,
-margin: EdgeInsets.only(bottom: 12.h),
-padding: EdgeInsets.symmetric(
-horizontal: 14.w,
+
+height: 80.h,
+
+margin: EdgeInsets.only(
+bottom: index ==
+genders.length - 1
+? 0
+    : 12.h,
 ),
+
+padding: EdgeInsets.symmetric(
+horizontal: 18.w,
+),
+
 decoration: BoxDecoration(
 color: selected
 ? const Color(0xFFFFF2E8)
@@ -158,29 +228,34 @@ border: Border.all(
 color: selected
 ? const Color(0xffFF6B00)
     : Colors.grey.shade300,
-width: selected ? 1.5 : 1,
+width:
+selected ? 1.5 : 1,
 ),
 ),
+
 child: Row(
 children: [
-// ==================================================
+// =================================
 // RADIO ICON
-// ==================================================
+// =================================
 Icon(
 selected
-? Icons.radio_button_checked
+? Icons
+    .radio_button_checked
     : Icons.radio_button_off,
 size: 18.sp,
 color: selected
-? const Color(0xffFF6B00)
+? const Color(
+0xffFF6B00,
+)
     : Colors.grey.shade500,
 ),
 
 SizedBox(width: 12.w),
 
-// ==================================================
+// =================================
 // GENDER TEXT
-// ==================================================
+// =================================
 Expanded(
 child: Text(
 genders[index],
@@ -191,15 +266,17 @@ fontWeight: selected
     : FontWeight.w500,
 letterSpacing: 0.5,
 color: selected
-? const Color(0xffFF6B00)
+? const Color(
+0xffFF6B00,
+)
     : Colors.black87,
 ),
 ),
 ),
 
-// ==================================================
+// =================================
 // ARROW FOR OTHERS
-// ==================================================
+// =================================
 if (index == 2)
 Icon(
 Icons
@@ -212,6 +289,7 @@ color: Colors.black54,
 ),
 );
 },
+),
 ),
 ),
 
@@ -274,6 +352,7 @@ SizedBox(height: 15.h),
 
 // ==================================================
 // NEXT BUTTON
+// SAME BOTTOM PLACEMENT
 // ==================================================
 SafeArea(
 top: false,
@@ -285,7 +364,7 @@ _next();
 ),
 ),
 
-SizedBox(height: 150.h),
+SizedBox(height: 90.h),
 ],
 ),
 ),
@@ -334,4 +413,3 @@ Routes.INTRESTEDIN,
 }
 }
 }
-

@@ -31,11 +31,11 @@ backgroundColor: Colors.transparent,
 // ============================================================
 // APP BAR
 // ============================================================
-  appBar: const CustomAppBar(
-    title: "Your Birthday",
-    subtitle: "Let’s get to know you a little better",
-    useIllustration: true,
-  ),
+appBar: const CustomAppBar(
+title: "Your Birthday",
+subtitle: "Let’s get to know you a little better",
+useIllustration: true,
+),
 
 body: Stack(
 children: [
@@ -67,36 +67,99 @@ padding: EdgeInsets.symmetric(horizontal: 28.w),
 child: Column(
 crossAxisAlignment: CrossAxisAlignment.start,
 children: [
-SizedBox(height: 20.h),
+SizedBox(height: 40.h),
+// ==================================================
+  Row(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+      Container(
+        padding: EdgeInsets.all(8.w),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: const Color(0xFFFFE0CC),
+            width: 1.2,
+          ),
+        ),
+        child: Icon(
+          Icons.cake_outlined,
+          color: const Color(0xFFFF6B00),
+          size: 22.sp,
+        ),
+      ),
+
+      SizedBox(width: 20.w),
+
+      Expanded(
+        child: Column(
+          crossAxisAlignment:
+          CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Your Birthday",
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.2,
+              ),
+            ),
+
+            SizedBox(height: 8.h),
+
+            Text(
+              "This Helps Us Show Your Age Accurately.",
+              style: TextStyle(
+                fontSize: 9.sp,
+                color: Colors.black54,
+                letterSpacing: 0.5,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ],
+  ),
+
+SizedBox(height: 30.h),
 
 // ======================================================
-// BIRTHDAY TITLE
+// WHITE CONTAINER
+// Same style as Tell Me About You
 // ======================================================
-Text(
-"Your Birthday",
-style: TextStyle(
-fontSize: 18.sp,
-fontWeight: FontWeight.w700,
-letterSpacing: 1.2,
+Container(
+width: double.infinity,
+padding: EdgeInsets.fromLTRB(
+16.w,
+0.h,
+16.w,
+20.h,
 ),
+decoration: BoxDecoration(
+color: Colors.white,
+borderRadius: BorderRadius.circular(14.r),
+border: Border.all(
+color: const Color(0xFFF1E8E4),
+width: 0.8,
 ),
-
-SizedBox(height: 8.h),
-
-Text(
-"This Helps Us Show Your Age Accurately.",
-style: TextStyle(
-fontSize: 9.sp,
-color: Colors.black54,
-letterSpacing: 0.5,
+boxShadow: [
+BoxShadow(
+color: Colors.black.withOpacity(0.035),
+blurRadius: 12,
+offset: const Offset(0, 3),
 ),
+],
 ),
+child: Column(
+crossAxisAlignment: CrossAxisAlignment.start,
+children: [
+// ==================================================
+// ICON + TITLE + DESCRIPTION
 
-SizedBox(height: 25.h),
+SizedBox(height: 30.h),
 
-// ======================================================
+// ==================================================
 // DATE DROPDOWNS
-// ======================================================
+// ==================================================
 Row(
 crossAxisAlignment: CrossAxisAlignment.start,
 children: [
@@ -132,13 +195,13 @@ letterSpacing: 0.3,
 
 SizedBox(height: 35.h),
 
-// ======================================================
+// ==================================================
 // MEETING PLACE
-// ======================================================
+// ==================================================
 Text(
 "Do You Have A Place To Meet?",
 style: TextStyle(
-fontSize: 18.sp,
+fontSize: 14.sp,
 fontWeight: FontWeight.w700,
 letterSpacing: 1.0,
 ),
@@ -165,12 +228,18 @@ _meetButton("Yes"),
 SizedBox(height: 12.h),
 
 _meetButton("No"),
+
+  SizedBox(height: 20.h),
+],
+),
+),
 ],
 ),
 ),
 
 // ======================================================
 // BUTTON
+// OUTSIDE WHITE CONTAINER
 // ======================================================
 if (!isKeyboardOpen) ...[
 const Spacer(),
@@ -182,7 +251,7 @@ controller.next(context);
 },
 ),
 
-  SizedBox(height: 150.h),
+SizedBox(height: 110.h),
 ],
 ],
 ),

@@ -379,7 +379,20 @@ String? get currentUserId {
   // ============================================================
   // ✅ FIRESTORE METHODS WITH TOKEN REFRESH
   // ============================================================
-  
+  Future<void> _waitForRoomVisible(String chatRoomId) async {
+  for (int i = 0; i < 5; i++) {
+    try {
+      final doc = await _firestore
+          .collection('conversations')
+          .doc(chatRoomId)
+          .get(const GetOptions(source: Source.server));
+      if (doc.exists) return;
+    } catch (_) {
+      // abhi rules ko nahi dikha, retry karenge
+    }
+    await Future.delayed(Duration(milliseconds: 300 * (i + 1)));
+  }
+}
   Future<String> getOrCreateChatRoom(String otherUserId) async {
     try {
       // ✅ Refresh Firebase token before Firestore operations
@@ -440,8 +453,11 @@ String? get currentUserId {
           'isActive': true,
           'updatedAt': FieldValue.serverTimestamp(),
         });
+          await _waitForRoomVisible(chatRoomId);
+          print('✅ Conversation created: $chatRoomId');
         print('✅ Conversation created: $chatRoomId');
       }
+      
       
       return chatRoomId;
     } catch (e) {

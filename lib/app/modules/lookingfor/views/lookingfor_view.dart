@@ -11,7 +11,11 @@ import 'package:get/get.dart';
 
 import '../controllers/lookingfor_controller.dart';
 
-// ========== Shimmer Effect Widget ==========
+// ============================================================
+// SHIMMER EFFECT
+// Keep your existing ShimmerEffect and ShimmerMask here
+// ============================================================
+
 class ShimmerEffect extends StatefulWidget {
 final Widget child;
 final Duration duration;
@@ -95,9 +99,10 @@ required this.child,
 Widget build(BuildContext context) {
 return ShaderMask(
 shaderCallback: (bounds) {
-final double width = bounds.width;
-final double start = animationValue * width;
-final double end = start + width * 0.5;
+final width = bounds.width;
+
+final start = animationValue * width;
+final end = start + width * 0.5;
 
 return LinearGradient(
 colors: [
@@ -127,6 +132,10 @@ child: child,
 }
 }
 
+// ============================================================
+// LOOKING FOR VIEW
+// ============================================================
+
 class LookingforView extends StatefulWidget {
 const LookingforView({super.key});
 
@@ -145,7 +154,6 @@ super.initState();
 
 controller = Get.put(LookingforController());
 
-// Sync selected index with controller
 WidgetsBinding.instance.addPostFrameCallback((_) {
 if (controller.selectedIndex.value != -1) {
 setState(() {
@@ -154,6 +162,10 @@ selectedIndex = controller.selectedIndex.value;
 }
 });
 }
+
+// ============================================================
+// SELECT ITEM
+// ============================================================
 
 void _selectItem(int index) {
 setState(() {
@@ -165,6 +177,10 @@ print(
 '✅ Selected: ${controller.lookingForList[index].title}',
 );
 }
+
+// ============================================================
+// NEXT
+// ============================================================
 
 void _goToNext() {
 if (selectedIndex == -1) {
@@ -188,17 +204,26 @@ return Scaffold(
 extendBodyBehindAppBar: true,
 backgroundColor: Colors.transparent,
 
-// ================= APP BAR =================
+// ========================================================
+// APP BAR
+// ========================================================
+
 appBar: const CustomAppBar(
 title: "What Are You Looking For?",
 subtitle: "Tell us what you want to find",
 useIllustration: true,
 ),
 
-// ================= BODY =================
+// ========================================================
+// BODY
+// ========================================================
+
 body: Stack(
 children: [
-// Background Image
+// ======================================================
+// BACKGROUND IMAGE
+// ======================================================
+
 Positioned.fill(
 child: Image.asset(
 "assets/images/LoginBack2.png",
@@ -206,12 +231,19 @@ fit: BoxFit.cover,
 ),
 ),
 
-// Light Overlay
+// ======================================================
+// OVERLAY
+// ======================================================
+
 Positioned.fill(
 child: Container(
 color: const Color(0xFFFFF0E6).withOpacity(0.10),
 ),
 ),
+
+// ======================================================
+// CONTENT
+// ======================================================
 
 SafeArea(
 child: Padding(
@@ -219,47 +251,114 @@ padding: EdgeInsets.symmetric(horizontal: 28.w),
 child: Column(
 crossAxisAlignment: CrossAxisAlignment.start,
 children: [
-SizedBox(height: 25.h),
+// ==================================================
+// HEADER
+// ==================================================
 
-// ================= TITLE =================
+SizedBox(height: 40.h),
+
+Row(
+crossAxisAlignment: CrossAxisAlignment.center,
+children: [
+Container(
+padding: EdgeInsets.all(8.w),
+decoration: BoxDecoration(
+shape: BoxShape.circle,
+border: Border.all(
+color: const Color(0xFFFFE0CC),
+width: 1.2,
+),
+),
+child: Icon(
+Icons.search_rounded,
+color: const Color(0xFFFF6B00),
+size: 22.sp,
+),
+),
+
+SizedBox(width: 20.w),
+
+Expanded(
+child: Column(
+crossAxisAlignment:
+CrossAxisAlignment.start,
+children: [
 Text(
-"Right Now I'm Looking For…",
+"What Are You Looking For?",
 style: TextStyle(
-letterSpacing: 1.2.w,
-fontSize: 18.sp,
+fontSize: 14.sp,
 fontWeight: FontWeight.w700,
-color: Colors.black,
+letterSpacing: 1.2,
 ),
 ),
 
-SizedBox(height: 5.h),
+SizedBox(height: 8.h),
 
-// ================= SUBTITLE =================
 Text(
-"Increase compatibility by sharing yours!",
+"Choose what best matches what you want.",
 style: TextStyle(
-letterSpacing: 0.5.w,
 fontSize: 9.sp,
 color: Colors.black54,
-fontWeight: FontWeight.w400,
+letterSpacing: 0.5,
 ),
 ),
+],
+),
+),
+],
+),
 
-SizedBox(height: 22.h),
+SizedBox(height: 30.h),
 
-// ================= OPTIONS =================
+// ==================================================
+// WHITE OUTER CONTAINER
+// ==================================================
+
 Expanded(
+child: Container(
+width: double.infinity,
+padding: EdgeInsets.fromLTRB(
+16.w,
+25.h,
+16.w,
+20.h,
+),
+decoration: BoxDecoration(
+color: Colors.white,
+borderRadius: BorderRadius.circular(14.r),
+border: Border.all(
+color: const Color(0xFFF1E8E4),
+width: 0.8,
+),
+boxShadow: [
+BoxShadow(
+color:
+Colors.black.withOpacity(0.035),
+blurRadius: 12,
+offset: const Offset(0, 3),
+),
+],
+),
+
+// ==================================================
+// GRID / STATES
+// ==================================================
+
 child: Obx(() {
-// ================= LOADING =================
+// ================================================
+// LOADING
+// ================================================
+
 if (controller.isLoading.value) {
 return GridView.builder(
 padding: EdgeInsets.zero,
 shrinkWrap: true,
-physics: const NeverScrollableScrollPhysics(),
+physics:
+const NeverScrollableScrollPhysics(),
 itemCount: 6,
 gridDelegate:
 SliverGridDelegateWithFixedCrossAxisCount(
-crossAxisCount: 3,
+crossAxisCount: 2,
 crossAxisSpacing: 9.w,
 mainAxisSpacing: 10.h,
 childAspectRatio: 0.75,
@@ -267,11 +366,13 @@ childAspectRatio: 0.75,
 itemBuilder: (_, index) {
 return ShimmerEffect(
 baseColor: Colors.grey[300]!,
-highlightColor: Colors.grey[100]!,
+highlightColor:
+Colors.grey[100]!,
 child: Container(
 decoration: BoxDecoration(
 color: Colors.grey[300],
-borderRadius: BorderRadius.circular(12.r),
+borderRadius:
+BorderRadius.circular(12.r),
 ),
 ),
 );
@@ -279,7 +380,10 @@ borderRadius: BorderRadius.circular(12.r),
 );
 }
 
-// ================= EMPTY =================
+// ================================================
+// EMPTY STATE
+// ================================================
+
 if (controller.lookingForList.isEmpty) {
 return Center(
 child: Column(
@@ -305,9 +409,11 @@ SizedBox(height: 10.h),
 
 ElevatedButton(
 onPressed: () {
-controller.fetchLookingForOptions();
+controller
+    .fetchLookingForOptions();
 },
-style: ElevatedButton.styleFrom(
+style:
+ElevatedButton.styleFrom(
 backgroundColor:
 const Color(0xffFF6B00),
 ),
@@ -323,49 +429,75 @@ color: Colors.white,
 );
 }
 
-// ================= GRID =================
+// ================================================
+// ORIGINAL 3 COLUMN GRID
+// ================================================
+
 return GridView.builder(
-padding: EdgeInsets.only(bottom: 10.h),
+padding: EdgeInsets.only(
+bottom: 10.h,
+),
 shrinkWrap: true,
-physics: const BouncingScrollPhysics(),
-itemCount: controller.lookingForList.length,
+physics:
+const BouncingScrollPhysics(),
+
+itemCount:
+controller.lookingForList.length,
+
+// ==============================================
+// SAME GRID SETTINGS
+// ==============================================
+
 gridDelegate:
 SliverGridDelegateWithFixedCrossAxisCount(
-crossAxisCount: 3,
+crossAxisCount: 2,
 crossAxisSpacing: 9.w,
 mainAxisSpacing: 10.h,
-childAspectRatio: 0.75,
+childAspectRatio: 1.1,
 ),
+
 itemBuilder: (_, index) {
-final bool selected = selectedIndex == index;
+final bool selected =
+selectedIndex == index;
 
 final LookingForModel item =
-controller.lookingForList[index];
+controller
+    .lookingForList[index];
 
 return GestureDetector(
 onTap: () => _selectItem(index),
 
-child: AnimatedContainer(
-duration:
-const Duration(milliseconds: 200),
+// ==================================================
+// ORIGINAL GRID CARD UI - UNCHANGED
+// ==================================================
 
+child: AnimatedContainer(
+duration: const Duration(
+milliseconds: 200,
+),
 decoration: BoxDecoration(
 color: selected
 ? const Color(0xFFFFF2E8)
     : Colors.white,
+
 borderRadius:
 BorderRadius.circular(12.r),
+
 border: Border.all(
-width: selected ? 1.5.w : 1.w,
+width:
+selected ? 1.5.w : 1.w,
 color: selected
 ? const Color(0xffFF6B00)
     : Colors.grey.shade200,
 ),
+
 boxShadow: [
 BoxShadow(
-color: Colors.black.withOpacity(0.03),
+color: Colors.black
+    .withOpacity(0.03),
 blurRadius: 5,
-offset: const Offset(0, 2),
+offset:
+const Offset(0, 2),
 ),
 ],
 ),
@@ -374,7 +506,10 @@ child: Column(
 mainAxisAlignment:
 MainAxisAlignment.center,
 children: [
-// ================= ICON =================
+// ==========================================
+// ORIGINAL IMAGE
+// ==========================================
+
 if (item.icon.isNotEmpty)
 Image.network(
 item.icon,
@@ -382,7 +517,11 @@ width: 30.w,
 height: 30.h,
 fit: BoxFit.contain,
 errorBuilder:
-(context, error, stackTrace) {
+(
+context,
+error,
+stackTrace,
+) {
 return Text(
 '📌',
 style: TextStyle(
@@ -401,16 +540,22 @@ fontSize: 25.sp,
 
 SizedBox(height: 10.h),
 
-// ================= TITLE =================
+// ==========================================
+// ORIGINAL TITLE
+// ==========================================
+
 Padding(
-padding: EdgeInsets.symmetric(
+padding:
+EdgeInsets.symmetric(
 horizontal: 4.w,
 ),
 child: Text(
 item.title,
-textAlign: TextAlign.center,
+textAlign:
+TextAlign.center,
 maxLines: 3,
-overflow: TextOverflow.ellipsis,
+overflow:
+TextOverflow.ellipsis,
 style: TextStyle(
 letterSpacing: 0.5.w,
 fontSize: 9.sp,
@@ -430,8 +575,12 @@ color: Colors.black,
 );
 }),
 ),
+),
 
-// ================= NEXT BUTTON =================
+// ==================================================
+// NEXT BUTTON
+// ==================================================
+
 SafeArea(
 top: false,
 child: Padding(
@@ -443,7 +592,11 @@ onPressed: _goToNext,
 ),
 ),
 
-SizedBox(height: 150.h),
+// ==================================================
+// BOTTOM SPACE
+// ==================================================
+
+SizedBox(height: 80.h),
 ],
 ),
 ),

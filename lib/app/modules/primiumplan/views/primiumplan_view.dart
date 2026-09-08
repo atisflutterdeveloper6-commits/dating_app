@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:dating_app/app/modules/paymentplan/views/paymentplan_view.dart';
 import 'package:dating_app/app/modules/primiumplan/controllers/primiumplan_controller.dart';
 import 'package:flutter/material.dart';
@@ -141,51 +143,82 @@ Positioned.fill(
                     const Spacer(flex: 2),
 
                     // Continue Button
-                    Container(
-                      width: double.infinity,
-                      height: 54,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xffFF6A00), Color(0xffFF8C00)],
-                        ),
-                        borderRadius: BorderRadius.circular(30),
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xffFF6A00).withOpacity(0.4),
-                            blurRadius: 16,
-                            offset: const Offset(0, 6),
-                          ),
-                        ],
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const PaymentplanView(),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
-                          shadowColor: Colors.transparent,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
-                        child: const Text(
-                          "Continue",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                      ),
-                    ),
 
-                    const SizedBox(height: 16),
+            Container(
+            width: double.infinity,
+            height: 54,
+            decoration: BoxDecoration(
+            gradient: const LinearGradient(
+            colors: [
+            Color(0xffFF6A00),
+            Color(0xffFF8C00),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+        BoxShadow(
+        color: const Color(0xffFF6A00).withOpacity(0.4),
+        blurRadius: 16,
+        offset: const Offset(0, 6),
+        ),
+        ],
+        ),
+        child: ElevatedButton(
+        onPressed: () {
+        Navigator.push(
+        context,
+        MaterialPageRoute(
+        builder: (context) => const PaymentplanView(),
+        ),
+        );
+        },
+        style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.transparent,
+        shadowColor: Colors.transparent,
+        elevation: 0,
+        padding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(30),
+        ),
+        ),
+        child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+        // Shield Icon
+        const Icon(
+        Icons.arrow_forward_rounded,
+        color: Colors.white,
+        size: 18,
+        ),
+
+        const SizedBox(width: 10),
+
+        // Divider
+        Container(
+        height: 20,
+        width: 0.7,
+        color: Colors.white.withOpacity(0.45),
+        ),
+
+        const SizedBox(width: 10),
+
+        // Text
+        const Text(
+        "Continue",
+        style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w700,
+        color: Colors.white,
+        letterSpacing: 1.2,
+        ),
+        ),
+        ],
+        ),
+        ),
+        ),
+
+
+        const SizedBox(height: 16),
                   ],
                 ),
               ),
@@ -347,6 +380,7 @@ class ShimmerFeatureTile extends StatelessWidget {
 }
 
 // Feature Tile Widget (Same as before)
+
 class FeatureTile extends StatelessWidget {
   final IconData icon;
   final String title;
@@ -362,50 +396,76 @@ class FeatureTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 40),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            height: 38,
-            width: 38,
-            decoration: BoxDecoration(
-              color: Colors.orange.withOpacity(0.20),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              color: const Color(0xffFF9A44),
-              size: 20,
-            ),
+      padding: const EdgeInsets.only(bottom: 16),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: 10,
+            sigmaY: 10,
           ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.15),
+                width: 1,
+              ),
+            ),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.3,
+                Container(
+                  height: 38,
+                  width: 38,
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.20),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    icon,
+                    color: const Color(0xffFF9A44),
+                    size: 20,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  subtitle,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.75),
-                    fontSize: 12,
-                    letterSpacing: 0.2,
+
+                const SizedBox(width: 14),
+
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          color: Colors.white.withOpacity(0.75),
+                          fontSize: 12,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
-          )
-        ],
+          ),
+        ),
       ),
     );
   }

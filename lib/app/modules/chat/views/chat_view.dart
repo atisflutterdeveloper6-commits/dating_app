@@ -93,6 +93,18 @@ class _ChatViewState extends State<ChatView> {
       ),
     );
   }
+// Replace the existing _startCall method in chat_view.dart with this one.
+//
+// Key changes:
+// 1. Uses CallInvitationService.sendInvitationWithRetry() instead of
+//    calling ZegoUIKitPrebuiltCallInvitationService().send() directly —
+//    this gets you the retry-with-backoff AND the forceReconnect-on-
+//    repeated-failure behavior that lives in CallInvitationService.
+// 2. On failure, calls dashboardController.markCallServiceUnavailable()
+//    so the cached isCallServiceReady flag doesn't stay stuck `true`
+//    forever — the NEXT call attempt will force a real reconnect instead
+//    of trusting stale state.
+
 void _startCall(bool isVideoCall, {int retryCount = 0}) async {
   if (currentUserId == null || currentUserId!.isEmpty) {
     CustomToast.error('You must be logged in to start a call');
@@ -103,18 +115,13 @@ void _startCall(bool isVideoCall, {int retryCount = 0}) async {
     return;
   }
 
-  // ✅ ADD: Button dabate hi sabse pehle turant check karo — agar service
-  // already "not ready" pata chal chuka hai (jaise account suspended/expired),
-  // to bina permission dialog ya kuch aur try kiye seedha turant toast dikhao.
   final dashboardController = Get.find<DashboardController>();
-  if (!dashboardController.isCallServiceReady.value) {
-    CustomToast.error('Call service is currently unavailable. Please try again later.');
-    return;
-  }
 
   final bool granted = await _checkCallPermissions(isVideoCall);
   if (!granted) return;
 
+  // ✅ This now does a REAL forced reconnect if the flag was previously
+  // marked unavailable — not just a stale cached `true` check.
   final ready = await dashboardController.ensureCallServiceReady();
 
   if (!ready) {
@@ -123,18 +130,20 @@ void _startCall(bool isVideoCall, {int retryCount = 0}) async {
   }
 
   try {
-    final bool success = await ZegoUIKitPrebuiltCallInvitationService().send(
+    // ✅ Uses the retry + forceReconnect-on-repeated-failure logic instead
+    // of a single raw send() call.
+    final bool success = await CallInvitationService.sendInvitationWithRetry(
       invitees: [ZegoCallUser(otherUserId!, otherUserName)],
       isVideoCall: isVideoCall,
       resourceID: "zego_call",
     );
 
     if (!success) {
-      if (!dashboardController.isCallServiceReady.value) {
-        CustomToast.error('Call service is currently unavailable. Please try again later.');
-      } else {
-        CustomToast.error('Zegocloud Plan Expried');
-      }
+      // Real signaling failure even after retries + forced reconnect —
+      // mark the flag stale so the NEXT attempt forces a fresh login
+      // instead of trusting cached "ready" state again.
+      dashboardController.markCallServiceUnavailable();
+      CustomToast.error('Call service is currently unavailable. Please try again later.');
       return;
     }
 
@@ -153,8 +162,11 @@ void _startCall(bool isVideoCall, {int retryCount = 0}) async {
 
     if (errorStr.contains('signaling is not connected') ||
         errorStr.contains('signaling plugin is null') ||
+        errorStr.contains('disconnected') ||
         errorStr.contains('suspended') ||
         errorStr.contains('expired')) {
+      // Same as above — don't leave the flag stuck stale-ready.
+      dashboardController.markCallServiceUnavailable();
       CustomToast.error('Call service is currently unavailable. Please try again later.');
     } else if (errorStr.contains('107026') || errorStr.contains('not registered')) {
       CustomToast.error('$otherUserName is currently unavailable.');
@@ -165,6 +177,8 @@ void _startCall(bool isVideoCall, {int retryCount = 0}) async {
     }
   }
 }
+ 
+ 
  Future<bool> _checkCallPermissions(bool isVideoCall) async {
     // Mic hamesha chahiye (voice + video dono ke liye)
     final micStatus = await Permission.microphone.status;
@@ -1067,7 +1081,7 @@ void _loadUserStatus() {
   // ✅ Build messages with StreamBuilder - FIXED double update and loader issues
   // Replace your _buildMessagesStream() method with this updated version:
 
-  Widget _buildMessagesStream() {
+    Widget _buildMessagesStream() {
     return StreamBuilder<QuerySnapshot>(
       stream: _chatService.getMessages(chatRoomId!),
       builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -1081,6 +1095,24 @@ void _loadUserStatus() {
 
         // ✅ Error state
         if (snapshot.hasError) {
+          final errStr = snapshot.error.toString();
+          final isPermRace = errStr.contains('permission-denied') ||
+              errStr.contains('PERMISSION_DENIED');
+
+          if (isPermRace) {
+            // ✅ Naya conversation doc abhi Firestore rules tak fully
+            // propagate nahi hua — genuine error nahi hai, sirf timing.
+            // Chup-chaap thodi der baad rebuild karke retry karo,
+            // user ko error screen mat dikhao.
+            print('⏳ Permission race on new room, retrying silently...');
+            Future.delayed(const Duration(milliseconds: 800), () {
+              if (mounted) setState(() {});
+            });
+            return const Center(
+              child: CircularProgressIndicator(color: Color(0xffFF6A00)),
+            );
+          }
+
           print('❌ Stream error: ${snapshot.error}');
           return Center(
             child: Column(
@@ -1168,7 +1200,6 @@ void _loadUserStatus() {
         // ✅ Build messages list with proper keys and scroll management
         return NotificationListener<ScrollNotification>(
           onNotification: (ScrollNotification scrollInfo) {
-            // Auto-scroll to bottom when keyboard appears or new messages arrive
             if (scrollInfo is UserScrollNotification) {
               // User manually scrolled, don't auto-scroll
             }
@@ -1178,31 +1209,28 @@ void _loadUserStatus() {
             key: const PageStorageKey('chat_messages_list'),
             controller: scrollController,
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-            reverse:
-                true, // ✅ KEY FIX: Reverse the list to show newest at bottom
+            reverse: true,
             itemCount: messages.length,
             itemBuilder: (context, index) {
               try {
-                // ✅ Reverse the index to show newest first
                 final reversedIndex = messages.length - 1 - index;
                 final doc = messages[reversedIndex];
                 final msg = doc.data() as Map<String, dynamic>;
                 msg['id'] = doc.id;
 
                 final isSender = msg['senderId'] == currentUserId;
-                final messageType = msg['type'] ?? 'text'; // ✅ add
+                final messageType = msg['type'] ?? 'text';
                 final hasImage =
                     msg['imageUrl'] != null &&
                     msg['imageUrl'].toString().isNotEmpty;
                 final hasFile =
                     msg['fileUrl'] != null &&
-                    msg['fileUrl'].toString().isNotEmpty; // ✅ add
+                    msg['fileUrl'].toString().isNotEmpty;
 
                 final messageText = msg['message'] ?? '';
                 final timestamp = msg['timestamp'] as Timestamp?;
                 final time = _getMessageTime(timestamp);
 
-                // ✅ Call log message — check ye sabse pehle
                 if (messageType == 'call') {
                   return RepaintBoundary(
                     key: ValueKey(doc.id),
@@ -1246,7 +1274,6 @@ void _loadUserStatus() {
       },
     );
   }
-
   Timer? _markReadTimer;
 
   void _markMessagesAsReadDebounced(String chatRoomId) {

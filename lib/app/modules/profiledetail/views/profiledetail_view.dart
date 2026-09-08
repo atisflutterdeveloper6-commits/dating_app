@@ -1,3 +1,4 @@
+import 'dart:ui'; // ✅ NAYA — BackdropFilter/ImageFilter ke liye
 import 'package:dating_app/app/apiurl/api_url.dart';
 import 'package:dating_app/app/custom_widget/custom_toast.dart';
 import 'package:dating_app/app/custom_widget/profile_service_controller.dart';
@@ -11,9 +12,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import '../../profilesetup/views/profilesetup_view.dart';
 
 class ProfiledetailView extends StatefulWidget {
   final Map<String, dynamic>? profileData;
@@ -26,14 +30,14 @@ class ProfiledetailView extends StatefulWidget {
 
 class _ProfiledetailViewState extends State<ProfiledetailView> {
   String _capitalize(String text) {
-  if (text.isEmpty) return text;
-  return text
-      .split(' ')
-      .map((word) => word.isEmpty
-          ? word
-          : word[0].toUpperCase() + word.substring(1).toLowerCase())
-      .join(' ');
-}
+    if (text.isEmpty) return text;
+    return text
+        .split(' ')
+        .map((word) => word.isEmpty
+        ? word
+        : word[0].toUpperCase() + word.substring(1).toLowerCase())
+        .join(' ');
+  }
   @override
   void dispose() {
     _reviewController.dispose();
@@ -761,11 +765,11 @@ class _ProfiledetailViewState extends State<ProfiledetailView> {
 
       await Share.share(
         'Check out $name\'s profile on Dating App! ❤️\n'
-        'Age: $age\n'
-        'Location: $location\n'
-        'Profession: $profession\n'
-        'Looking For: $interests\n'
-        'Download the app to connect!',
+            'Age: $age\n'
+            'Location: $location\n'
+            'Profession: $profession\n'
+            'Looking For: $interests\n'
+            'Download the app to connect!',
         subject: 'Check out this profile!',
       );
     } catch (e) {
@@ -893,20 +897,20 @@ class _ProfiledetailViewState extends State<ProfiledetailView> {
               maxScale: 4.0,
               child: imagePath.startsWith('http')
                   ? Image.network(
-                      imagePath,
-                      fit: BoxFit.contain,
-                      width: double.infinity,
-                      height: double.infinity,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Image.asset('assets/images/hprofile.png', fit: BoxFit.contain);
-                      },
-                    )
+                imagePath,
+                fit: BoxFit.contain,
+                width: double.infinity,
+                height: double.infinity,
+                errorBuilder: (context, error, stackTrace) {
+                  return Image.asset('assets/images/hprofile.png', fit: BoxFit.contain);
+                },
+              )
                   : Image.asset(
-                      imagePath,
-                      fit: BoxFit.contain,
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
+                imagePath,
+                fit: BoxFit.contain,
+                width: double.infinity,
+                height: double.infinity,
+              ),
             ),
             Positioned(
               top: 40.h,
@@ -963,54 +967,144 @@ class _ProfiledetailViewState extends State<ProfiledetailView> {
             child: SizedBox(
               height: 0.76.sh,
               width: double.infinity,
-              child: selectedProfileImage.startsWith('http')
-                  ? Image.network(
-                      selectedProfileImage,
-                      fit: BoxFit.fill,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Image.asset('assets/images/hprofile.png', fit: BoxFit.fill);
-                      },
-                    )
-                  : Image.asset(
-                      selectedProfileImage,
-                      fit: BoxFit.fill,
-                    ),
-            ),
-          ),
-
-          /// Back Button & More Icon
-          SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              child: Row(
+              child: Stack(
+                fit: StackFit.expand,
                 children: [
-                  CircleAvatar(
-                    radius: 22.r,
-                    backgroundColor: Colors.white,
-                    child: IconButton(
-                      icon: const Icon(Icons.arrow_back_ios_new, size: 18),
-                      onPressed: () => Navigator.pop(context),
-                    ),
+                  selectedProfileImage.startsWith('http')
+                      ? Image.network(
+                    selectedProfileImage,
+                    fit: BoxFit.fill,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset('assets/images/hprofile.png', fit: BoxFit.fill);
+                    },
+                  )
+                      : Image.asset(
+                    selectedProfileImage,
+                    fit: BoxFit.fill,
                   ),
-                  const Spacer(),
-                  if (!isLoading)
-                    GestureDetector(
-                      onTap: () => setState(() => showMenu = !showMenu),
-                      child: Icon(Icons.more_horiz, color: Colors.white, size: 30.sp),
-                    )
-                  else
-                    SizedBox(
-                      height: 30.sp,
-                      width: 30.sp,
-                      child: const CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
+                  // ✅ NAYA — top pe halka dark gradient, taaki back/more icon clearly dikhein (card jaisa)
+                  Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment(0, 0.35),
+                        colors: [Colors.black45, Colors.transparent],
                       ),
                     ),
+                  ),
                 ],
               ),
             ),
           ),
+
+          /// Back Button & More Icon
+
+          SafeArea(
+          child: Padding(
+          padding: EdgeInsets.symmetric(
+          horizontal: 16.w,
+          vertical: 8.h,
+          ),
+          child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+          // Glass Back Button
+          ClipRRect(
+          borderRadius: BorderRadius.circular(50.r),
+          child: BackdropFilter(
+          filter: ImageFilter.blur(
+          sigmaX: 10,
+          sigmaY: 10,
+          ),
+          child: Container(
+          height: 44.r,
+          width: 44.r,
+          decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.black.withOpacity(0.35),
+          border: Border.all(
+          color: Colors.white.withOpacity(0.45),
+          width: 1,
+          ),
+          boxShadow: [
+          BoxShadow(
+          color: Colors.black.withOpacity(0.20),
+          blurRadius: 8,
+          offset: const Offset(0, 3),
+          ),
+          ],
+          ),
+          child: IconButton(
+          padding: EdgeInsets.zero,
+          icon: const Icon(
+          Icons.arrow_back_ios_new,
+          size: 18,
+          color: Colors.white,
+          ),
+          onPressed: () => Navigator.pop(context),
+          ),
+          ),
+          ),
+          ),
+
+          const Spacer(),
+
+          if (!isLoading)
+          // Glass More Button
+          ClipRRect(
+          borderRadius: BorderRadius.circular(50.r),
+          child: BackdropFilter(
+          filter: ImageFilter.blur(
+          sigmaX: 10,
+          sigmaY: 10,
+          ),
+          child: GestureDetector(
+          onTap: () {
+          setState(() {
+          showMenu = !showMenu;
+          });
+          },
+          child: Container(
+          height: 44.r,
+          width: 44.r,
+          decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.black.withOpacity(0.35),
+          border: Border.all(
+          color: Colors.white.withOpacity(0.45),
+          width: 1,
+          ),
+          boxShadow: [
+          BoxShadow(
+          color: Colors.black.withOpacity(0.20),
+          blurRadius: 8,
+          offset: const Offset(0, 3),
+          ),
+          ],
+          ),
+          child: Icon(
+          Icons.more_horiz,
+          color: Colors.white,
+          size: 24.sp,
+          ),
+          ),
+          ),
+          ),
+          )
+          else
+          SizedBox(
+          height: 30.sp,
+          width: 30.sp,
+          child: const CircularProgressIndicator(
+          strokeWidth: 2,
+          color: Colors.white,
+          ),
+          ),
+          ],
+          ),
+          ),
+          ),
+
 
           /// Bottom Card
           Align(
@@ -1030,31 +1124,41 @@ class _ProfiledetailViewState extends State<ProfiledetailView> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                  Row(
-  children: [
-    Expanded(
-      child: Text(
-        "${_capitalize(name)}, $age",
-        style: TextStyle(
-          letterSpacing: 1.5,
-          fontSize: 14.sp,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  "${_capitalize(name)}, $age",
+                                  style: TextStyle(
+                                    letterSpacing: 1.5,
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
                               Container(
                                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
                                 decoration: BoxDecoration(
-                                  color: Colors.red.shade50,
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      const Color(0xFFFFA146).withOpacity(0.10),
+                                      const Color(0xFFFF6100).withOpacity(0.10),
+                                    ],
+                                  ),
                                   borderRadius: BorderRadius.circular(20.r),
+                                  border: Border.all(color: const Color(0xFFFF6100).withOpacity(0.15)),
                                 ),
                                 child: Row(
                                   children: [
-                                    Icon(Icons.favorite, color: Colors.red, size: 15.sp),
+                                    Icon(Icons.favorite, color: const Color(0xFFFF6100), size: 15.sp),
                                     SizedBox(width: 4.w),
                                     Text(
                                       _formatLikeCount(likeCount),
-                                      style: TextStyle(fontSize: 12.sp),
+                                      style: TextStyle(
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w600,
+                                        color: const Color(0xFFFF6100),
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -1216,28 +1320,28 @@ class _ProfiledetailViewState extends State<ProfiledetailView> {
                                     borderRadius: BorderRadius.circular(14.r),
                                     border: selectedProfileImage == imageUrl
                                         ? Border.all(
-                                            color: const Color(0xffFF6100),
-                                            width: 0.6,
-                                          )
+                                      color: const Color(0xffFF6100),
+                                      width: 0.6,
+                                    )
                                         : null,
                                   ),
                                   child: ClipRRect(
                                     borderRadius: BorderRadius.circular(14.r),
                                     child: imageUrl.startsWith('http')
                                         ? Image.network(
-                                            imageUrl,
-                                            fit: BoxFit.fill,
-                                            errorBuilder: (context, error, stackTrace) {
-                                              return Image.asset(
-                                                'assets/images/hprofile.png',
-                                                fit: BoxFit.fill,
-                                              );
-                                            },
-                                          )
+                                      imageUrl,
+                                      fit: BoxFit.fill,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Image.asset(
+                                          'assets/images/hprofile.png',
+                                          fit: BoxFit.fill,
+                                        );
+                                      },
+                                    )
                                         : Image.asset(
-                                            imageUrl,
-                                            fit: BoxFit.fill,
-                                          ),
+                                      imageUrl,
+                                      fit: BoxFit.fill,
+                                    ),
                                   ),
                                 ),
                               );
@@ -1313,56 +1417,56 @@ class _ProfiledetailViewState extends State<ProfiledetailView> {
                             ),
                             child: isLoadingReviews
                                 ? Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 20.h),
-                                    child: const Center(child: CircularProgressIndicator()),
-                                  )
+                              padding: EdgeInsets.symmetric(vertical: 20.h),
+                              child: const Center(child: CircularProgressIndicator()),
+                            )
                                 : reviews.isEmpty
-                                    ? Padding(
-                                        padding: EdgeInsets.symmetric(vertical: 20.h),
-                                        child: Center(
-                                          child: Text(
-                                            'No reviews yet',
-                                            style: TextStyle(color: Colors.grey, fontSize: 13.sp),
-                                          ),
-                                        ),
-                                      )
-                                    : Column(
-                                        children: List.generate(reviews.length, (index) {
-                                          final reviewItem = reviews[index];
-                                          final reviewerData = reviewItem['id'];
+                                ? Padding(
+                              padding: EdgeInsets.symmetric(vertical: 20.h),
+                              child: Center(
+                                child: Text(
+                                  'No reviews yet',
+                                  style: TextStyle(color: Colors.grey, fontSize: 13.sp),
+                                ),
+                              ),
+                            )
+                                : Column(
+                              children: List.generate(reviews.length, (index) {
+                                final reviewItem = reviews[index];
+                                final reviewerData = reviewItem['id'];
 
-                                          String reviewerName = 'User';
-                                          String reviewerImage = '';
+                                String reviewerName = 'User';
+                                String reviewerImage = '';
 
-                                          if (reviewerData is Map<String, dynamic>) {
-                                            final first = reviewerData['firstName'] ?? '';
-                                            final last = reviewerData['lastName'] ?? '';
-                                            reviewerName = '$first $last'.trim();
-                                            if (reviewerName.isEmpty) reviewerName = 'User';
+                                if (reviewerData is Map<String, dynamic>) {
+                                  final first = reviewerData['firstName'] ?? '';
+                                  final last = reviewerData['lastName'] ?? '';
+                                  reviewerName = '$first $last'.trim();
+                                  if (reviewerName.isEmpty) reviewerName = 'User';
 
-                                            final photos = reviewerData['photos'];
-                                            if (photos is List && photos.isNotEmpty) {
-                                              final firstPhoto = photos[0];
-                                              if (firstPhoto is Map<String, dynamic>) {
-                                                reviewerImage = firstPhoto['image']?.toString() ?? '';
-                                              }
-                                            }
-                                          }
+                                  final photos = reviewerData['photos'];
+                                  if (photos is List && photos.isNotEmpty) {
+                                    final firstPhoto = photos[0];
+                                    if (firstPhoto is Map<String, dynamic>) {
+                                      reviewerImage = firstPhoto['image']?.toString() ?? '';
+                                    }
+                                  }
+                                }
 
-                                          final reviewText = reviewItem['review']?.toString() ?? '';
+                                final reviewText = reviewItem['review']?.toString() ?? '';
 
-                                          return Column(
-                                            children: [
-                                              dynamicReviewTile(
-                                                name: reviewerName,
-                                                image: reviewerImage,
-                                                review: reviewText,
-                                              ),
-                                              if (index != reviews.length - 1) const Divider(height: 28),
-                                            ],
-                                          );
-                                        }),
-                                      ),
+                                return Column(
+                                  children: [
+                                    dynamicReviewTile(
+                                      name: reviewerName,
+                                      image: reviewerImage,
+                                      review: reviewText,
+                                    ),
+                                    if (index != reviews.length - 1) const Divider(height: 28),
+                                  ],
+                                );
+                              }),
+                            ),
                           ),
                           SizedBox(height: 30.h),
                         ],
@@ -1371,51 +1475,100 @@ class _ProfiledetailViewState extends State<ProfiledetailView> {
                   ),
 
                   /// Sticky Message Button
+
                   Padding(
                     padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 10.h),
                     child: SafeArea(
                       child: SizedBox(
                         width: double.infinity,
                         height: 50.h,
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            final targetUserId = (profile['id'] ?? profile['_id'] ?? '').toString();
-
-                            if (targetUserId.isEmpty) {
-                              CustomToast.error('Unable to start chat: user not found');
-                              return;
-                            }
-
-                            Get.to(
-                              () => const ChatView(),
-                              arguments: {
-                                'userId': targetUserId,
-                                'userName': getDisplayName(),
-                                'userImage': selectedProfileImage.startsWith('http') ? selectedProfileImage : '',
-                              },
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFF6100),
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30.r),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                              colors: [
+                                orange,
+                                orange,
+                                orangeLight,
+                              ],
+                              stops: [
+                                0.0,
+                                0.72,
+                                1.0,
+                              ],
                             ),
+                            borderRadius: BorderRadius.circular(30.r),
+                            boxShadow: [
+                              BoxShadow(
+                                color: orange.withOpacity(0.20),
+                                blurRadius: 12,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
                           ),
-                          icon: const Icon(Icons.send_outlined, color: Colors.white),
-                          label: Text(
-                            "Message",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w600,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              final targetUserId =
+                              (profile['id'] ?? profile['_id'] ?? '').toString();
+
+                              if (targetUserId.isEmpty) {
+                                CustomToast.error(
+                                  'Unable to start chat: user not found',
+                                );
+                                return;
+                              }
+
+                              Get.to(
+                                    () => const ChatView(),
+                                arguments: {
+                                  'userId': targetUserId,
+                                  'userName': getDisplayName(),
+                                  'userImage': selectedProfileImage.startsWith('http')
+                                      ? selectedProfileImage
+                                      : '',
+                                },
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.transparent,
+                              foregroundColor: Colors.white,
+                              disabledBackgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
+                              elevation: 0,
+                              padding: EdgeInsets.zero,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30.r),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Message",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 11.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 9.w,
+                                ),
+                                Icon(
+                                  Icons.arrow_forward_rounded,
+                                  color: Colors.white,
+                                  size: 16.sp,
+                                ),
+                              ],
                             ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ],
+
+    ],
               ),
             ),
           ),
@@ -1436,13 +1589,7 @@ class _ProfiledetailViewState extends State<ProfiledetailView> {
                 //   onTap: () => Navigator.pop(context),
                 // ),
                 SizedBox(width: 20.w),
-                _circleButton(
-                    isLiked ? Icons.favorite : Icons.favorite_border,
-                    isLiked ? const Color(0xFFFF6100) : Colors.white,
-                    isLiked ? Colors.white : const Color(0xFFFF6100),
-                    38,
-                    onTap: _handleLikeToggle,
-                  ),
+                _gradientLikeButton(),
                 // SizedBox(width: 20.w),
                 // _circleButton(
                 //   Icons.chat_bubble_rounded,
@@ -1467,27 +1614,32 @@ class _ProfiledetailViewState extends State<ProfiledetailView> {
                 //     );
                 //   },
                 // ),
-           
-           
+
+
               ],
             ),
           ),
 
-          /// Menu
           if (showMenu && !isLoading)
             Positioned(
-              top: 70.h,
-              right: 12.w,
+              top: 100.h,
+              right: 18.w,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  menuCircle("assets/icons/share1.svg", _shareProfile),
+                  menuCircle(
+                    "assets/icons/share1.svg",
+                    _shareProfile,
+                  ),
+
                   SizedBox(height: 12.h),
+
                   menuCircle(
                     "assets/icons/share2.svg",
                     _handleBlockUser,
                   ),
+
                   SizedBox(height: 12.h),
                 ],
               ),
@@ -1513,11 +1665,11 @@ class _ProfiledetailViewState extends State<ProfiledetailView> {
           clipBehavior: Clip.antiAlias,
           child: image.isNotEmpty && image.startsWith('http')
               ? Image.network(
-                  image,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      Image.asset("assets/images/hprofile.png", fit: BoxFit.cover),
-                )
+            image,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) =>
+                Image.asset("assets/images/hprofile.png", fit: BoxFit.cover),
+          )
               : Image.asset("assets/images/hprofile.png", fit: BoxFit.cover),
         ),
         SizedBox(width: 12.w),
@@ -1538,6 +1690,48 @@ class _ProfiledetailViewState extends State<ProfiledetailView> {
           ),
         ),
       ],
+    );
+  }
+
+  // ✅ NAYA — homepage card ke flying-heart gradient se match karta glowing like button
+  // ✅ NAYA — homepage card ke flying-heart gradient se match karta glowing like button
+  Widget _gradientLikeButton() {
+    return GestureDetector(
+      onTap: _handleLikeToggle,
+      child: Container(
+        height: 76.r,
+        width: 76.r,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient:
+          const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [Color(0xFFFFA146), Color(0xFFFF6100)],
+          )
+ ,
+          color: Colors.white,
+          boxShadow:
+          [
+            BoxShadow(
+              color: const Color(0xFFFF6100).withOpacity(0.55),
+              blurRadius: 18,
+              spreadRadius: 3,
+            ),
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ]
+
+        ),
+        child: Icon(
+           Icons.favorite ,
+          color:  Colors.white ,
+          size: 34.sp,
+        ),
+      ),
     );
   }
 
@@ -1595,7 +1789,7 @@ Widget reviewTile() {
             Row(
               children: List.generate(
                 5,
-                (index) => Padding(
+                    (index) => Padding(
                   padding: EdgeInsets.only(right: 2.w),
                   child: Icon(Icons.star, size: 16.sp, color: Colors.amber),
                 ),
@@ -1635,29 +1829,53 @@ Widget interestChip(String title, bool selected) {
   );
 }
 
-Widget menuCircle(String svgPath, VoidCallback onTap) {
-  return GestureDetector(
-    onTap: onTap,
-    child: Container(
-      height: 35.w,
-      width: 35.w,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 10.r,
-            offset: const Offset(0, 3),
-          )
-        ],
+Widget menuCircle(
+    String assetPath,
+    VoidCallback onTap,
+    ) {
+  return ClipRRect(
+    borderRadius: BorderRadius.circular(50.r),
+    child: BackdropFilter(
+      filter: ImageFilter.blur(
+        sigmaX: 10,
+        sigmaY: 10,
       ),
-      child: Center(
-        child: SvgPicture.asset(
-          svgPath,
-          height: 18.sp,
-          width: 18.sp,
-          colorFilter: const ColorFilter.mode(Colors.grey, BlendMode.srcIn),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 44.r,
+          width: 44.r,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+
+            // Same as Back / More button
+            color: Colors.black.withOpacity(0.35),
+
+            border: Border.all(
+              color: Colors.white.withOpacity(0.45),
+              width: 1,
+            ),
+
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.20),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child:Center(
+  child: SvgPicture.asset(
+    assetPath,
+    width: 21.w,
+    height: 21.w,
+    fit: BoxFit.contain,
+    colorFilter: const ColorFilter.mode(
+      Color.fromARGB(255, 240, 240, 240),
+      BlendMode.srcIn,
+    ),
+  ),
+),
         ),
       ),
     ),

@@ -336,7 +336,7 @@ class _OtpViewState extends State<OtpView> {
                                           .start,
 
                                       children: [
-
+SizedBox(height: 60.h,),
                                         // ==========================================
                                         // TITLE
                                         // ==========================================
