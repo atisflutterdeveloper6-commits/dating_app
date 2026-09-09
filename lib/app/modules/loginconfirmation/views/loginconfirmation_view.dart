@@ -277,7 +277,7 @@ class LoginconfirmationView extends GetView<LoginconfirmationController> {
                                           : screenHeight * 0.017,
                                     ),
                                     child: Image.asset(
-                                      'assets/images/loginback.jpeg',
+                                      'assets/images/loginback.png',
                                       height: isKeyboardOpen
                                           ? screenHeight * 0.30
                                           : screenHeight * 0.40,

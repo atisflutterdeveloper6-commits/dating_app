@@ -20,6 +20,9 @@ import 'package:shimmer/shimmer.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../../../custom_widget/custom_button.dart';
+import '../../paymentplan/controllers/paymentplan_controller.dart';
+
 class HomepageView extends StatefulWidget {
   const HomepageView({super.key});
 
@@ -110,6 +113,12 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
         });
       }
     });
+  }
+  String getAppName() {
+    if (Get.isRegistered<PaymentplanController>()) {
+      return Get.find<PaymentplanController>().getSubscription().appName;
+    }
+    return "Vibely"; // fallback
   }
   // Filter state variables
   String _selectedDistance = "40km";
@@ -1073,142 +1082,170 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    child: Container(
-                      height: MediaQuery.of(context).size.height * 0.45,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(30),
-                        ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(30.r),
                       ),
-                      child: Column(
+                      child: Stack(
                         children: [
-                          const SizedBox(height: 35),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 20),
-                            child: Row(
-                              children: [
-                                const SizedBox(width: 60),
-                                const Expanded(
-                                  child: Text(
-                                    "All Filters",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  width: 60,
-                                  child: TextButton(
-                                    onPressed: () {
-                                      setModalState(() {
-                                        _selectedDistance = "Select Distance";
-                                        _selectedAgeRange = "Select Age";
-                                      });
-                                      setState(() {
-                                        _selectedDistance = "Select Distance";
-                                        _selectedAgeRange = "Select Age";
-                                      });
-                                      // Controller ka real default rakho — placeholder text
-                                      // yahan bhejne se agar baad me Distance/Age sheet me
-                                      // koi value select kiye bina "Apply" dabaye, parsing
-                                      // crash ho sakta hai (double.parse fail).
-                                      controller.selectedDistance.value = "40km";
-                                      controller.selectedAgeRange.value = "22-30";
-// sheet band karo
-                                      _forceRefreshProfiles(); // saari (unfiltered) profiles
-                                    },
+                          // 🔥 Background Image
+                          Positioned.fill(
+                            child: Image.asset(
+                              "assets/images/LoginBack2.png",
+                              fit: BoxFit.cover,
+                            ),
+                          ),
 
-                                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
-                                    child: const Text(
-                                      "Reset",
-                                      style: TextStyle(
-                                        color: Colors.orange,
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
+                          // 🔥 White Opacity Overlay
+                          Positioned.fill(
+                            child: Container(
+                              color: Colors.white.withOpacity(0.70),
                             ),
                           ),
-                          const SizedBox(height: 22),
-                          Expanded(
-                            child: ListView(
-                              padding: const EdgeInsets.symmetric(horizontal: 20),
+
+                          // 🔥 Bottom Sheet Content
+                          Container(
+                            child: Column(
                               children: [
-                                _filterTile(
-                                  title: "Distance",
-                                  value: _selectedDistance,
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    _showDistanceFilter();
-                                  },
-                                ),
-                                _filterTile(
-                                  title: "Age Range",
-                                  value: _selectedAgeRange,
-                                  onTap: () {
-                                    Navigator.pop(context);
-                                    _showAgeFilter();
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 10, 20, 25),
-                            child: SizedBox(
-                              width: double.infinity,
-                              height: 56,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  // 🔥 Update controller values before applying
-                                  controller.selectedDistance.value = _selectedDistance;
-                                  controller.selectedAgeRange.value = _selectedAgeRange;
-                                  controller.applyFilters();
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30),
+                                SizedBox(height: 35.h),
+
+                                Padding(
+                                  padding:
+                                  EdgeInsets.symmetric(horizontal: 20.w),
+                                  child: Row(
+                                    children: [
+                                      SizedBox(width: 60.w),
+
+                                      Expanded(
+                                        child: Text(
+                                          "All Filters",
+                                          textAlign: TextAlign.center,
+                                          style: TextStyle(
+                                            fontSize: 22.sp,
+                                            fontWeight: FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+
+                                      SizedBox(
+                                        width: 60.w,
+                                        child: TextButton(
+                                          onPressed: () {
+                                            setModalState(() {
+                                              _selectedDistance =
+                                              "Select Distance";
+                                              _selectedAgeRange =
+                                              "Select Age";
+                                            });
+
+                                            setState(() {
+                                              _selectedDistance =
+                                              "Select Distance";
+                                              _selectedAgeRange =
+                                              "Select Age";
+                                            });
+
+                                            controller.selectedDistance.value =
+                                            "40km";
+                                            controller.selectedAgeRange.value =
+                                            "22-30";
+
+                                            _forceRefreshProfiles();
+                                          },
+                                          style: TextButton.styleFrom(
+                                            padding: EdgeInsets.zero,
+                                          ),
+                                          child: Text(
+                                            "Reset",
+                                            style: TextStyle(
+                                              color: Colors.orange,
+                                              fontSize: 14.sp,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
-                                child: Text(
-                                  "Apply Filters (${_getFilterCount()})",
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 17,
+
+                                SizedBox(height: 22.h),
+
+                                Expanded(
+                                  child: ListView(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 20.w,
+                                    ),
+                                    children: [
+                                      _filterTile(
+                                        title: "Distance",
+                                        value: _selectedDistance,
+                                        onTap: () {
+                                          Navigator.pop(context);
+                                          _showDistanceFilter();
+                                        },
+                                      ),
+
+                                      _filterTile(
+                                        title: "Age Range",
+                                        value: _selectedAgeRange,
+                                        onTap: () {
+                                          Navigator.pop(context);
+                                          _showAgeFilter();
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                Padding(
+                                  padding: EdgeInsets.fromLTRB(
+                                    20.w,
+                                    10.h,
+                                    20.w,
+                                    25.h,
+                                  ),
+                                  child: CustomButton(
+                                    text:
+                                    "Apply Filters (${_getFilterCount()})",
+                                    onPressed: () {
+                                      Navigator.pop(context);
+
+                                      controller.selectedDistance.value =
+                                          _selectedDistance;
+                                      controller.selectedAgeRange.value =
+                                          _selectedAgeRange;
+
+                                      controller.applyFilters();
+                                    },
+                                    textColor: Colors.white,
+                                    borderRadius: 30.r,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
-                          )
-
+                          ),
                         ],
                       ),
                     ),
                   ),
+
                   Positioned(
                     top: 265,
                     child: GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
+                        width: 52.w,
+                        height: 52.w,
+                        decoration: const BoxDecoration(
                           color: Colors.black,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.close,
                           color: Colors.white,
-                          size: 24,
+                          size: 24.sp,
                         ),
                       ),
                     ),
@@ -1222,8 +1259,16 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
     );
   }
 
+
   void _showDistanceFilter() {
-    List<String> distances = ["10km", "20km", "30km", "40km", "50km", "100km"];
+    List<String> distances = [
+      "10km",
+      "20km",
+      "30km",
+      "40km",
+      "50km",
+      "100km"
+    ];
 
     showModalBottomSheet(
       context: context,
@@ -1241,94 +1286,111 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    child: Container(
-                      height: MediaQuery.of(context).size.height * 0.45,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(30),
-                        ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(30.r),
                       ),
-                      child: Column(
+                      child: Stack(
                         children: [
-                          const SizedBox(height: 35),
-                          const Text(
-                            "Select Distance",
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
+                          // 🔥 Background Image
+                          Positioned.fill(
+                            child: Image.asset(
+                              "assets/images/LoginBack2.png",
+                              fit: BoxFit.cover,
                             ),
                           ),
-                          const SizedBox(height: 22),
-                          Expanded(
-                            child: ListView(
-                              padding: const EdgeInsets.symmetric(horizontal: 20),
-                              children: distances.map((distance) {
-                                return _locationTile(
-                                  title: distance,
-                                  subtitle: "Show people within $distance",
-                                  icon: Icons.location_on,
-                                  isSelected: _selectedDistance == distance,
-                                  onTap: () {
-                                    setModalState(() {
-                                      _selectedDistance = distance;
-                                    });
-                                    // ✅ Update controller immediately
-                                    controller.selectedDistance.value = distance;
-                                  },
-                                );
-                              }).toList(),
+
+                          // 🔥 White Opacity Overlay
+                          Positioned.fill(
+                            child: Container(
+                              color: Colors.white.withOpacity(0.70),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 10, 20, 25),
-                            child: SizedBox(
-                              width: double.infinity,
-                              height: 56,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  controller. fetchProfilesWithDistanceFilter();
 
-                                  // ✅ Apply filters
+                          // 🔥 Bottom Sheet Content
+                          Container(
+                            child: Column(
+                              children: [
+                                SizedBox(height: 35.h),
 
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30),
+                                Text(
+                                  "Select Distance",
+                                  style: TextStyle(
+                                    fontSize: 22.sp,
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
-                                child: const Text(
-                                  "Apply Distance",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 17,
+
+                                SizedBox(height: 22.h),
+
+                                Expanded(
+                                  child: ListView(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 20.w,
+                                    ),
+                                    children: distances.map((distance) {
+                                      return _locationTile(
+                                        title: distance,
+                                        subtitle:
+                                        "Show people within $distance",
+                                        icon: Icons.location_on,
+                                        isSelected:
+                                        _selectedDistance == distance,
+                                        onTap: () {
+                                          setModalState(() {
+                                            _selectedDistance = distance;
+                                          });
+
+                                          controller.selectedDistance.value =
+                                              distance;
+                                        },
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+
+                                Padding(
+                                  padding: EdgeInsets.fromLTRB(
+                                    20.w,
+                                    10.h,
+                                    20.w,
+                                    25.h,
+                                  ),
+                                  child: CustomButton(
+                                    text: "Apply Distance",
+                                    onPressed: () {
+                                      Navigator.pop(context);
+                                      controller
+                                          .fetchProfilesWithDistanceFilter();
+                                    },
+                                    textColor: Colors.white,
+                                    borderRadius: 30.r,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
+
                   Positioned(
                     top: 265,
                     child: GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
+                        width: 52.w,
+                        height: 52.w,
+                        decoration: const BoxDecoration(
                           color: Colors.black,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.close,
                           color: Colors.white,
-                          size: 24,
+                          size: 24.sp,
                         ),
                       ),
                     ),
@@ -1368,92 +1430,112 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    child: Container(
-                      height: MediaQuery.of(context).size.height * 0.45,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(30),
-                        ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(30.r),
                       ),
-                      child: Column(
+                      child: Stack(
                         children: [
-                          const SizedBox(height: 35),
-                          const Text(
-                            "Select Age Range",
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w700,
+                          // 🔥 Background Image
+                          Positioned.fill(
+                            child: Image.asset(
+                              "assets/images/LoginBack2.png",
+                              fit: BoxFit.cover,
                             ),
                           ),
-                          const SizedBox(height: 22),
-                          Expanded(
-                            child: ListView(
-                              padding: const EdgeInsets.symmetric(horizontal: 20),
-                              children: ageRanges.map((ageRange) {
-                                return _locationTile(
-                                  title: ageRange["label"]!,
-                                  subtitle: ageRange["subtitle"]!,
-                                  icon: Icons.cake,
-                                  isSelected: _selectedAgeRange == ageRange["label"],
-                                  onTap: () {
-                                    setModalState(() {
-                                      _selectedAgeRange = ageRange["label"]!;
-                                    });
-                                    // ✅ Update controller immediately
-                                    controller.selectedAgeRange.value = ageRange["label"]!;
-                                  },
-                                );
-                              }).toList(),
+
+                          // 🔥 White Opacity Overlay
+                          Positioned.fill(
+                            child: Container(
+                              color: Colors.white.withOpacity(0.70),
                             ),
                           ),
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 10, 20, 25),
-                            child: SizedBox(
-                              width: double.infinity,
-                              height: 56,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  // ✅ Apply filters
-                                  _applyFilters();
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: Colors.orange,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30),
+
+                          // 🔥 Bottom Sheet Content
+                          Container(
+                            child: Column(
+                              children: [
+                                SizedBox(height: 35.h),
+
+                                Text(
+                                  "Select Age Range",
+                                  style: TextStyle(
+                                    fontSize: 22.sp,
+                                    fontWeight: FontWeight.w700,
                                   ),
                                 ),
-                                child: const Text(
-                                  "Apply Age Range",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 17,
+
+                                SizedBox(height: 22.h),
+
+                                Expanded(
+                                  child: ListView(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 20.w,
+                                    ),
+                                    children: ageRanges.map((ageRange) {
+                                      return _locationTile(
+                                        title: ageRange["label"]!,
+                                        subtitle: ageRange["subtitle"]!,
+                                        icon: Icons.cake,
+                                        isSelected:
+                                        _selectedAgeRange ==
+                                            ageRange["label"],
+                                        onTap: () {
+                                          setModalState(() {
+                                            _selectedAgeRange =
+                                            ageRange["label"]!;
+                                          });
+
+                                          controller.selectedAgeRange.value =
+                                          ageRange["label"]!;
+                                        },
+                                      );
+                                    }).toList(),
+                                  ),
+                                ),
+
+                                Padding(
+                                  padding: EdgeInsets.fromLTRB(
+                                    20.w,
+                                    10.h,
+                                    20.w,
+                                    25.h,
+                                  ),
+                                  child: CustomButton(
+                                    text: "Apply Age Range",
+                                    onPressed: () {
+                                      Navigator.pop(context);
+
+                                      _applyFilters();
+                                    },
+                                    textColor: Colors.white,
+                                    borderRadius: 30.r,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
-                              ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                     ),
                   ),
+
                   Positioned(
                     top: 265,
                     child: GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
+                        width: 52.w,
+                        height: 52.w,
+                        decoration: const BoxDecoration(
                           color: Colors.black,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.close,
                           color: Colors.white,
-                          size: 24,
+                          size: 24.sp,
                         ),
                       ),
                     ),
@@ -1466,6 +1548,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
       },
     );
   }
+
   // 🔥🔥🔥 UPDATED: Show location picker with Google Places search
   // 🔥🔥🔥 UPDATED: Show location picker with Google Places search
   void _showLocationPicker() {
@@ -2547,7 +2630,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
 
                   Text(
                     getShortAppName(
-                      'Vibely',
+                      getAppName(),
                     ),
                     maxLines: 1,
                     style: TextStyle(
@@ -2802,6 +2885,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
   // 🔥🔥🔥 BUILD PROFILE CARD WITH REAL DISTANCE
   Widget buildProfileCard(Profile profile, bool isTop) {
     print('🃏 Building card for ${profile.name}: likeCount = ${profile.likes}');
+
     return GestureDetector(
       onPanUpdate: isTop && !_isSwiping
           ? (details) {
@@ -2815,25 +2899,29 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
           if (_dragOffset.dx > 20) {
             _bubbleText = "LIKE";
             _bubbleColor = Colors.green;
-            _bubbleScale = 1.0 + (_dragOffset.dx / threshold).clamp(0.0, 1.0) * 0.5;
-            _bubbleOpacity = (_dragOffset.dx / threshold).clamp(0.0, 1.0);
+            _bubbleScale = 1.0 +
+                (_dragOffset.dx / threshold).clamp(0.0, 1.0) * 0.5;
+            _bubbleOpacity =
+                (_dragOffset.dx / threshold).clamp(0.0, 1.0);
           } else if (_dragOffset.dx < -20) {
             _bubbleText = "NOPE";
             _bubbleColor = Colors.red;
-            _bubbleScale = 1.0 + (-_dragOffset.dx / threshold).clamp(0.0, 1.0) * 0.5;
-            _bubbleOpacity = (-_dragOffset.dx / threshold).clamp(0.0, 1.0);
+            _bubbleScale = 1.0 +
+                (-_dragOffset.dx / threshold).clamp(0.0, 1.0) * 0.5;
+            _bubbleOpacity =
+                (-_dragOffset.dx / threshold).clamp(0.0, 1.0);
           } else {
             _bubbleOpacity = 0.0;
           }
         });
       }
           : null,
+
       onPanEnd: isTop && !_isSwiping
           ? (details) {
         final velocity = details.velocity.pixelsPerSecond;
         final screenWidth = MediaQuery.of(context).size.width;
 
-        // Pull-to-refresh / detail view checks same rahenge
         if (velocity.dy > 500 || _dragOffset.dy > 100) {
           _triggerPullRefresh();
           return;
@@ -2849,14 +2937,14 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
           _isButtonTapAction = false;
         });
 
-        // ✅ Threshold kaafi kam kar diya — sirf ~18% screen width
-        // ya halki si velocity se hi next profile dikh jaayega
-        final distanceThreshold = screenWidth * 0.18; // pehle 150px fixed tha
-        final velocityThreshold = 300.0; // pehle 800 tha
+        final distanceThreshold = screenWidth * 0.18;
+        final velocityThreshold = 300.0;
 
-        if (velocity.dx > velocityThreshold || _dragOffset.dx > distanceThreshold) {
+        if (velocity.dx > velocityThreshold ||
+            _dragOffset.dx > distanceThreshold) {
           _likeProfile();
-        } else if (velocity.dx < -velocityThreshold || _dragOffset.dx < -distanceThreshold) {
+        } else if (velocity.dx < -velocityThreshold ||
+            _dragOffset.dx < -distanceThreshold) {
           _dislikeProfile();
         } else {
           _resetPosition();
@@ -2866,27 +2954,47 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
         }
       }
           : null,
-      // ✅ NAYA — card ke kisi bhi khaali jagah tap karne se profile detail khule
-      // (arrows/buttons/badges ka apna GestureDetector hai, so wahan tap karne se yeh fire nahi hoga)
+
       onTap: () => _openProfileDetail(profile),
+
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(28.r),
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // ✅ NAYA — photo index ke hisaab se current image dikhao
-            Builder(builder: (context) {
-              final photoIndex = _getPhotoIndex(profile.id);
-              final currentPhoto = profile.photos.isNotEmpty
-                  ? profile.photos[photoIndex.clamp(0, profile.photos.length - 1)]
-                  : profile.image;
-              return currentPhoto.startsWith('http')
-                  ? Image.network(currentPhoto, fit: BoxFit.fill, errorBuilder: (context, error, stackTrace) {
-                return Image.asset('assets/images/hprofile.png', fit: BoxFit.fill);
-              })
-                  : Image.asset(currentPhoto, fit: BoxFit.fill);
-            }),
-            Container(
+            Builder(
+              builder: (context) {
+                final photoIndex = _getPhotoIndex(profile.id);
+                final currentPhoto = profile.photos.isNotEmpty
+                    ? profile.photos[
+                photoIndex.clamp(0, profile.photos.length - 1)
+                ]
+                    : profile.image;
+
+                return currentPhoto.startsWith('http')
+                    ? Image.network(
+                  currentPhoto,
+                  fit: BoxFit.fill,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Image.asset(
+                      'assets/images/hprofile.png',
+                      fit: BoxFit.fill,
+                    );
+                  },
+                )
+                    : Image.asset(
+                  currentPhoto,
+                  fit: BoxFit.fill,
+                );
+              },
+            ),
+
+            Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  height: 700.h,
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment(0, 0.25),
@@ -2900,8 +3008,8 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                   stops: [0.0, 0.35, 0.65, 1.0],
                 ),
               ),
-            ),
-            // ✅ NAYA — side vignette (left-right thoda dark) taaki edges pe photo halka dabа jaaye
+            ),),
+
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
@@ -2917,37 +3025,57 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                 ),
               ),
             ),
+
             if (isTop)
               Positioned.fill(
                 child: Padding(
-                  padding: const EdgeInsets.all(40),
+                  padding: EdgeInsets.all(40.w),
                   child: Stack(
                     children: [
                       Align(
                         alignment: Alignment.topLeft,
                         child: Opacity(
-                          opacity: _dragOffset.dx > 30 ? (_dragOffset.dx / 180).clamp(0.0, 1.0) : 0.0,
+                          opacity: _dragOffset.dx > 30
+                              ? (_dragOffset.dx / 180).clamp(0.0, 1.0)
+                              : 0.0,
                           child: Transform.rotate(
                             angle: -0.35,
-                            child: const Icon(Icons.favorite, color: Colors.red, size: 120),
+                            child: Icon(
+                              Icons.favorite,
+                              color: Colors.red,
+                              size: 120.sp,
+                            ),
                           ),
                         ),
                       ),
+
                       Align(
                         alignment: Alignment.topRight,
                         child: Opacity(
-                          opacity: _dragOffset.dx < -30 ? (-_dragOffset.dx / 180).clamp(0.0, 1.0) : 0.0,
+                          opacity: _dragOffset.dx < -30
+                              ? (-_dragOffset.dx / 180).clamp(0.0, 1.0)
+                              : 0.0,
                           child: Transform.rotate(
                             angle: 0.35,
                             child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.red, width: 5),
-                                borderRadius: BorderRadius.circular(12),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 25.w,
+                                vertical: 12.h,
                               ),
-                              child: const Text(
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                  color: Colors.red,
+                                  width: 5.w,
+                                ),
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              child: Text(
                                 "NOPE",
-                                style: TextStyle(color: Colors.red, fontSize: 45, fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  color: Colors.red,
+                                  fontSize: 45.sp,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
@@ -2957,49 +3085,58 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                   ),
                 ),
               ),
-            // ✅ FIXED — Left / Right arrow icons hamesha dikhenge (photo count condition hata di)
+
             if (isTop)
               Positioned(
-                left: 12,
+                left: 12.w,
                 top: 0,
                 bottom: 0,
                 child: Center(
                   child: GestureDetector(
                     onTap: () {
-                      if (_isSwiping || _profiles.isEmpty || _currentIndex >= _profiles.length) return;
+                      if (_isSwiping ||
+                          _profiles.isEmpty ||
+                          _currentIndex >= _profiles.length) {
+                        return;
+                      }
+
                       setState(() {
                         _isButtonTapAction = true;
                         _bubbleText = "NOPE";
                         _bubbleColor = Colors.red;
                       });
+
                       _dislikeProfile();
                     },
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(20.r),
                       child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        filter: ImageFilter.blur(
+                          sigmaX: 10,
+                          sigmaY: 10,
+                        ),
                         child: Container(
-                          width: 36,
-                          height: 36,
+                          width: 36.w,
+                          height: 36.h,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.black.withOpacity(0.35),
                             border: Border.all(
                               color: Colors.white.withOpacity(0.45),
-                              width: 1,
+                              width: 1.w,
                             ),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.20),
-                                blurRadius: 8,
-                                offset: const Offset(0, 3),
+                                blurRadius: 8.r,
+                                offset: Offset(0, 3.h),
                               ),
                             ],
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.chevron_left,
                             color: Colors.white,
-                            size: 22,
+                            size: 22.sp,
                           ),
                         ),
                       ),
@@ -3007,48 +3144,58 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                   ),
                 ),
               ),
+
             if (isTop)
               Positioned(
-                right: 12,
+                right: 12.w,
                 top: 0,
                 bottom: 0,
                 child: Center(
                   child: GestureDetector(
                     onTap: () {
-                      if (_isSwiping || _profiles.isEmpty || _currentIndex >= _profiles.length) return;
+                      if (_isSwiping ||
+                          _profiles.isEmpty ||
+                          _currentIndex >= _profiles.length) {
+                        return;
+                      }
+
                       setState(() {
                         _isButtonTapAction = true;
                         _bubbleText = "LIKE";
                         _bubbleColor = Colors.green;
                       });
+
                       _likeProfile();
                     },
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(20.r),
                       child: BackdropFilter(
-                        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                        filter: ImageFilter.blur(
+                          sigmaX: 10,
+                          sigmaY: 10,
+                        ),
                         child: Container(
-                          width: 36,
-                          height: 36,
+                          width: 36.w,
+                          height: 36.h,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
                             color: Colors.black.withOpacity(0.35),
                             border: Border.all(
                               color: Colors.white.withOpacity(0.45),
-                              width: 1,
+                              width: 1.w,
                             ),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.20),
-                                blurRadius: 8,
-                                offset: const Offset(0, 3),
+                                blurRadius: 8.r,
+                                offset: Offset(0, 3.h),
                               ),
                             ],
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.chevron_right,
                             color: Colors.white,
-                            size: 22,
+                            size: 22.sp,
                           ),
                         ),
                       ),
@@ -3056,44 +3203,40 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                   ),
                 ),
               ),
+
             Positioned(
-              left: 15,
-              top: 15,
-              child: _buildOnlineStatusBadge(profile.id),  // ✅ Yahi ek line badli
+              left: 15.w,
+              top: 15.h,
+              child: _buildOnlineStatusBadge(profile.id),
             ),
+
             Positioned(
-              right: 15,
-              top: 15,
+              right: 15.w,
+              top: 15.h,
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(20.r),
                 child: BackdropFilter(
                   filter: ImageFilter.blur(
                     sigmaX: 10,
                     sigmaY: 10,
                   ),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 6.h,
                     ),
                     decoration: BoxDecoration(
-                      // 🖤 Glass background
                       color: Colors.black.withOpacity(0.35),
-
-                      borderRadius: BorderRadius.circular(20),
-
-                      // 🤍 Glass border
+                      borderRadius: BorderRadius.circular(20.r),
                       border: Border.all(
                         color: Colors.white.withOpacity(0.45),
-                        width: 1,
+                        width: 1.w,
                       ),
-
-                      // ✨ Soft shadow
                       boxShadow: [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.20),
-                          blurRadius: 8,
-                          offset: const Offset(0, 3),
+                          blurRadius: 8.r,
+                          offset: Offset(0, 3.h),
                         ),
                       ],
                     ),
@@ -3109,21 +3252,21 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                                   _currentIndex == _profiles.indexOf(profile)
                                   ? _likeScaleAnimation.value
                                   : 1.0,
-                              child: const Icon(
+                              child: Icon(
                                 Icons.favorite_outline,
                                 color: Colors.red,
-                                size: 18,
+                                size: 18.sp,
                               ),
                             );
                           },
                         ),
 
-                        const SizedBox(width: 6),
+                        SizedBox(width: 6.w),
 
                         Text(
                           _formatLikeCount(profile.likes),
-                          style: const TextStyle(
-                            fontSize: 12,
+                          style: TextStyle(
+                            fontSize: 12.sp,
                             color: Colors.white,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.3,
@@ -3135,117 +3278,128 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                 ),
               ),
             ),
+
             Positioned(
-              left: 20,
-              right: 20,
-              bottom: 80,
+              left: 20.w,
+              right: 20.w,
+              bottom: 80.h,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.only(bottom:10),
-                        child: Text("${profile.name}, ${profile.age}",
-                            style: const TextStyle(letterSpacing: 1.5, color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                      ),
-                      const SizedBox(width: 6),
+    Row(
+    children: [
+    Padding(
+    padding: EdgeInsets.only(bottom: 1.h),
+    child: Text(
+      profile.name
+          .split(' ')
+          .map(
+            (word) => word.isNotEmpty
+            ? '${word[0].toUpperCase()}${word.substring(1).toLowerCase()}'
+            : '',
+      )
+          .join(' ') + ', ${profile.age}',
+      style: TextStyle(
+        letterSpacing: 1.5,
+        color: Colors.white,
+        fontSize: 20.sp,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+    ),
+
+                      SizedBox(width: 6.w),
+
                       if (profile.isVerified)
                         SvgPicture.asset(
                           "assets/icons/blue_tick.svg",
-                          width: 18,
-                          height: 18,
+                          width: 18.w,
+                          height: 18.h,
                         ),
+
                       const Spacer(),
+
                       GestureDetector(
                         onTap: () => _openProfileDetail(profile),
                         child: SvgPicture.asset(
                           "assets/icons/hshare.svg",
-                          width: 35,
-                          height: 35,
+                          width: 35.w,
+                          height: 35.h,
                         ),
                       ),
                     ],
                   ),
+
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 5,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 12.w,
+                      vertical: 5.h,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.black.withOpacity(0.70),
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.circular(18.r),
                       border: Border.all(
                         color: Colors.white.withOpacity(0.7),
-                        width: 1,
+                        width: 1.w,
                       ),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.location_on,
                           color: Colors.white,
-                          size: 18,
+                          size: 18.sp,
                         ),
-                        const SizedBox(width: 5),
+                        SizedBox(width: 5.w),
                         Text(
                           "${profile.distance} away (${profile.location})",
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: Colors.white,
-                            fontSize: 12,
+                            fontSize: 12.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 5),
+
+                  SizedBox(height: 1.h),
+
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Top Chips
+                      SizedBox(height: 5.h),
+
                       Row(
                         children: [
-                          // Designer Chip
-                          // MBA Chip
-                          // Looking For Chip
-                        ],
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      // Place to meet
-                      Row(
-                        children: [
-                          // 📍 Place to meet
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 5,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 12.w,
+                              vertical: 5.h,
                             ),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF6C4AB6).withOpacity(0.9),
-                              borderRadius: BorderRadius.circular(18),
+                              color: const Color(0xFF6C4AB6).withOpacity(0.70),
+                              borderRadius: BorderRadius.circular(18.r),
                               border: Border.all(
                                 color: Colors.white.withOpacity(0.7),
-                                width: 1,
+                                width: 1.w,
                               ),
                             ),
-                            child: const Row(
+                            child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
                                   Icons.location_on_rounded,
                                   color: Colors.white,
-                                  size: 13,
+                                  size: 13.sp,
                                 ),
-                                SizedBox(width: 4),
+                                SizedBox(width: 4.w),
                                 Text(
                                   "Place to meet",
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 12,
+                                    fontSize: 12.sp,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -3253,9 +3407,8 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                             ),
                           ),
 
-                          const SizedBox(width: 8),
+                          SizedBox(width: 8.w),
 
-                          // ✅ Yes / ❌ No
                           GestureDetector(
                             onTap: () {
                               setState(() {
@@ -3267,18 +3420,18 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                               });
                             },
                             child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 5,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 12.w,
+                                vertical: 5.h,
                               ),
                               decoration: BoxDecoration(
                                 color: profile.placeToMeet
                                     ? const Color(0xFF56C271)
                                     : Colors.red,
-                                borderRadius: BorderRadius.circular(18),
+                                borderRadius: BorderRadius.circular(18.r),
                                 border: Border.all(
-                                  color: Colors.white.withOpacity(0.7),
-                                  width: 1,
+                                  color: Colors.white.withOpacity(0.70),
+                                  width: 1.w,
                                 ),
                               ),
                               child: Row(
@@ -3289,14 +3442,14 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                                         ? Icons.check_circle_rounded
                                         : Icons.cancel_rounded,
                                     color: Colors.white,
-                                    size: 13,
+                                    size: 13.sp,
                                   ),
-                                  const SizedBox(width: 4),
+                                  SizedBox(width: 4.w),
                                   Text(
                                     profile.placeToMeet ? "Yes" : "No",
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 12,
+                                      fontSize: 12.sp,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -3304,29 +3457,24 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                               ),
                             ),
                           ),
-
-                          // 📝 Bio — only when available
-
                         ],
                       ),
-                      SizedBox(height: 30,),
+
+                      SizedBox(height: 5.h),
                     ],
                   ),
-
                 ],
               ),
             ),
+
             if (isTop)
               Positioned(
                 left: 0,
                 right: 0,
-                bottom: 10,
-                child:
-
-                Row(
+                bottom: 10.h,
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
-                    // ❌ Cancel / Dislike
                     actionButton(
                       Icons.close_rounded,
                       Colors.white,
@@ -3343,7 +3491,6 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                       },
                     ),
 
-                    // ❤️ Like
                     actionButton(
                       Icons.favorite,
                       Colors.transparent,
@@ -3361,7 +3508,6 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                       },
                     ),
 
-                    // 💬 Chat
                     actionButton(
                       Icons.chat_bubble,
                       Colors.white,
@@ -3395,8 +3541,12 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                           },
                         );
 
-                        chatService.getOrCreateChatRoom(profile.id).catchError((e) {
-                          print('⚠️ Background chat room creation failed: $e');
+                        chatService
+                            .getOrCreateChatRoom(profile.id)
+                            .catchError((e) {
+                          print(
+                            '⚠️ Background chat room creation failed: $e',
+                          );
                           return '';
                         });
 
@@ -3406,54 +3556,57 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                         });
                       },
                     ),
-
                   ],
                 ),
               ),
-            // ✅ NAYA — Flying heart: like ke turant baad heart button ke upar se float+fade (bada + glow)
+
             if (isTop && _showFlyingHeart)
               AnimatedBuilder(
                 animation: _flyingHeartController,
                 builder: (context, child) {
                   return Positioned(
-                    bottom: 50 + _flyingHeartOffset.value,
+                    bottom: 50.h + _flyingHeartOffset.value,
                     left: 0,
                     right: 0,
                     child: IgnorePointer(
                       child: Center(
                         child: Opacity(
-                          opacity: _flyingHeartOpacity.value.clamp(0.0, 1.0),
+                          opacity:
+                          _flyingHeartOpacity.value.clamp(0.0, 1.0),
                           child: Transform.scale(
-                            scale: 1.3 + (0.5 * _flyingHeartController.value),
+                            scale: 1.3 +
+                                (0.5 * _flyingHeartController.value),
                             child: Container(
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFFFF841F).withOpacity(0.65),
-                                    blurRadius: 40,
-                                    spreadRadius: 12,
+                                    color: const Color(0xFFFF841F)
+                                        .withOpacity(0.65),
+                                    blurRadius: 40.r,
+                                    spreadRadius: 12.r,
                                   ),
                                   BoxShadow(
                                     color: Colors.white.withOpacity(0.5),
-                                    blurRadius: 20,
-                                    spreadRadius: 2,
+                                    blurRadius: 20.r,
+                                    spreadRadius: 2.r,
                                   ),
                                 ],
                               ),
                               child: ShaderMask(
-                                shaderCallback: (bounds) => const LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    Color(0xFFFFA146),
-                                    Color(0xFFFF6100),
-                                  ],
-                                ).createShader(bounds),
-                                child: const Icon(
+                                shaderCallback: (bounds) =>
+                                    const LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        Color(0xFFFFA146),
+                                        Color(0xFFFF6100),
+                                      ],
+                                    ).createShader(bounds),
+                                child: Icon(
                                   Icons.favorite,
                                   color: Colors.white,
-                                  size: 130,
+                                  size: 130.sp,
                                 ),
                               ),
                             ),
@@ -3464,50 +3617,54 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                   );
                 },
               ),
-            // ✅ NAYA — Flying X (dislike): left-swipe/NOPE ke turant baad button ke upar se float+fade (bada + glow)
+
             if (isTop && _showFlyingIgnore)
               AnimatedBuilder(
                 animation: _flyingIgnoreController,
                 builder: (context, child) {
                   return Positioned(
-                    bottom: 50 + _flyingIgnoreOffset.value,
+                    bottom: 50.h + _flyingIgnoreOffset.value,
                     left: 0,
                     right: 0,
                     child: IgnorePointer(
                       child: Center(
                         child: Opacity(
-                          opacity: _flyingIgnoreOpacity.value.clamp(0.0, 1.0),
+                          opacity:
+                          _flyingIgnoreOpacity.value.clamp(0.0, 1.0),
                           child: Transform.scale(
-                            scale: 1.3 + (0.5 * _flyingIgnoreController.value),
+                            scale: 1.3 +
+                                (0.5 * _flyingIgnoreController.value),
                             child: Container(
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
                                 boxShadow: [
                                   BoxShadow(
-                                    color: const Color(0xFF64748B).withOpacity(0.65),
-                                    blurRadius: 40,
-                                    spreadRadius: 12,
+                                    color: const Color(0xFF64748B)
+                                        .withOpacity(0.65),
+                                    blurRadius: 40.r,
+                                    spreadRadius: 12.r,
                                   ),
                                   BoxShadow(
                                     color: Colors.white.withOpacity(0.5),
-                                    blurRadius: 20,
-                                    spreadRadius: 2,
+                                    blurRadius: 20.r,
+                                    spreadRadius: 2.r,
                                   ),
                                 ],
                               ),
                               child: ShaderMask(
-                                shaderCallback: (bounds) => const LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    Color(0xFF94A3B8),
-                                    Color(0xFF475569),
-                                  ],
-                                ).createShader(bounds),
-                                child: const Icon(
+                                shaderCallback: (bounds) =>
+                                    const LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        Color(0xFF94A3B8),
+                                        Color(0xFF475569),
+                                      ],
+                                    ).createShader(bounds),
+                                child: Icon(
                                   Icons.close_rounded,
                                   color: Colors.white,
-                                  size: 130,
+                                  size: 130.sp,
                                 ),
                               ),
                             ),

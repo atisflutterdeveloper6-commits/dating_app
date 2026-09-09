@@ -84,80 +84,74 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
       leading: Padding(
         padding: EdgeInsets.only(left: 10.w),
-        child: Center(
-          child: InkWell(
-            borderRadius: BorderRadius.circular(50.r),
-            onTap: onBackPressed ?? () => Get.back(),
-            child: Container(
-              width: 32.w,
-              height: 32.w,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: const Color(0xFFEDEDED),
-                  width: 1.w,
+        child: IconButton(
+          onPressed: onBackPressed ?? () => Get.back(),
+          padding: EdgeInsets.zero,
+          icon: Container(
+            width: 40.w,
+            height: 40.w,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.10),
+                  blurRadius: 8.r,
+                  offset: Offset(0, 3.h),
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 6.r,
-                    offset: Offset(0, 2.h),
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.chevron_left_rounded,
-                  size: 21.sp,
-                  color: const Color(0xFFFF6B00),
-                ),
+              ],
+            ),
+            child: Center(
+              child: Icon(
+                Icons.chevron_left_rounded,
+                size: 24.sp,
+                color: const Color(0xFFFF6B00),
               ),
             ),
           ),
         ),
       ),
-
       // ============================================================
       // TITLE + SUBTITLE
       // ============================================================
 
       titleSpacing: 0,
-
-      title: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w700,
-              color: const Color(0xFF172033),
-              height: 1.15,
-            ),
-          ),
-
-          if (subtitle != null && subtitle!.isNotEmpty) ...[
-            SizedBox(height: 3.h),
-
+      title: Padding(
+        padding: EdgeInsets.only(left: 8.w),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
             Text(
-              subtitle!,
+              title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 8.5.sp,
-                fontWeight: FontWeight.w400,
-                color: const Color(0xFF777777),
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w700,
+                color: const Color(0xFF172033),
                 height: 1.15,
               ),
             ),
-          ],
-        ],
-      ),
 
+            if (subtitle != null && subtitle!.isNotEmpty) ...[
+              SizedBox(height: 3.h),
+
+              Text(
+                subtitle!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 8.5.sp,
+                  fontWeight: FontWeight.w400,
+                  color: const Color(0xFF777777),
+                  height: 1.15,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
       // ============================================================
       // RIGHT SIDE — ILLUSTRATION OR IMAGE
       // ============================================================

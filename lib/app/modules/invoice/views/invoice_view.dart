@@ -27,236 +27,369 @@ class InvoiceView extends GetView<InvoiceController> {
     }
 
     return Scaffold(
-      backgroundColor: const Color(0xffF7F7F7),
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
+      extendBody: true,
+
       appBar: const CustomAppBar(
         title: "Invoice",
       ),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
-        }
 
-        if (controller.errorMessage.value.isNotEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(Icons.error_outline, size: 60, color: Colors.grey[400]),
-                SizedBox(height: 16.h),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 30.w),
-                  child: Text(
-                    controller.errorMessage.value,
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                SizedBox(height: 20.h),
-                ElevatedButton(
-                  onPressed: controller.retry,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xffFF6338),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                  ),
-                  child: const Text('Retry'),
-                ),
-              ],
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // ─────────────────────────────────────
+          // Background Image
+          // ─────────────────────────────────────
+          Positioned.fill(
+            child: Image.asset(
+              "assets/images/LoginBack2.png",
+              fit: BoxFit.cover,
             ),
-          );
-        }
+          ),
 
-        return SingleChildScrollView(
-          padding: EdgeInsets.all(16.w),
-          child: Column(
-            children: [
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(20.w),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(18.r),
-                  border: Border.all(
-                    color: Colors.grey.shade300,
-                    width: .5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(.04),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+          // ─────────────────────────────────────
+          // White Opacity Overlay
+          // No Blur
+          // ─────────────────────────────────────
+          Positioned.fill(
+            child: Container(
+              color: Colors.white.withOpacity(0.70),
+            ),
+          ),
+
+          // ─────────────────────────────────────
+          // Content
+          // ─────────────────────────────────────
+          Positioned.fill(
+            child: SafeArea(
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return const Center(
+                    child: CircularProgressIndicator(
+                      color: Color(0xffFF6B00),
                     ),
-                  ],
-                ),
-                child: Column(
-                  children: [
-                    /// Header
-                    Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.all(12.w),
-                          decoration: const BoxDecoration(
-                            color: Color(0xffFFF2E8),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(
-                            Icons.receipt_long_rounded,
-                            color: const Color(0xffFF6B00),
-                            size: 26.sp,
+                  );
+                }
+
+                if (controller.errorMessage.value.isNotEmpty) {
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20.w),
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(24.w),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.88),
+                          borderRadius: BorderRadius.circular(18.r),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.75),
+                            width: 0.6.w,
                           ),
                         ),
-                        SizedBox(width: 14.w),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                controller.planTitle.value,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              size: 60.sp,
+                              color: Colors.grey.shade400,
+                            ),
+
+                            SizedBox(height: 16.h),
+
+                            Text(
+                              controller.errorMessage.value,
+                              style: GoogleFonts.poppins(
+                                color: Colors.red,
+                                fontSize: 13.sp,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+
+                            SizedBox(height: 20.h),
+
+                            ElevatedButton(
+                              onPressed: controller.retry,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xffFF6B00),
+                                foregroundColor: Colors.white,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30.r),
+                                ),
+                              ),
+                              child: Text(
+                                "Retry",
                                 style: GoogleFonts.poppins(
-                                  fontSize: 15.sp,
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              SizedBox(height: 4.h),
-                              Text(
-                                controller.transactionId.value,
-                                style: GoogleFonts.poppins(
-                                  color: Colors.grey,
-                                  fontSize: 11.sp,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: 14.w, vertical: 6.h),
-                          decoration: BoxDecoration(
-                            color: Colors.green.shade50,
-                            borderRadius: BorderRadius.circular(30.r),
-                            border: Border.all(
-                              color: Colors.green.shade200,
                             ),
-                          ),
-                          child: Text(
-                            controller.displayStatus.value,
-                            style: GoogleFonts.poppins(
-                              color: Colors.green.shade700,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 11.sp,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 25.h),
-
-                    _row("Customer", controller.customerName.value),
-                    _row("Date", controller.date.value),
-                    _row("Payment", controller.paymentMode.value),
-                    _row("Transaction ID", controller.transactionId.value),
-
-                    SizedBox(height: 20.h),
-
-                    Divider(color: Colors.grey.shade300),
-
-                    SizedBox(height: 20.h),
-
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        "Billing Summary",
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15.sp,
+                          ],
                         ),
                       ),
                     ),
+                  );
+                }
 
-                    SizedBox(height: 15.h),
+                return SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(
+                    16.w,
+                    16.h,
+                    16.w,
+                    40.h,
+                  ),
+                  child: Column(
+                    children: [
+                      // ─────────────────────────────
+                      // Invoice Card
+                      // ─────────────────────────────
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(20.w),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.88),
+                          borderRadius: BorderRadius.circular(18.r),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.75),
+                            width: 0.6.w,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            // Header
+                            Row(
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(12.w),
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xffFFF2E8),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.receipt_long_rounded,
+                                    color: const Color(0xffFF6B00),
+                                    size: 26.sp,
+                                  ),
+                                ),
 
-                    _priceRow(
-                        controller.planTitle.value, controller.priceAfterTrial.value),
+                                SizedBox(width: 14.w),
 
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 15.h),
-                      child: Divider(color: Colors.grey.shade300),
-                    ),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        controller.planTitle.value,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 15.sp,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
 
-                    Row(
-                      children: [
-                        Text(
-                          "Total Paid",
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 16.sp,
+                                      SizedBox(height: 4.h),
+
+                                      Text(
+                                        controller.transactionId.value,
+                                        style: GoogleFonts.poppins(
+                                          color: Colors.grey.shade600,
+                                          fontSize: 11.sp,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 14.w,
+                                    vertical: 6.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green.shade50,
+                                    borderRadius:
+                                    BorderRadius.circular(30.r),
+                                    border: Border.all(
+                                      color: Colors.green.shade200,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    controller.displayStatus.value,
+                                    style: GoogleFonts.poppins(
+                                      color: Colors.green.shade700,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 11.sp,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            SizedBox(height: 25.h),
+
+                            _row(
+                              "Customer",
+                              controller.customerName.value,
+                            ),
+
+                            _row(
+                              "Date",
+                              controller.date.value,
+                            ),
+
+                            _row(
+                              "Payment",
+                              controller.paymentMode.value,
+                            ),
+
+                            _row(
+                              "Transaction ID",
+                              controller.transactionId.value,
+                            ),
+
+                            SizedBox(height: 20.h),
+
+                            Divider(
+                              color: Colors.grey.shade300,
+                            ),
+
+                            SizedBox(height: 20.h),
+
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                "Billing Summary",
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 15.sp,
+                                ),
+                              ),
+                            ),
+
+                            SizedBox(height: 15.h),
+
+                            _priceRow(
+                              controller.planTitle.value,
+                              controller.priceAfterTrial.value,
+                            ),
+
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: 15.h,
+                              ),
+                              child: Divider(
+                                color: Colors.grey.shade300,
+                              ),
+                            ),
+
+                            Row(
+                              children: [
+                                Text(
+                                  "Total Paid",
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 16.sp,
+                                  ),
+                                ),
+
+                                const Spacer(),
+
+                                Text(
+                                  controller.totalPaidAmount.value,
+                                  style: GoogleFonts.poppins(
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xffFF6B00),
+                                    fontSize: 18.sp,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      SizedBox(height: 30.h),
+
+                      // ─────────────────────────────
+                      // Download Button
+                      // ─────────────────────────────
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52.h,
+                        child: ElevatedButton.icon(
+                          onPressed: () =>
+                              _downloadInvoice(controller),
+                          icon: const Icon(Icons.download),
+                          label: Text(
+                            "Download Invoice",
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xffFF6B00),
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                              BorderRadius.circular(30.r),
+                            ),
                           ),
                         ),
-                        const Spacer(),
-                        Text(
-                          controller.totalPaidAmount.value,
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xffFF6B00),
-                            fontSize: 18.sp,
+                      ),
+
+                      SizedBox(height: 15.h),
+
+                      // ─────────────────────────────
+                      // Share Button
+                      // ─────────────────────────────
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52.h,
+                        child: OutlinedButton.icon(
+                          onPressed: () =>
+                              _shareInvoice(controller),
+                          icon: const Icon(Icons.share),
+                          label: Text(
+                            "Share Invoice",
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor:
+                            const Color(0xffFF6B00),
+                            side: const BorderSide(
+                              color: Color(0xffFF6B00),
+                            ),
+                            backgroundColor:
+                            Colors.white.withOpacity(0.55),
+                            shape: RoundedRectangleBorder(
+                              borderRadius:
+                              BorderRadius.circular(30.r),
+                            ),
                           ),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+                      ),
 
-              SizedBox(height: 30.h),
-
-              SizedBox(
-                width: double.infinity,
-                height: 52.h,
-                child: ElevatedButton.icon(
-                  onPressed: () => _downloadInvoice(controller),
-                  icon: const Icon(Icons.download),
-                  label: Text(
-                    "Download Invoice",
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
+                      SizedBox(height: 20.h),
+                    ],
                   ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xffFF6B00),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.r),
-                    ),
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 15.h),
-
-              SizedBox(
-                width: double.infinity,
-                height: 52.h,
-                child: OutlinedButton.icon(
-                  onPressed: () => _shareInvoice(controller),
-                  icon: const Icon(Icons.share),
-                  label: Text(
-                    "Share Invoice",
-                    style: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xffFF6B00),
-                    side: const BorderSide(color: Color(0xffFF6B00)),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.r),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+                );
+              }),
+            ),
           ),
-        );
-      }),
+        ],
+      ),
     );
   }
 

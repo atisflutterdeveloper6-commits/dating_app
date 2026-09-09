@@ -18,6 +18,8 @@ class PremiumView extends StatefulWidget {
 class _PremiumViewState extends State<PremiumView> {
   final PremiumController controller = Get.put(PremiumController());
 
+  static const Color orangeColor = Color(0xffFF6B00);
+
   @override
   Widget build(BuildContext context) {
     ScreenUtil.init(
@@ -28,368 +30,804 @@ class _PremiumViewState extends State<PremiumView> {
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xffF7F7F7),
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
+      extendBody: true,
+
       appBar: CustomAppBar(
         title: "Membership",
         onBackPressed: () {
           Get.find<DashboardController>().changeTab(0);
         },
       ),
-      body: Obx(() {
-        // Loading state - Show Shimmer
-        if (controller.isLoading.value) {
-          return _buildShimmerLoading();
-        }
 
-        // Error state
-        if (controller.errorMessage.value.isNotEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 60,
-                  color: Colors.red[300],
-                ),
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 30),
-                  child: Text(
-                    controller.errorMessage.value,
-                    style: const TextStyle(color: Colors.red),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  onPressed: controller.retry,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xffFF6338),
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text('Retry'),
-                ),
-              ],
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // ============================================================
+          // BACKGROUND IMAGE
+          // ============================================================
+          Positioned.fill(
+            child: Image.asset(
+              "assets/images/LoginBack2.png",
+              fit: BoxFit.cover,
             ),
-          );
-        }
-
-        // Main Content
-        return SingleChildScrollView(
-          padding: EdgeInsets.all(14.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// Premium Card
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(20.w),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(18.r),
-                  gradient: const LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xffD5C11D),
-                      Color(0xff3E2D2D),
-                      Color(0xffC96A11),
-                    ],
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          height: 34.h,
-                          width: 34.w,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(.15),
-                            borderRadius: BorderRadius.circular(10.r),
-                          ),
-                          child: Icon(
-                            Icons.workspace_premium,
-                            color: Colors.white,
-                            size: 22.sp,
-                          ),
-                        ),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Go Premium',
-                                style: GoogleFonts.poppins(
-                                  letterSpacing: 1.5.w,
-                                  color: Colors.white,
-                                  fontSize: 18.sp,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                              ),
-                              SizedBox(height: 2.h),
-                              Text(
-                                ' Upgrade for Enjoy All Premium Benefits',
-                                style: GoogleFonts.poppins(
-                                  letterSpacing: 1.5.w,
-                                  color: Colors.white70,
-                                  fontSize: 11.sp,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: 22.h),
-
-                    _premiumRow('Purchase Date', controller.purchaseDate.value),
-                    SizedBox(height: 10.h),
-                    _premiumRow('Next Billing Date', controller.nextBillingDate.value),
-                    SizedBox(height: 10.h),
-                    _premiumRow('Amount Paid', controller.amountPaid.value),
-                    SizedBox(height: 16.h),
-
-                    // Auto Renewal Toggle
-              
-            
-                  ],
-                ),
-              ),
-
-              SizedBox(height: 30.h),
-
-              Text(
-                "FAQ's",
-                style: GoogleFonts.poppins(
-                  letterSpacing: 1.5.w,
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xff2B2B2B),
-                ),
-              ),
-
-              SizedBox(height: 14.h),
-
-              // Dynamic FAQ from API
-              if (controller.faqList.isEmpty)
-                const Center(
-                  child: Text('No FAQ available'),
-                )
-              else
-                ...controller.faqList.map<Widget>((e) {
-                  return Container(
-                    margin: EdgeInsets.only(bottom: 10.h),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(color: const Color(0xffECECEC)),
-                    ),
-                    child: Theme(
-                      data: Theme.of(context)
-                          .copyWith(dividerColor: Colors.transparent),
-                      child: ExpansionTile(
-                        tilePadding: EdgeInsets.symmetric(horizontal: 16.w),
-                        childrenPadding: EdgeInsets.only(
-                          left: 16.w,
-                          right: 16.w,
-                          bottom: 16.h,
-                        ),
-                        title: Text(
-                          e.question,
-                          style: GoogleFonts.poppins(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xff303030),
-                          ),
-                        ),
-                        children: [
-                          Text(
-                            e.answer,
-                            style: GoogleFonts.poppins(
-                              fontSize: 12.sp,
-                              height: 1.7,
-                              color: const Color(0xff7B7B7B),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }).toList(),
-            ],
           ),
-        );
-      }),
+
+          // ============================================================
+          // WHITE OPACITY OVERLAY
+          // ============================================================
+          Positioned.fill(
+            child: Container(
+              color: Colors.white.withOpacity(0.70),
+            ),
+          ),
+
+          // ============================================================
+          // CONTENT
+          // ============================================================
+          Positioned.fill(
+            child: SafeArea(
+              child: Obx(() {
+                // ======================================================
+                // LOADING
+                // ======================================================
+                if (controller.isLoading.value) {
+                  return _buildShimmerLoading();
+                }
+
+                // ======================================================
+                // ERROR
+                // STATIC DATA SHOW
+                // ======================================================
+                if (controller.errorMessage.value.isNotEmpty) {
+                  return _buildStaticPremiumData();
+                }
+
+                // ======================================================
+                // API SUCCESS
+                // ======================================================
+                return _buildPremiumContent();
+              }),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _premiumRow(String title, String value) {
+  // ================================================================
+  // API SUCCESS CONTENT
+  // ================================================================
+
+  Widget _buildPremiumContent() {
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(
+        14.w,
+        14.h,
+        14.w,
+        40.h,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ==========================================================
+          // PREMIUM CARD
+          // ==========================================================
+
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(20.w),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.88),
+              borderRadius: BorderRadius.circular(18.r),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.75),
+                width: 0.8.w,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(18.w),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16.r),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xffD5C11D),
+                    Color(0xff3E2D2D),
+                    Color(0xffC96A11),
+                  ],
+                ),
+              ),
+              child: Column(
+                children: [
+                  // ==================================================
+                  // PREMIUM HEADER
+                  // ==================================================
+
+                  Row(
+                    children: [
+                      Container(
+                        height: 34.h,
+                        width: 34.w,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        child: Icon(
+                          Icons.workspace_premium,
+                          color: Colors.white,
+                          size: 22.sp,
+                        ),
+                      ),
+
+                      SizedBox(width: 12.w),
+
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Go Premium',
+                              style: GoogleFonts.poppins(
+                                letterSpacing: 1.5.w,
+                                color: Colors.white,
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+
+                            SizedBox(height: 2.h),
+
+                            Text(
+                              'Upgrade for Enjoy All Premium Benefits',
+                              style: GoogleFonts.poppins(
+                                letterSpacing: 0.8.w,
+                                color: Colors.white70,
+                                fontSize: 11.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 22.h),
+
+                  // ==================================================
+                  // PURCHASE DATE
+                  // ==================================================
+
+                  _premiumRow(
+                    'Purchase Date',
+                    controller.purchaseDate.value,
+                  ),
+
+                  SizedBox(height: 10.h),
+
+                  // ==================================================
+                  // NEXT BILLING DATE
+                  // ==================================================
+
+                  _premiumRow(
+                    'Next Billing Date',
+                    controller.nextBillingDate.value,
+                  ),
+
+                  SizedBox(height: 10.h),
+
+                  // ==================================================
+                  // AMOUNT PAID
+                  // ==================================================
+
+                  _premiumRow(
+                    'Amount Paid',
+                    controller.amountPaid.value,
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          SizedBox(height: 30.h),
+
+          // ==========================================================
+          // FAQ TITLE
+          // ==========================================================
+
+          Text(
+            "FAQ's",
+            style: GoogleFonts.poppins(
+              letterSpacing: 1.5.w,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xff2B2B2B),
+            ),
+          ),
+
+          SizedBox(height: 14.h),
+
+          // ==========================================================
+          // FAQ
+          // ==========================================================
+
+          if (controller.faqList.isEmpty)
+            _staticNoFaq()
+          else
+            ...controller.faqList.map<Widget>((e) {
+              return _faqCard(
+                question: e.question,
+                answer: e.answer,
+              );
+            }).toList(),
+        ],
+      ),
+    );
+  }
+
+  // ================================================================
+  // STATIC DATA WHEN API ERROR
+  // ================================================================
+  String _formatDate(DateTime date) {
+    return "${date.day.toString().padLeft(2, '0')} "
+        "${_monthName(date.month)} "
+        "${date.year}";
+  }
+
+  String _monthName(int month) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+
+    return months[month - 1];
+  }
+  Widget _buildStaticPremiumData() {
+    final DateTime now = DateTime.now();
+    final DateTime nextBillingDate = now.add(
+      const Duration(days: 1),
+    );
+
+    return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(
+        14.w,
+        14.h,
+        14.w,
+        40.h,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ==========================================================
+          // PREMIUM CARD
+          // ==========================================================
+
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(20.w),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.88),
+              borderRadius: BorderRadius.circular(18.r),
+              border: Border.all(
+                color: Colors.white.withOpacity(0.75),
+                width: 0.8.w,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
+                ),
+              ],
+            ),
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(18.w),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16.r),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xffD5C11D),
+                    Color(0xff3E2D2D),
+                    Color(0xffC96A11),
+                  ],
+                ),
+              ),
+              child: Column(
+                children: [
+                  // ==================================================
+                  // HEADER
+                  // ==================================================
+
+                  Row(
+                    children: [
+                      Container(
+                        height: 34.h,
+                        width: 34.w,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.15),
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        child: Icon(
+                          Icons.workspace_premium,
+                          color: Colors.white,
+                          size: 22.sp,
+                        ),
+                      ),
+
+                      SizedBox(width: 12.w),
+
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Go Premium',
+                              style: GoogleFonts.poppins(
+                                letterSpacing: 1.5.w,
+                                color: Colors.white,
+                                fontSize: 18.sp,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+
+                            SizedBox(height: 2.h),
+
+                            Text(
+                              'Upgrade for Enjoy All Premium Benefits',
+                              style: GoogleFonts.poppins(
+                                letterSpacing: 0.8.w,
+                                color: Colors.white70,
+                                fontSize: 11.sp,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 22.h),
+
+                  // ==================================================
+                  // DYNAMIC PURCHASE DATE
+                  // ==================================================
+
+                  _premiumRow(
+                    'Purchase Date',
+                    _formatDate(now),
+                  ),
+
+                  SizedBox(height: 10.h),
+
+                  // ==================================================
+                  // DYNAMIC NEXT BILLING DATE
+                  // ==================================================
+
+                  _premiumRow(
+                    'Next Billing Date',
+                    _formatDate(nextBillingDate),
+                  ),
+
+                  SizedBox(height: 10.h),
+
+                  // ==================================================
+                  // STATIC AMOUNT
+                  // ==================================================
+
+                  _premiumRow(
+                    'Amount Paid',
+                    '₹1',
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          SizedBox(height: 30.h),
+
+          // ==========================================================
+          // FAQ TITLE
+          // ==========================================================
+
+          Text(
+            "FAQ's",
+            style: GoogleFonts.poppins(
+              letterSpacing: 1.5.w,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xff2B2B2B),
+            ),
+          ),
+
+          SizedBox(height: 14.h),
+
+          // ==========================================================
+          // STATIC FAQ 1
+          // ==========================================================
+
+          _faqCard(
+            question: 'What is Premium Membership?',
+            answer:
+            'Premium Membership gives you access to exclusive features and benefits.',
+          ),
+
+          // ==========================================================
+          // STATIC FAQ 2
+          // ==========================================================
+
+          _faqCard(
+            question: 'How long is my membership valid?',
+            answer:
+            'Your membership is valid for one month from the purchase date.',
+          ),
+
+          // ==========================================================
+          // STATIC FAQ 3
+          // ==========================================================
+
+          _faqCard(
+            question: 'When will I be charged again?',
+            answer:
+            'Your subscription will be renewed on the next billing date.',
+          ),
+
+          // ==========================================================
+          // STATIC FAQ 4
+          // ==========================================================
+
+          _faqCard(
+            question: 'Can I cancel my membership?',
+            answer:
+            'Yes, you can cancel your membership according to the subscription terms.',
+          ),
+        ],
+      ),
+    );
+  }
+  // ================================================================
+  // PREMIUM ROW
+  // ================================================================
+
+  Widget _premiumRow(
+      String title,
+      String value,
+      ) {
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          title,
-          style: GoogleFonts.poppins(
-            color: Colors.white,
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w500,
+        Expanded(
+          child: Text(
+            title,
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
-        const Spacer(),
-        Text(
-          value,
-          style: GoogleFonts.poppins(
-            color: Colors.white,
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w500,
+
+        SizedBox(width: 10.w),
+
+        Flexible(
+          child: Text(
+            value,
+            textAlign: TextAlign.right,
+            style: GoogleFonts.poppins(
+              color: Colors.white,
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ],
     );
   }
 
-  // ✅ Shimmer Loading Widget
+  // ================================================================
+  // FAQ CARD
+  // ================================================================
+
+  Widget _faqCard({
+    required String question,
+    required String answer,
+  }) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 10.h),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.82),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.75),
+          width: 0.8.w,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          dividerColor: Colors.transparent,
+        ),
+        child: ExpansionTile(
+          tilePadding: EdgeInsets.symmetric(
+            horizontal: 16.w,
+          ),
+          childrenPadding: EdgeInsets.only(
+            left: 16.w,
+            right: 16.w,
+            bottom: 16.h,
+          ),
+          iconColor: orangeColor,
+          collapsedIconColor: const Color(0xff666666),
+          title: Text(
+            question,
+            style: GoogleFonts.poppins(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xff303030),
+            ),
+          ),
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                answer,
+                style: GoogleFonts.poppins(
+                  fontSize: 12.sp,
+                  height: 1.7,
+                  color: const Color(0xff7B7B7B),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ================================================================
+  // NO FAQ
+  // ================================================================
+
+  Widget _staticNoFaq() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(20.w),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.82),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(
+          color: Colors.white.withOpacity(0.75),
+          width: 0.8.w,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Text(
+        'No FAQ available',
+        textAlign: TextAlign.center,
+        style: GoogleFonts.poppins(
+          fontSize: 13.sp,
+          color: const Color(0xff777777),
+        ),
+      ),
+    );
+  }
+
+  // ================================================================
+  // SHIMMER LOADING
+  // ================================================================
+
   Widget _buildShimmerLoading() {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(14.w),
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(
+        14.w,
+        14.h,
+        14.w,
+        40.h,
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Premium Card Shimmer
+          // ==========================================================
+          // PREMIUM CARD SHIMMER
+          // ==========================================================
+
           Container(
             width: double.infinity,
             padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.88),
               borderRadius: BorderRadius.circular(18.r),
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  Color(0xffD5C11D),
-                  Color(0xff3E2D2D),
-                  Color(0xffC96A11),
-                ],
+              border: Border.all(
+                color: Colors.white.withOpacity(0.75),
+                width: 0.8.w,
               ),
-            ),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    // Premium Icon Shimmer
-                    ShimmerContainer(
-                      width: 34.w,
-                      height: 34.h,
-                      radius: 10.r,
-                    ),
-                    SizedBox(width: 12.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Title Shimmer
-                          ShimmerContainer(
-                            width: 150.w,
-                            height: 18.h,
-                            radius: 4.r,
-                          ),
-                          SizedBox(height: 4.h),
-                          // Subtitle Shimmer
-                          ShimmerContainer(
-                            width: 120.w,
-                            height: 12.h,
-                            radius: 4.r,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 22.h),
-                // Purchase Date Shimmer
-                _shimmerRow(),
-                SizedBox(height: 10.h),
-                // Next Billing Date Shimmer
-                _shimmerRow(),
-                SizedBox(height: 10.h),
-                // Amount Paid Shimmer
-                _shimmerRow(),
-                SizedBox(height: 16.h),
-                // Auto Renewal Toggle Shimmer
-                Row(
-                  children: [
-                    ShimmerContainer(
-                      width: 100.w,
-                      height: 16.h,
-                      radius: 4.r,
-                    ),
-                    const Spacer(),
-                    ShimmerContainer(
-                      width: 44.w,
-                      height: 24.h,
-                      radius: 20.r,
-                    ),
-                  ],
-                ),
-                SizedBox(height: 22.h),
-                // Cancel Button Shimmer
-                ShimmerContainer(
-                  width: double.infinity,
-                  height: 50.h,
-                  radius: 30.r,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 15,
+                  offset: const Offset(0, 5),
                 ),
               ],
             ),
+            child: Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(18.w),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16.r),
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xffD5C11D),
+                    Color(0xff3E2D2D),
+                    Color(0xffC96A11),
+                  ],
+                ),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    children: [
+                      ShimmerContainer(
+                        width: 34.w,
+                        height: 34.h,
+                        radius: 10.r,
+                      ),
+
+                      SizedBox(width: 12.w),
+
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                          children: [
+                            ShimmerContainer(
+                              width: 150.w,
+                              height: 18.h,
+                              radius: 4.r,
+                            ),
+
+                            SizedBox(height: 5.h),
+
+                            ShimmerContainer(
+                              width: 190.w,
+                              height: 12.h,
+                              radius: 4.r,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 22.h),
+
+                  _shimmerRow(),
+
+                  SizedBox(height: 12.h),
+
+                  _shimmerRow(),
+
+                  SizedBox(height: 12.h),
+
+                  _shimmerRow(),
+                ],
+              ),
+            ),
           ),
+
           SizedBox(height: 30.h),
-          // FAQ Title Shimmer
+
+          // ==========================================================
+          // FAQ TITLE SHIMMER
+          // ==========================================================
+
           ShimmerContainer(
             width: 80.w,
             height: 18.h,
             radius: 4.r,
           ),
+
           SizedBox(height: 14.h),
-          // FAQ Items Shimmer
-          ...List.generate(4, (index) {
-            return Container(
-              margin: EdgeInsets.only(bottom: 10.h),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: const Color(0xffECECEC)),
-              ),
-              child: ExpansionTile(
-                tilePadding: EdgeInsets.symmetric(horizontal: 16.w),
-                title: ShimmerContainer(
-                  width: 200.w,
-                  height: 16.h,
-                  radius: 4.r,
+
+          // ==========================================================
+          // FAQ SHIMMER
+          // ==========================================================
+
+          ...List.generate(
+            4,
+                (index) {
+              return Container(
+                width: double.infinity,
+                margin: EdgeInsets.only(bottom: 10.h),
+                padding: EdgeInsets.symmetric(
+                  horizontal: 16.w,
+                  vertical: 17.h,
                 ),
-                children: [
-                  Padding(
-                    padding: EdgeInsets.only(
-                      left: 16.w,
-                      right: 16.w,
-                      bottom: 16.h,
-                    ),
-                    child: ShimmerContainer(
-                      width: double.infinity,
-                      height: 40.h,
-                      radius: 4.r,
-                    ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.82),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.75),
+                    width: 0.8.w,
                   ),
-                ],
-              ),
-            );
-          }),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 8,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ShimmerContainer(
+                        width: double.infinity,
+                        height: 16.h,
+                        radius: 4.r,
+                      ),
+                    ),
+
+                    SizedBox(width: 15.w),
+
+                    ShimmerContainer(
+                      width: 18.w,
+                      height: 18.w,
+                      radius: 20.r,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
         ],
       ),
     );
   }
+
+  // ================================================================
+  // SHIMMER ROW
+  // ================================================================
 
   Widget _shimmerRow() {
     return Row(
@@ -399,7 +837,9 @@ class _PremiumViewState extends State<PremiumView> {
           height: 16.h,
           radius: 4.r,
         ),
+
         const Spacer(),
+
         ShimmerContainer(
           width: 80.w,
           height: 16.h,
@@ -410,7 +850,10 @@ class _PremiumViewState extends State<PremiumView> {
   }
 }
 
-// ✅ Shimmer Container Widget
+// ==================================================================
+// SHIMMER CONTAINER
+// ==================================================================
+
 class ShimmerContainer extends StatefulWidget {
   final double width;
   final double height;
@@ -434,6 +877,7 @@ class _ShimmerContainerState extends State<ShimmerContainer>
   @override
   void initState() {
     super.initState();
+
     _shimmerController = AnimationController(
       duration: const Duration(milliseconds: 1500),
       vsync: this,
@@ -451,27 +895,29 @@ class _ShimmerContainerState extends State<ShimmerContainer>
     return AnimatedBuilder(
       animation: _shimmerController,
       builder: (context, child) {
+        final double value = _shimmerController.value;
+
         return Container(
           width: widget.width,
           height: widget.height,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(widget.radius),
-            color: Colors.grey[300],
+            color: Colors.white.withOpacity(0.25),
           ),
           child: ShaderMask(
-            shaderCallback: (rect) {
+            shaderCallback: (Rect rect) {
               return LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Colors.grey.shade300,
-                  Colors.grey.shade100,
-                  Colors.grey.shade300,
+                  Colors.white.withOpacity(0.15),
+                  Colors.white.withOpacity(0.70),
+                  Colors.white.withOpacity(0.15),
                 ],
                 stops: [
-                  _shimmerController.value - 0.3,
-                  _shimmerController.value,
-                  _shimmerController.value + 0.3,
+                  (value - 0.3).clamp(0.0, 1.0),
+                  value.clamp(0.0, 1.0),
+                  (value + 0.3).clamp(0.0, 1.0),
                 ],
               ).createShader(rect);
             },
@@ -480,8 +926,9 @@ class _ShimmerContainerState extends State<ShimmerContainer>
               width: widget.width,
               height: widget.height,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(widget.radius),
-                color: Colors.grey[300],
+                borderRadius:
+                BorderRadius.circular(widget.radius),
+                color: Colors.white.withOpacity(0.30),
               ),
             ),
           ),

@@ -21,31 +21,65 @@ class SafetyandpolicyView extends StatelessWidget {
     final controller = Get.put(SafetyandpolicyController());
 
     return Scaffold(
-      backgroundColor: const Color(0xffF7F7F7),
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
+      extendBody: true,
       appBar: const CustomAppBar(
         title: "Safety & Child Protection Policy",
       ),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return _buildShimmerLoading();
-        }
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background image
+          Positioned.fill(
+            child: Image.asset(
+              "assets/images/LoginBack2.png",
+              fit: BoxFit.cover,
+            ),
+          ),
 
-        if (controller.errorMessage.value.isNotEmpty) {
-          return _buildErrorWidget(controller);
-        }
+          // White opacity overlay - NO BLUR
+          Positioned.fill(
+            child: Container(
+              color: Colors.white.withOpacity(0.70),
+            ),
+          ),
 
-        if (controller.safetyPolicyData.isEmpty) {
-          return _buildEmptyState();
-        }
+          // Content
+          Positioned.fill(
+            child: SafeArea(
+              child: Obx(() {
+                if (controller.isLoading.value) {
+                  return _buildShimmerLoading();
+                }
 
-        return _buildPolicyContent(controller);
-      }),
+                if (controller.errorMessage.value.isNotEmpty) {
+                  return _buildErrorWidget(controller);
+                }
+
+                if (controller.safetyPolicyData.isEmpty) {
+                  return _buildEmptyState();
+                }
+
+                return _buildPolicyContent(controller);
+              }),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
+  // ================= SHIMMER =================
+
   Widget _buildShimmerLoading() {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.fromLTRB(
+        16.w,
+        16.h,
+        16.w,
+        40.h,
+      ),
       child: Shimmer.fromColors(
         baseColor: Colors.grey.shade300,
         highlightColor: Colors.grey.shade100,
@@ -53,8 +87,8 @@ class SafetyandpolicyView extends StatelessWidget {
         child: Container(
           padding: EdgeInsets.all(20.w),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16.r),
+            color: Colors.white.withOpacity(0.90),
+            borderRadius: BorderRadius.circular(18.r),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -64,39 +98,52 @@ class SafetyandpolicyView extends StatelessWidget {
                 height: 20.h,
                 color: Colors.white,
               ),
+
               SizedBox(height: 12.h),
-              ...List.generate(6, (index) => 
-                Container(
+
+              ...List.generate(
+                6,
+                    (index) => Container(
                   width: double.infinity,
                   height: 14.h,
                   margin: EdgeInsets.only(bottom: 8.h),
                   color: Colors.white,
                 ),
               ),
+
               SizedBox(height: 22.h),
+
               Container(
                 width: 120.w,
                 height: 16.h,
                 color: Colors.white,
               ),
+
               SizedBox(height: 12.h),
-              ...List.generate(4, (index) => 
-                Container(
+
+              ...List.generate(
+                4,
+                    (index) => Container(
                   width: double.infinity,
                   height: 14.h,
                   margin: EdgeInsets.only(bottom: 8.h),
                   color: Colors.white,
                 ),
               ),
+
               SizedBox(height: 22.h),
+
               Container(
                 width: 100.w,
                 height: 16.h,
                 color: Colors.white,
               ),
+
               SizedBox(height: 12.h),
-              ...List.generate(3, (index) => 
-                Container(
+
+              ...List.generate(
+                3,
+                    (index) => Container(
                   width: double.infinity,
                   height: 14.h,
                   margin: EdgeInsets.only(bottom: 8.h),
@@ -110,90 +157,172 @@ class SafetyandpolicyView extends StatelessWidget {
     );
   }
 
-  Widget _buildErrorWidget(SafetyandpolicyController controller) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: 60.sp,
-            color: Colors.red.shade300,
-          ),
-          SizedBox(height: 16.h),
-          Text(
-            'Something went wrong',
-            style: GoogleFonts.poppins(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 32.w),
-            child: Text(
-              controller.errorMessage.value,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                fontSize: 14.sp,
-                color: Colors.grey.shade600,
-              ),
-            ),
-          ),
-          SizedBox(height: 20.h),
-          ElevatedButton(
-            onPressed: controller.retry,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xff6C63FF),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              padding: EdgeInsets.symmetric(
-                horizontal: 32.w,
-                vertical: 12.h,
-              ),
-            ),
-            child: Text(
-              'Retry',
-              style: GoogleFonts.poppins(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // ================= ERROR =================
 
-  Widget _buildEmptyState() {
+  Widget _buildErrorWidget(
+      SafetyandpolicyController controller,
+      ) {
     return Center(
-      child: Text(
-        'No safety policy data available',
-        style: GoogleFonts.poppins(
-          fontSize: 14.sp,
-          color: Colors.grey.shade600,
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(24.w),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.88),
+            borderRadius: BorderRadius.circular(18.r),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.75),
+              width: 0.6.w,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.error_outline,
+                size: 60.sp,
+                color: Colors.red.shade300,
+              ),
+
+              SizedBox(height: 16.h),
+
+              Text(
+                'Something went wrong',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+
+              SizedBox(height: 8.h),
+
+              Text(
+                controller.errorMessage.value,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 14.sp,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+
+              SizedBox(height: 20.h),
+
+              ElevatedButton(
+                onPressed: controller.retry,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xffFF6A00),
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 32.w,
+                    vertical: 12.h,
+                  ),
+                ),
+                child: Text(
+                  'Retry',
+                  style: GoogleFonts.poppins(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildPolicyContent(SafetyandpolicyController controller) {
-    // Show all items if multiple, or just the first one
+  // ================= EMPTY =================
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20.w),
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(24.w),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.88),
+            borderRadius: BorderRadius.circular(18.r),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.75),
+              width: 0.6.w,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.shield_outlined,
+                size: 60.sp,
+                color: Colors.grey.shade400,
+              ),
+
+              SizedBox(height: 16.h),
+
+              Text(
+                'No safety policy data available',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black87,
+                ),
+              ),
+
+              SizedBox(height: 8.h),
+
+              Text(
+                'Please check back later',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 14.sp,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ================= POLICY CONTENT =================
+
+  Widget _buildPolicyContent(
+      SafetyandpolicyController controller,
+      ) {
     final items = controller.safetyPolicyData;
-    
+
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.fromLTRB(
+        16.w,
+        16.h,
+        16.w,
+        40.h,
+      ),
       child: Container(
         padding: EdgeInsets.all(20.w),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16.r),
+          color: Colors.white.withOpacity(0.88),
+          borderRadius: BorderRadius.circular(18.r),
           border: Border.all(
-            color: Colors.grey.shade300,
-            width: 0.4.w,
+            color: Colors.white.withOpacity(0.75),
+            width: 0.6.w,
           ),
           boxShadow: [
             BoxShadow(
@@ -211,38 +340,50 @@ class SafetyandpolicyView extends StatelessWidget {
     );
   }
 
-  List<Widget> _buildPolicyItems(List<SafetyPolicyItem> items) {
+  // ================= POLICY ITEMS =================
+
+  List<Widget> _buildPolicyItems(
+      List<SafetyPolicyItem> items,
+      ) {
     final List<Widget> widgets = [];
 
     for (int i = 0; i < items.length; i++) {
       final item = items[i];
 
-      // Add title
       widgets.add(
         Padding(
-          padding: EdgeInsets.only(bottom: 12.h, top: i > 0 ? 24.h : 0),
+          padding: EdgeInsets.only(
+            bottom: 12.h,
+            top: i > 0 ? 24.h : 0,
+          ),
           child: Text(
-            item.title,
+            _cleanText(item.title),
             style: GoogleFonts.poppins(
               letterSpacing: 1.5.w,
-              fontSize: i == 0 ? 16.sp : 16.sp,
-              fontWeight: i == 0 ? FontWeight.w700 : FontWeight.w600,
-              color: Colors.black87,
+              fontSize: 16.sp,
+              fontWeight:
+              i == 0 ? FontWeight.w700 : FontWeight.w600,
+              color: const Color(0xff333333),
             ),
           ),
         ),
       );
 
-      // Parse and add content
-      widgets.addAll(_parseContent(item.content));
+      widgets.addAll(
+        _parseContent(item.content),
+      );
 
-      // Add divider between items
       if (i < items.length - 1) {
         widgets.add(
-          Divider(
-            height: 32.h,
-            color: Colors.grey.shade200,
-            thickness: 1,
+          Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: 8.h,
+            ),
+            child: Divider(
+              height: 24.h,
+              color: Colors.grey.shade200,
+              thickness: 1,
+            ),
           ),
         );
       }
@@ -251,55 +392,75 @@ class SafetyandpolicyView extends StatelessWidget {
     return widgets;
   }
 
+  // ================= PARSE CONTENT =================
+
   List<Widget> _parseContent(String content) {
     final List<Widget> widgets = [];
-    
-    // Split content by lines
+
     final lines = content.split('\n');
-    
+
     for (var line in lines) {
-      final trimmed = line.trim();
+      final trimmed = _cleanText(line);
+
       if (trimmed.isEmpty) continue;
 
-      // Check if it's a bullet point (starts with •, -, or number)
-      if (trimmed.startsWith('•') || 
-          trimmed.startsWith('-') || 
+      // Bullet / Number
+      if (trimmed.startsWith('•') ||
+          trimmed.startsWith('-') ||
           trimmed.startsWith('*') ||
           RegExp(r'^\d+\.').hasMatch(trimmed)) {
-        
-        // Remove bullet symbol
         String bulletText = trimmed;
-        if (trimmed.startsWith('•') || trimmed.startsWith('-') || trimmed.startsWith('*')) {
+
+        if (trimmed.startsWith('•') ||
+            trimmed.startsWith('-') ||
+            trimmed.startsWith('*')) {
           bulletText = trimmed.substring(1).trim();
         } else {
-          bulletText = trimmed.replaceFirst(RegExp(r'^\d+\.'), '').trim();
+          bulletText = trimmed
+              .replaceFirst(
+            RegExp(r'^\d+\.'),
+            '',
+          )
+              .trim();
         }
-        
-        widgets.add(_bullet(bulletText));
+
+        if (bulletText.isNotEmpty) {
+          widgets.add(
+            _bullet(bulletText),
+          );
+        }
       } else {
-        // Regular text
-        widgets.add(_text(trimmed));
-        widgets.add(SizedBox(height: 8.h));
+        widgets.add(
+          _text(trimmed),
+        );
+
+        widgets.add(
+          SizedBox(height: 4.h),
+        );
       }
     }
 
     return widgets;
   }
 
+  // ================= NORMAL TEXT =================
+
   Widget _text(String text) {
     return Padding(
       padding: EdgeInsets.only(bottom: 4.h),
       child: Text(
-        text,
+        _cleanText(text),
         style: GoogleFonts.poppins(
           fontSize: 13.sp,
           fontWeight: FontWeight.w400,
           height: 1.7,
-          color: Colors.grey.shade700,
+          color: const Color(0xff7A7A7A),
         ),
       ),
     );
   }
+
+  // ================= BULLET =================
 
   Widget _bullet(String text) {
     return Padding(
@@ -308,27 +469,72 @@ class SafetyandpolicyView extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: EdgeInsets.only(top: 6.h),
+            padding: EdgeInsets.only(top: 7.h),
             child: Icon(
               Icons.circle,
               size: 6.sp,
-              color: const Color(0xff6C63FF),
+              color: const Color(0xffFF6A00),
             ),
           ),
+
           SizedBox(width: 10.w),
+
           Expanded(
             child: Text(
-              text,
+              _cleanText(text),
               style: GoogleFonts.poppins(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w400,
                 height: 1.7,
-                color: Colors.grey.shade700,
+                color: const Color(0xff7A7A7A),
               ),
             ),
           ),
         ],
       ),
     );
+  }
+
+  // ================= CLEAN HTML =================
+
+  String _cleanText(String text) {
+    String cleaned = text;
+
+    // Remove HTML comments
+    cleaned = cleaned.replaceAll(
+      RegExp(
+        r'<!--.*?-->',
+        dotAll: true,
+      ),
+      '',
+    );
+
+    // Remove HTML tags
+    cleaned = cleaned.replaceAll(
+      RegExp(
+        r'<[^>]*>',
+        dotAll: true,
+      ),
+      ' ',
+    );
+
+    // Decode common HTML entities
+    cleaned = cleaned
+        .replaceAll('&nbsp;', ' ')
+        .replaceAll('&amp;', '&')
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAll('&quot;', '"')
+        .replaceAll('&#39;', "'")
+        .replaceAll('&#x27;', "'")
+        .replaceAll('&apos;', "'");
+
+    // Remove extra spaces
+    cleaned = cleaned.replaceAll(
+      RegExp(r'\s+'),
+      ' ',
+    );
+
+    return cleaned.trim();
   }
 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
+
 import '../../../custom_widget/custom_appbar.dart';
 import '../controllers/privacypolicy_controller.dart';
 
@@ -18,72 +19,320 @@ class PrivacypolicyView extends StatelessWidget {
       splitScreenMode: true,
     );
 
-    final controller = Get.put(PrivacypolicyController());
+    final controller = Get.put(
+      PrivacypolicyController(),
+    );
 
     return Scaffold(
-      backgroundColor: const Color(0xffF7F7F7),
-      appBar: const CustomAppBar(title: "Privacy Policy"),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return _buildShimmerLoading();
-        }
+      backgroundColor: Colors.transparent,
+      extendBodyBehindAppBar: true,
+      extendBody: true,
 
-        if (controller.errorMessage.value.isNotEmpty) {
-          return _buildErrorWidget(controller);
-        }
+      appBar: const CustomAppBar(
+        title: "Privacy Policy",
+      ),
 
-        if (controller.privacyPolicyData.isEmpty) {
-          return _buildEmptyState();
-        }
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // =========================================================
+          // BACKGROUND IMAGE
+          // =========================================================
+          Positioned.fill(
+            child: Image.asset(
+              "assets/images/LoginBack2.png",
+              fit: BoxFit.cover,
+            ),
+          ),
 
-        return _buildPolicyContent(controller);
-      }),
+          // =========================================================
+          // WHITE OPACITY OVERLAY
+          // NO BLUR
+          // =========================================================
+          Positioned.fill(
+            child: Container(
+              color: Colors.white.withOpacity(0.70),
+            ),
+          ),
+
+          // =========================================================
+          // CONTENT
+          // =========================================================
+          Positioned.fill(
+            child: SafeArea(
+              child: Obx(
+                    () {
+                  // -------------------------------------------------
+                  // LOADING
+                  // -------------------------------------------------
+                  if (controller.isLoading.value) {
+                    return _buildShimmerLoading();
+                  }
+
+                  // -------------------------------------------------
+                  // ERROR
+                  // -------------------------------------------------
+                  if (controller.errorMessage.value.isNotEmpty) {
+                    return _buildErrorWidget(controller);
+                  }
+
+                  // -------------------------------------------------
+                  // EMPTY
+                  // -------------------------------------------------
+                  if (controller.privacyPolicyData.isEmpty) {
+                    return _buildEmptyState();
+                  }
+
+                  // -------------------------------------------------
+                  // DATA
+                  // -------------------------------------------------
+                  return _buildPolicyContent(controller);
+                },
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
+  // =================================================================
+  // SHIMMER LOADING
+  // =================================================================
   Widget _buildShimmerLoading() {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16.w),
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(
+        16.w,
+        16.h,
+        16.w,
+        40.h,
+      ),
       child: Shimmer.fromColors(
         baseColor: Colors.grey.shade300,
         highlightColor: Colors.grey.shade100,
         enabled: true,
         child: Container(
+          width: double.infinity,
           padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Colors.white.withOpacity(0.88),
             borderRadius: BorderRadius.circular(16.r),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Title
               Container(
                 width: 160.w,
                 height: 24.h,
-                color: Colors.white,
-              ),
-              SizedBox(height: 12.h),
-              ...List.generate(8, (index) => 
-                Container(
-                  width: double.infinity,
-                  height: 14.h,
-                  margin: EdgeInsets.only(bottom: 8.h),
+                decoration: BoxDecoration(
                   color: Colors.white,
+                  borderRadius: BorderRadius.circular(6.r),
                 ),
               ),
+
+              SizedBox(height: 14.h),
+
+              // Paragraph
+              ...List.generate(
+                8,
+                    (index) {
+                  return Container(
+                    width: index == 7
+                        ? 220.w
+                        : double.infinity,
+                    height: 14.h,
+                    margin: EdgeInsets.only(
+                      bottom: 8.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius:
+                      BorderRadius.circular(5.r),
+                    ),
+                  );
+                },
+              ),
+
               SizedBox(height: 22.h),
+
+              // Heading
               Container(
                 width: 150.w,
-                height: 16.h,
-                color: Colors.white,
-              ),
-              SizedBox(height: 12.h),
-              ...List.generate(6, (index) => 
-                Container(
-                  width: double.infinity,
-                  height: 14.h,
-                  margin: EdgeInsets.only(bottom: 8.h),
+                height: 18.h,
+                decoration: BoxDecoration(
                   color: Colors.white,
+                  borderRadius:
+                  BorderRadius.circular(5.r),
+                ),
+              ),
+
+              SizedBox(height: 14.h),
+
+              // Paragraph
+              ...List.generate(
+                6,
+                    (index) {
+                  return Container(
+                    width: index == 5
+                        ? 200.w
+                        : double.infinity,
+                    height: 14.h,
+                    margin: EdgeInsets.only(
+                      bottom: 8.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius:
+                      BorderRadius.circular(5.r),
+                    ),
+                  );
+                },
+              ),
+
+              SizedBox(height: 22.h),
+
+              // Heading
+              Container(
+                width: 180.w,
+                height: 18.h,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius:
+                  BorderRadius.circular(5.r),
+                ),
+              ),
+
+              SizedBox(height: 14.h),
+
+              // Paragraph
+              ...List.generate(
+                5,
+                    (index) {
+                  return Container(
+                    width: index == 4
+                        ? 230.w
+                        : double.infinity,
+                    height: 14.h,
+                    margin: EdgeInsets.only(
+                      bottom: 8.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius:
+                      BorderRadius.circular(5.r),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // =================================================================
+  // ERROR WIDGET
+  // =================================================================
+  Widget _buildErrorWidget(
+      PrivacypolicyController controller,
+      ) {
+    return Center(
+      child: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(
+          horizontal: 24.w,
+        ),
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(
+            horizontal: 20.w,
+            vertical: 24.h,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.88),
+            borderRadius: BorderRadius.circular(18.r),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.8),
+              width: 0.6.w,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 12,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 60.w,
+                height: 60.w,
+                decoration: BoxDecoration(
+                  color: Colors.red.withOpacity(0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.error_outline,
+                  size: 34.sp,
+                  color: Colors.red.shade300,
+                ),
+              ),
+
+              SizedBox(height: 16.h),
+
+              Text(
+                'Something went wrong',
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+
+              SizedBox(height: 8.h),
+
+              Text(
+                controller.errorMessage.value,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.poppins(
+                  fontSize: 12.sp,
+                  height: 1.5,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+
+              SizedBox(height: 18.h),
+
+              SizedBox(
+                height: 44.h,
+                child: ElevatedButton(
+                  onPressed: controller.retry,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                    const Color(0xffFF6A00),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 32.w,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                      BorderRadius.circular(12.r),
+                    ),
+                  ),
+                  child: Text(
+                    'Retry',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -93,87 +342,65 @@ class PrivacypolicyView extends StatelessWidget {
     );
   }
 
-  Widget _buildErrorWidget(PrivacypolicyController controller) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.error_outline,
-            size: 60.sp,
-            color: Colors.red.shade300,
-          ),
-          SizedBox(height: 16.h),
-          Text(
-            'Something went wrong',
-            style: GoogleFonts.poppins(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 32.w),
-            child: Text(
-              controller.errorMessage.value,
-              textAlign: TextAlign.center,
-              style: GoogleFonts.poppins(
-                fontSize: 14.sp,
-                color: Colors.grey.shade600,
-              ),
-            ),
-          ),
-          SizedBox(height: 16.h),
-          ElevatedButton(
-            onPressed: controller.retry,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xff6C63FF),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              padding: EdgeInsets.symmetric(
-                horizontal: 32.w,
-                vertical: 12.h,
-              ),
-            ),
-            child: Text(
-              'Retry',
-              style: GoogleFonts.poppins(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
+  // =================================================================
+  // EMPTY STATE
+  // =================================================================
   Widget _buildEmptyState() {
     return Center(
-      child: Text(
-        'No privacy policy data available',
-        style: GoogleFonts.poppins(
-          fontSize: 14.sp,
-          color: Colors.grey.shade600,
+      child: Padding(
+        padding: EdgeInsets.symmetric(
+          horizontal: 24.w,
+        ),
+        child: Container(
+          width: double.infinity,
+          padding: EdgeInsets.symmetric(
+            horizontal: 20.w,
+            vertical: 22.h,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.88),
+            borderRadius: BorderRadius.circular(16.r),
+            border: Border.all(
+              color: Colors.white.withOpacity(0.8),
+              width: 0.6.w,
+            ),
+          ),
+          child: Text(
+            'No privacy policy data available',
+            textAlign: TextAlign.center,
+            style: GoogleFonts.poppins(
+              fontSize: 13.sp,
+              color: Colors.grey.shade600,
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildPolicyContent(PrivacypolicyController controller) {
+  // =================================================================
+  // POLICY CONTENT
+  // =================================================================
+  Widget _buildPolicyContent(
+      PrivacypolicyController controller,
+      ) {
     return SingleChildScrollView(
-      padding: EdgeInsets.all(16.w),
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.fromLTRB(
+        16.w,
+        16.h,
+        16.w,
+        40.h,
+      ),
       child: Container(
+        width: double.infinity,
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white.withOpacity(0.88),
           borderRadius: BorderRadius.circular(16.r),
           border: Border.all(
-            color: Colors.grey.shade300,
-            width: 0.4.w,
+            color: Colors.white.withOpacity(0.8),
+            width: 0.6.w,
           ),
           boxShadow: [
             BoxShadow(
@@ -184,45 +411,72 @@ class PrivacypolicyView extends StatelessWidget {
           ],
         ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: _buildPolicyItems(controller.privacyPolicyData),
+          crossAxisAlignment:
+          CrossAxisAlignment.start,
+          children: _buildPolicyItems(
+            controller.privacyPolicyData,
+          ),
         ),
       ),
     );
   }
 
-  List<Widget> _buildPolicyItems(List<PrivacyPolicyItem> items) {
+  // =================================================================
+  // POLICY ITEMS
+  // =================================================================
+  List<Widget> _buildPolicyItems(
+      List<PrivacyPolicyItem> items,
+      ) {
     final List<Widget> widgets = [];
 
     for (int i = 0; i < items.length; i++) {
       final item = items[i];
-      
-      // Add title for each item
+
+      // -------------------------------------------------------------
+      // TITLE
+      // -------------------------------------------------------------
       widgets.add(
         Padding(
-          padding: EdgeInsets.only(bottom: 12.h, top: i > 0 ? 24.h : 0),
+          padding: EdgeInsets.only(
+            bottom: 12.h,
+            top: i > 0 ? 24.h : 0,
+          ),
           child: Text(
-            item.title.trim(),
+            _cleanText(item.title),
             style: GoogleFonts.poppins(
-              letterSpacing: 1.5.w,
-              fontSize: i == 0 ? 16.sp : 16.sp,
-              fontWeight: i == 0 ? FontWeight.w700 : FontWeight.w600,
+              letterSpacing: 1.0.w,
+              fontSize: 16.sp,
+              fontWeight: i == 0
+                  ? FontWeight.w700
+                  : FontWeight.w600,
               color: Colors.black87,
+              height: 1.5,
             ),
           ),
         ),
       );
 
-      // Parse HTML content in order - preserves exact sequence
-      widgets.addAll(_parseHtmlInOrder(item.content));
+      // -------------------------------------------------------------
+      // CONTENT
+      // -------------------------------------------------------------
+      widgets.addAll(
+        _parseHtmlInOrder(item.content),
+      );
 
-      // Add divider between items (except after the last one)
+      // -------------------------------------------------------------
+      // DIVIDER
+      // -------------------------------------------------------------
       if (i < items.length - 1) {
         widgets.add(
-          Divider(
-            height: 32.h,
-            color: Colors.grey.shade200,
-            thickness: 1,
+          Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: 4.h,
+            ),
+            child: Divider(
+              height: 32.h,
+              color: Colors.grey.shade200,
+              thickness: 1,
+            ),
           ),
         );
       }
@@ -231,106 +485,187 @@ class PrivacypolicyView extends StatelessWidget {
     return widgets;
   }
 
-  // Parse HTML content and maintain exact order as in the API response
-  List<Widget> _parseHtmlInOrder(String html) {
+  // =================================================================
+  // HTML PARSER
+  // =================================================================
+  List<Widget> _parseHtmlInOrder(
+      String html,
+      ) {
     final List<Widget> widgets = [];
-    String content = html;
 
-    // Find all HTML tags in order
-    final tagRegex = RegExp(r'<(/?)([a-zA-Z0-9]+)[^>]*>');
-    final textRegex = RegExp(r'[^<]+');
-    
-    // Process the HTML sequentially
-    int position = 0;
-    String currentText = '';
-    
-    // First, extract all matches in order
-    final List<Map<String, dynamic>> elements = [];
-    
-    // Find all tags and text in order
-    while (position < content.length) {
-      // Check for text before next tag
-      final textMatch = textRegex.matchAsPrefix(content, position);
-      if (textMatch != null && textMatch.group(0)!.isNotEmpty) {
-        final text = textMatch.group(0)!.trim();
-        if (text.isNotEmpty) {
-          elements.add({
-            'type': 'text',
-            'content': text,
-          });
-        }
-        position = textMatch.end;
-        continue;
-      }
-      
-      // Check for tag
-      final tagMatch = tagRegex.matchAsPrefix(content, position);
-      if (tagMatch != null) {
-        final isClosing = tagMatch.group(1) == '/';
-        final tagName = tagMatch.group(2)?.toLowerCase() ?? '';
-        
-        // Get full tag content including attributes
-        final fullTag = tagMatch.group(0) ?? '';
-        
-        // Extract content between tags if it's an opening tag
-        if (!isClosing) {
-          // Find closing tag
-          final closingTag = '</$tagName>';
-          final startPos = tagMatch.end;
-          final endPos = content.indexOf(closingTag, startPos);
-          
-          if (endPos != -1) {
-            final innerContent = content.substring(startPos, endPos).trim();
-            elements.add({
-              'type': 'tag',
-              'tag': tagName,
-              'content': innerContent,
-              'fullTag': fullTag,
-              'isClosing': false,
-            });
-            position = endPos + closingTag.length;
-            continue;
-          }
-        }
-        
-        // Skip other tags (like closing tags or self-closing)
-        position = tagMatch.end;
-        continue;
-      }
-      
-      // If no match, move forward
-      position++;
+    if (html.trim().isEmpty) {
+      return widgets;
     }
 
-    // Now process all elements in order
-    bool isInList = false;
-    List<String> listItems = [];
-    
-    for (var element in elements) {
-      if (element['type'] == 'tag') {
-        final tag = element['tag'] as String;
-        final content = element['content'] as String;
-        
-        if (tag == 'ul') {
-          // Start of a list - collect list items
-          isInList = true;
-          listItems = [];
-        } else if (tag == 'li' && isInList) {
-          // Add list item
-          listItems.add(_cleanText(content));
-        } else if (tag == 'h1') {
-          // If we were in a list, render it first
-          if (isInList && listItems.isNotEmpty) {
-            widgets.addAll(_renderListItems(listItems));
-            isInList = false;
-            listItems = [];
-          }
-          // Add heading
+    String content = html;
+
+    // ---------------------------------------------------------------
+    // Remove script/style blocks completely
+    // ---------------------------------------------------------------
+    content = content.replaceAll(
+      RegExp(
+        r'<(script|style)[^>]*>.*?</\1>',
+        dotAll: true,
+        caseSensitive: false,
+      ),
+      '',
+    );
+
+    // ---------------------------------------------------------------
+    // UL LIST
+    // ---------------------------------------------------------------
+    final ulRegex = RegExp(
+      r'<ul[^>]*>(.*?)</ul>',
+      dotAll: true,
+      caseSensitive: false,
+    );
+
+    final processedUlRanges = <List<int>>[];
+
+    for (final ulMatch
+    in ulRegex.allMatches(content)) {
+      final ulContent =
+          ulMatch.group(1) ?? '';
+
+      final liRegex = RegExp(
+        r'<li[^>]*>(.*?)</li>',
+        dotAll: true,
+        caseSensitive: false,
+      );
+
+      final listItems = <String>[];
+
+      for (final liMatch
+      in liRegex.allMatches(ulContent)) {
+        listItems.add(
+          _cleanText(
+            liMatch.group(1) ?? '',
+          ),
+        );
+      }
+
+      if (listItems.isNotEmpty) {
+        widgets.addAll(
+          _renderListItems(listItems),
+        );
+      }
+
+      processedUlRanges.add([
+        ulMatch.start,
+        ulMatch.end,
+      ]);
+    }
+
+    // ---------------------------------------------------------------
+    // Remove UL blocks from normal content
+    // ---------------------------------------------------------------
+    content = content.replaceAll(
+      RegExp(
+        r'<ul[^>]*>.*?</ul>',
+        dotAll: true,
+        caseSensitive: false,
+      ),
+      '',
+    );
+
+    // ---------------------------------------------------------------
+    // BLOCK TAGS
+    // ---------------------------------------------------------------
+    final blockRegex = RegExp(
+      r'<(h1|h2|h3|h4|p|div|br)[^>]*>(.*?)</\1>',
+      dotAll: true,
+      caseSensitive: false,
+    );
+
+    final matches =
+    blockRegex.allMatches(content).toList();
+
+    if (matches.isEmpty) {
+      final cleaned = _cleanText(content);
+
+      if (cleaned.isNotEmpty) {
+        widgets.add(
+          Padding(
+            padding: EdgeInsets.only(
+              bottom: 12.h,
+            ),
+            child: RichText(
+              text: TextSpan(
+                style: GoogleFonts.poppins(
+                  fontSize: 14.sp,
+                  height: 1.8,
+                  color: Colors.grey.shade700,
+                ),
+                children:
+                _processBoldText(content),
+              ),
+            ),
+          ),
+        );
+      }
+
+      return widgets;
+    }
+
+    int lastPosition = 0;
+
+    for (final match in matches) {
+      // -------------------------------------------------------------
+      // Text before tag
+      // -------------------------------------------------------------
+      if (match.start > lastPosition) {
+        final before = content.substring(
+          lastPosition,
+          match.start,
+        );
+
+        final cleanedBefore =
+        _cleanText(before);
+
+        if (cleanedBefore.isNotEmpty) {
           widgets.add(
             Padding(
-              padding: EdgeInsets.only(top: 0.h, bottom: 8.h),
+              padding: EdgeInsets.only(
+                bottom: 12.h,
+              ),
+              child: RichText(
+                text: TextSpan(
+                  style: GoogleFonts.poppins(
+                    fontSize: 14.sp,
+                    height: 1.8,
+                    color: Colors.grey.shade700,
+                  ),
+                  children:
+                  _processBoldText(before),
+                ),
+              ),
+            ),
+          );
+        }
+      }
+
+      final tag =
+          match.group(1)?.toLowerCase() ?? '';
+
+      final inner =
+          match.group(2) ?? '';
+
+      final cleaned =
+      _cleanText(inner);
+
+      if (cleaned.isNotEmpty) {
+        // -----------------------------------------------------------
+        // H1
+        // -----------------------------------------------------------
+        if (tag == 'h1') {
+          widgets.add(
+            Padding(
+              padding: EdgeInsets.only(
+                top: 4.h,
+                bottom: 8.h,
+              ),
               child: Text(
-                _cleanText(content),
+                cleaned,
                 style: GoogleFonts.poppins(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.w700,
@@ -340,145 +675,210 @@ class PrivacypolicyView extends StatelessWidget {
               ),
             ),
           );
-        } else if (tag == 'h2') {
-          // If we were in a list, render it first
-          if (isInList && listItems.isNotEmpty) {
-            widgets.addAll(_renderListItems(listItems));
-            isInList = false;
-            listItems = [];
-          }
-          // Add subheading
-          widgets.add(
-            Padding(
-              padding: EdgeInsets.only(top: 16.h, bottom: 8.h),
-              child: Text(
-                _cleanText(content),
-                style: GoogleFonts.poppins(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                  height: 1.5,
-                ),
-              ),
-            ),
-          );
-        } else if (tag == 'h3') {
-          if (isInList && listItems.isNotEmpty) {
-            widgets.addAll(_renderListItems(listItems));
-            isInList = false;
-            listItems = [];
-          }
-          widgets.add(
-            Padding(
-              padding: EdgeInsets.only(top: 14.h, bottom: 6.h),
-              child: Text(
-                _cleanText(content),
-                style: GoogleFonts.poppins(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                  height: 1.5,
-                ),
-              ),
-            ),
-          );
-        } else if (tag == 'h4') {
-          if (isInList && listItems.isNotEmpty) {
-            widgets.addAll(_renderListItems(listItems));
-            isInList = false;
-            listItems = [];
-          }
-          widgets.add(
-            Padding(
-              padding: EdgeInsets.only(top: 12.h, bottom: 6.h),
-              child: Text(
-                _cleanText(content),
-                style: GoogleFonts.poppins(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                  height: 1.5,
-                ),
-              ),
-            ),
-          );
-        } else if (tag == 'p') {
-          // If we were in a list, render it first
-          if (isInList && listItems.isNotEmpty) {
-            widgets.addAll(_renderListItems(listItems));
-            isInList = false;
-            listItems = [];
-          }
-          // Add paragraph with bold text support
-          final processedText = _processBoldText(content);
-          if (processedText.isNotEmpty) {
-            widgets.add(
-              Padding(
-                padding: EdgeInsets.only(bottom: 12.h),
-                child: RichText(
-                  text: TextSpan(
-                    style: GoogleFonts.poppins(
-                      fontSize: 14.sp,
-                      height: 1.8,
-                      color: Colors.grey.shade700,
-                    ),
-                    children: processedText,
-                  ),
-                ),
-              ),
-            );
-          }
         }
-      } else if (element['type'] == 'text') {
-        // Plain text outside of any tag (should be minimal)
-        final text = element['content'] as String;
-        if (text.isNotEmpty && !isInList) {
+
+        // -----------------------------------------------------------
+        // H2
+        // -----------------------------------------------------------
+        else if (tag == 'h2') {
           widgets.add(
             Padding(
-              padding: EdgeInsets.only(bottom: 12.h),
+              padding: EdgeInsets.only(
+                top: 16.h,
+                bottom: 8.h,
+              ),
               child: Text(
-                _cleanText(text),
+                cleaned,
                 style: GoogleFonts.poppins(
-                  fontSize: 14.sp,
-                  height: 1.8,
-                  color: Colors.grey.shade700,
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          );
+        }
+
+        // -----------------------------------------------------------
+        // H3
+        // -----------------------------------------------------------
+        else if (tag == 'h3') {
+          widgets.add(
+            Padding(
+              padding: EdgeInsets.only(
+                top: 14.h,
+                bottom: 6.h,
+              ),
+              child: Text(
+                cleaned,
+                style: GoogleFonts.poppins(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          );
+        }
+
+        // -----------------------------------------------------------
+        // H4
+        // -----------------------------------------------------------
+        else if (tag == 'h4') {
+          widgets.add(
+            Padding(
+              padding: EdgeInsets.only(
+                top: 12.h,
+                bottom: 6.h,
+              ),
+              child: Text(
+                cleaned,
+                style: GoogleFonts.poppins(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                  height: 1.5,
+                ),
+              ),
+            ),
+          );
+        }
+
+        // -----------------------------------------------------------
+        // P
+        // -----------------------------------------------------------
+        else if (tag == 'p') {
+          widgets.add(
+            Padding(
+              padding: EdgeInsets.only(
+                bottom: 12.h,
+              ),
+              child: RichText(
+                text: TextSpan(
+                  style: GoogleFonts.poppins(
+                    fontSize: 14.sp,
+                    height: 1.8,
+                    color: Colors.grey.shade700,
+                  ),
+                  children:
+                  _processBoldText(inner),
+                ),
+              ),
+            ),
+          );
+        }
+
+        // -----------------------------------------------------------
+        // DIV
+        // -----------------------------------------------------------
+        else if (tag == 'div') {
+          widgets.add(
+            Padding(
+              padding: EdgeInsets.only(
+                bottom: 10.h,
+              ),
+              child: RichText(
+                text: TextSpan(
+                  style: GoogleFonts.poppins(
+                    fontSize: 14.sp,
+                    height: 1.8,
+                    color: Colors.grey.shade700,
+                  ),
+                  children:
+                  _processBoldText(inner),
                 ),
               ),
             ),
           );
         }
       }
+
+      lastPosition = match.end;
     }
-    
-    // If there are remaining list items, render them
-    if (isInList && listItems.isNotEmpty) {
-      widgets.addAll(_renderListItems(listItems));
+
+    // ---------------------------------------------------------------
+    // Remaining content
+    // ---------------------------------------------------------------
+    if (lastPosition < content.length) {
+      final remaining =
+      content.substring(lastPosition);
+
+      final cleanedRemaining =
+      _cleanText(remaining);
+
+      if (cleanedRemaining.isNotEmpty) {
+        widgets.add(
+          Padding(
+            padding: EdgeInsets.only(
+              bottom: 12.h,
+            ),
+            child: RichText(
+              text: TextSpan(
+                style: GoogleFonts.poppins(
+                  fontSize: 14.sp,
+                  height: 1.8,
+                  color: Colors.grey.shade700,
+                ),
+                children:
+                _processBoldText(remaining),
+              ),
+            ),
+          ),
+        );
+      }
     }
 
     return widgets;
   }
 
-  // Render list items with bullet points
-  List<Widget> _renderListItems(List<String> items) {
+  // =================================================================
+  // LIST ITEMS
+  // =================================================================
+  List<Widget> _renderListItems(
+      List<String> items,
+      ) {
     final List<Widget> widgets = [];
-    
-    for (var item in items) {
-      final processedItem = _processBoldText(item);
+
+    for (final item in items) {
+      final cleanedItem =
+      _cleanText(item);
+
+      if (cleanedItem.isEmpty) {
+        continue;
+      }
+
       widgets.add(
         Padding(
-          padding: EdgeInsets.only(bottom: 8.h, left: 16.w),
+          padding: EdgeInsets.only(
+            bottom: 8.h,
+            left: 10.w,
+          ),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment:
+            CrossAxisAlignment.start,
             children: [
-              Text(
-                '• ',
-                style: GoogleFonts.poppins(
-                  fontSize: 14.sp,
-                  height: 1.8,
-                  color: const Color(0xff6C63FF),
-                  fontWeight: FontWeight.bold,
+              Padding(
+                padding: EdgeInsets.only(
+                  top: 1.h,
+                ),
+                child: Text(
+                  '•',
+                  style: GoogleFonts.poppins(
+                    fontSize: 15.sp,
+                    height: 1.8,
+                    color: const Color(
+                      0xffFF6A00,
+                    ),
+                    fontWeight:
+                    FontWeight.bold,
+                  ),
                 ),
               ),
+
+              SizedBox(width: 8.w),
+
               Expanded(
                 child: RichText(
                   text: TextSpan(
@@ -487,7 +887,8 @@ class PrivacypolicyView extends StatelessWidget {
                       height: 1.8,
                       color: Colors.grey.shade700,
                     ),
-                    children: processedItem,
+                    children:
+                    _processBoldText(item),
                   ),
                 ),
               ),
@@ -496,79 +897,185 @@ class PrivacypolicyView extends StatelessWidget {
         ),
       );
     }
-    
+
     return widgets;
   }
 
-  // Process bold/strong tags in text
-  List<TextSpan> _processBoldText(String text) {
+  // =================================================================
+  // BOLD TEXT
+  // =================================================================
+  List<TextSpan> _processBoldText(
+      String text,
+      ) {
     final List<TextSpan> spans = [];
-    final boldRegex = RegExp(r'<(?:strong|b)>(.*?)</(?:strong|b)>', dotAll: true);
-    
+
+    final boldRegex = RegExp(
+      r'<(?:strong|b)[^>]*>(.*?)</(?:strong|b)>',
+      dotAll: true,
+      caseSensitive: false,
+    );
+
     int position = 0;
-    final matches = boldRegex.allMatches(text);
-    
+
+    final matches =
+    boldRegex.allMatches(text).toList();
+
     if (matches.isEmpty) {
-      // No bold text, return plain text
+      final cleaned = _cleanText(text);
+
+      if (cleaned.isEmpty) {
+        return [];
+      }
+
       return [
         TextSpan(
-          text: _cleanText(text),
+          text: cleaned,
         ),
       ];
     }
-    
-    for (var match in matches) {
-      // Add text before bold
+
+    for (final match in matches) {
+      // -------------------------------------------------------------
+      // Normal text before bold
+      // -------------------------------------------------------------
       if (match.start > position) {
-        final beforeText = text.substring(position, match.start);
-        if (beforeText.isNotEmpty) {
+        final beforeText =
+        text.substring(
+          position,
+          match.start,
+        );
+
+        final cleanedBefore =
+        _cleanText(beforeText);
+
+        if (cleanedBefore.isNotEmpty) {
           spans.add(
             TextSpan(
-              text: _cleanText(beforeText),
+              text: cleanedBefore,
             ),
           );
         }
       }
-      
-      // Add bold text
-      final boldText = match.group(1)?.trim() ?? '';
-      spans.add(
-        TextSpan(
-          text: _cleanText(boldText),
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Colors.black87,
-          ),
-        ),
-      );
-      
-      position = match.end;
-    }
-    
-    // Add remaining text
-    if (position < text.length) {
-      final afterText = text.substring(position);
-      if (afterText.isNotEmpty) {
+
+      // -------------------------------------------------------------
+      // Bold text
+      // -------------------------------------------------------------
+      final boldText =
+          match.group(1) ?? '';
+
+      final cleanedBold =
+      _cleanText(boldText);
+
+      if (cleanedBold.isNotEmpty) {
         spans.add(
           TextSpan(
-            text: _cleanText(afterText),
+            text: cleanedBold,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+        );
+      }
+
+      position = match.end;
+    }
+
+    // -------------------------------------------------------------
+    // Text after bold
+    // -------------------------------------------------------------
+    if (position < text.length) {
+      final afterText =
+      text.substring(position);
+
+      final cleanedAfter =
+      _cleanText(afterText);
+
+      if (cleanedAfter.isNotEmpty) {
+        spans.add(
+          TextSpan(
+            text: cleanedAfter,
           ),
         );
       }
     }
-    
+
     return spans;
   }
 
+  // =================================================================
+  // CLEAN HTML
+  // =================================================================
   String _cleanText(String text) {
-    return text
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .replaceAll('&nbsp;', ' ')
-        .replaceAll('&amp;', '&')
-        .replaceAll('&lt;', '<')
-        .replaceAll('&gt;', '>')
-        .replaceAll('&quot;', '"')
-        .replaceAll('&#39;', "'")
-        .trim();
+    String cleaned = text;
+
+    // ---------------------------------------------------------------
+    // Remove ALL HTML tags
+    // ---------------------------------------------------------------
+    cleaned = cleaned.replaceAll(
+      RegExp(
+        r'<[^>]*>',
+        dotAll: true,
+      ),
+      ' ',
+    );
+
+    // ---------------------------------------------------------------
+    // Decode HTML entities
+    // ---------------------------------------------------------------
+    cleaned = cleaned
+        .replaceAll(
+      '&nbsp;',
+      ' ',
+    )
+        .replaceAll(
+      '&amp;',
+      '&',
+    )
+        .replaceAll(
+      '&lt;',
+      '<',
+    )
+        .replaceAll(
+      '&gt;',
+      '>',
+    )
+        .replaceAll(
+      '&quot;',
+      '"',
+    )
+        .replaceAll(
+      '&#39;',
+      "'",
+    )
+        .replaceAll(
+      '&#x27;',
+      "'",
+    )
+        .replaceAll(
+      '&apos;',
+      "'",
+    );
+
+    // ---------------------------------------------------------------
+    // Remove HTML comments
+    // ---------------------------------------------------------------
+    cleaned = cleaned.replaceAll(
+      RegExp(
+        r'<!--.*?-->',
+        dotAll: true,
+      ),
+      '',
+    );
+
+    // ---------------------------------------------------------------
+    // Multiple spaces
+    // ---------------------------------------------------------------
+    cleaned = cleaned.replaceAll(
+      RegExp(r'\s+'),
+      ' ',
+    );
+
+    return cleaned.trim();
   }
 }

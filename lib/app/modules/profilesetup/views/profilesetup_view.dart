@@ -11,6 +11,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../custom_widget/custom_appbar.dart';
+import '../../../custom_widget/custom_button.dart';
 import '../controllers/profilesetup_controller.dart';
 
 // ============================================================
@@ -1316,122 +1317,19 @@ class _ProfilesetupViewState
                 // CONTINUE BUTTON
                 // ==================================================
 
-                SizedBox(
-                  width:
-                  double.infinity,
-                  height:
-                  43.h,
-                  child:
-                  Container(
-                    decoration:
-                    BoxDecoration(
-                      gradient:
-                      const LinearGradient(
-                        begin:
-                        Alignment
-                            .centerLeft,
-                        end:
-                        Alignment
-                            .centerRight,
-                        colors: [
-                          orange,
-                          orange,
-                          orangeLight,
-                        ],
-                        stops: [
-                          0.0,
-                          0.72,
-                          1.0,
-                        ],
-                      ),
-                      borderRadius:
-                      BorderRadius
-                          .circular(
-                        30.r,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: orange
-                              .withOpacity(
-                            0.22,
-                          ),
-                          blurRadius:
-                          12,
-                          offset:
-                          const Offset(
-                            0,
-                            5,
-                          ),
-                        ),
-                      ],
-                    ),
-                    child:
-                    ElevatedButton(
-                      onPressed:
-                      isLoading ||
-                          !hasMinimumPhotos
-                          ? null
-                          : continueToTellmeabout,
-                      style:
-                      ElevatedButton
-                          .styleFrom(
-                        backgroundColor:
-                        Colors
-                            .transparent,
-                        disabledBackgroundColor:
-                        Colors
-                            .transparent,
-                        shadowColor:
-                        Colors
-                            .transparent,
-                        elevation: 0,
-                        padding:
-                        EdgeInsets
-                            .zero,
-                        shape:
-                        RoundedRectangleBorder(
-                          borderRadius:
-                          BorderRadius
-                              .circular(
-                            30.r,
-                          ),
-                        ),
-                      ),
-                      child:
-                 Row(
-                        mainAxisAlignment:
-                        MainAxisAlignment
-                            .center,
-                        children: [
-                          Text(
-                            "Continue",
-                            style:
-                            poppins(
-                              size:
-                              11,
-                              weight:
-                              FontWeight
-                                  .w600,
-                              color:
-                              Colors.white,
-                            ),
-                          ),
-                          SizedBox(
-                            width:
-                            9.w,
-                          ),
-                          Icon(
-                            Icons
-                                .arrow_forward_rounded,
-                            color:
-                            Colors.white,
-                            size:
-                            16.sp,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                CustomButton(
+                  text: "Continue",
+                  onPressed: continueToTellmeabout,
+                  height: 43,
+                  borderRadius: 30,
+                  backgroundColor: orange,
+                  textColor: Colors.white,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0,
+                  isLoading: isLoading,
+                  enabled: hasMinimumPhotos,
+                  showArrow: true,
                 ),
 
 

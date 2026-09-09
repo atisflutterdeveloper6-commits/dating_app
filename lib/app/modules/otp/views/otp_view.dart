@@ -570,7 +570,7 @@ SizedBox(height: 60.h,),
                                 // ==================================================
 
                                 Expanded(
-                                  flex: 50,
+                                  flex: 40,
 
                                   child: Padding(
                                     padding:
@@ -584,7 +584,7 @@ SizedBox(height: 60.h,),
                                     ),
 
                                     child: Image.asset(
-                                      'assets/images/loginback.jpeg',
+                                      'assets/images/loginback.png',
 
                                       height:
                                       isKeyboardOpen

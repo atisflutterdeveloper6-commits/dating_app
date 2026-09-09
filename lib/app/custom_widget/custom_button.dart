@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
@@ -13,8 +14,6 @@ class CustomButton extends StatelessWidget {
   final Widget? prefixIcon;
   final bool isLoading;
 
-  /// New, optional — defaults keep old buttons visually similar
-  /// while enabling the gradient look used across the app.
   final bool enabled;
   final bool showArrow;
   final Widget? suffixIcon;
@@ -28,8 +27,8 @@ class CustomButton extends StatelessWidget {
     this.height = 50,
     this.borderRadius = 35,
     this.fontSize = 14,
-    this.fontWeight = FontWeight.bold,
-    this.letterSpacing = 1.5,
+    this.fontWeight = FontWeight.w600,
+    this.letterSpacing = 0,
     this.prefixIcon,
     this.isLoading = false,
     this.enabled = true,
@@ -41,7 +40,6 @@ class CustomButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final bool isDisabled = isLoading || !enabled;
 
-    // Lighter shade of backgroundColor for the gradient's tail end.
     final Color lightShade = Color.lerp(
       backgroundColor,
       Colors.white,
@@ -50,7 +48,7 @@ class CustomButton extends StatelessWidget {
 
     return SizedBox(
       width: double.infinity,
-      height: height,
+      height: height.h,
       child: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -68,14 +66,14 @@ class CustomButton extends StatelessWidget {
             ],
             stops: isDisabled ? null : const [0.0, 0.72, 1.0],
           ),
-          borderRadius: BorderRadius.circular(borderRadius),
+          borderRadius: BorderRadius.circular(borderRadius.r),
           boxShadow: isDisabled
               ? []
               : [
             BoxShadow(
               color: backgroundColor.withOpacity(0.22),
-              blurRadius: 12,
-              offset: const Offset(0, 5),
+              blurRadius: 12.r,
+              offset: Offset(0, 5.h),
             ),
           ],
         ),
@@ -86,44 +84,48 @@ class CustomButton extends StatelessWidget {
             disabledBackgroundColor: Colors.transparent,
             shadowColor: Colors.transparent,
             elevation: 0,
+            padding: EdgeInsets.zero,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(borderRadius),
+              borderRadius: BorderRadius.circular(borderRadius.r),
             ),
           ),
           child: isLoading
-              ? const SizedBox(
-            width: 22,
-            height: 22,
+              ? SizedBox(
+            width: 22.w,
+            height: 22.h,
             child: CircularProgressIndicator(
-              strokeWidth: 2,
+              strokeWidth: 2.w,
               color: Colors.white,
             ),
           )
               : Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
             children: [
               if (prefixIcon != null) ...[
                 prefixIcon!,
-                const SizedBox(width: 8),
+                SizedBox(width: 8.w),
               ],
+
               Text(
                 text,
                 style: TextStyle(
                   color: textColor,
-                  fontSize: fontSize,
+                  fontSize: 14.sp,
                   fontWeight: fontWeight,
                   letterSpacing: letterSpacing,
                 ),
               ),
+
               if (suffixIcon != null) ...[
-                const SizedBox(width: 9),
+                SizedBox(width: 9.w),
                 suffixIcon!,
               ] else if (showArrow) ...[
-                const SizedBox(width: 9),
+                SizedBox(width: 9.w),
                 Icon(
                   Icons.arrow_forward_rounded,
                   color: textColor,
-                  size: 16,
+                  size: 16.sp,
                 ),
               ],
             ],

@@ -756,7 +756,7 @@ screenHeight *
 
 child:
 Image.asset(
-'assets/images/loginback.jpeg',
+'assets/images/loginback.png',
 
 height:
 isKeyboardOpen
