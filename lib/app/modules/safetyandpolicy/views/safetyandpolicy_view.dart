@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
+
 import '../../../custom_widget/custom_appbar.dart';
 import '../controllers/safetyandpolicy_controller.dart';
 
@@ -24,13 +25,15 @@ class SafetyandpolicyView extends StatelessWidget {
       backgroundColor: Colors.transparent,
       extendBodyBehindAppBar: true,
       extendBody: true,
+
       appBar: const CustomAppBar(
         title: "Safety & Child Protection Policy",
+        subtitle: "Please read the policy carefully",
       ),
+
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Background image
           Positioned.fill(
             child: Image.asset(
               "assets/images/LoginBack2.png",
@@ -38,35 +41,51 @@ class SafetyandpolicyView extends StatelessWidget {
             ),
           ),
 
-          // White opacity overlay - NO BLUR
           Positioned.fill(
             child: Container(
               color: Colors.white.withOpacity(0.70),
             ),
           ),
 
-          // Content
           Positioned.fill(
-            child: SafeArea(
-              child: Obx(() {
-                if (controller.isLoading.value) {
-                  return _buildShimmerLoading();
-                }
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return _buildShimmerLoading();
+              }
 
-                if (controller.errorMessage.value.isNotEmpty) {
-                  return _buildErrorWidget(controller);
-                }
+              if (controller.errorMessage.value.isNotEmpty) {
+                return _buildErrorWidget(controller);
+              }
 
-                if (controller.safetyPolicyData.isEmpty) {
-                  return _buildEmptyState();
-                }
+              if (controller.safetyPolicyData.isEmpty) {
+                return _buildEmptyState();
+              }
 
-                return _buildPolicyContent(controller);
-              }),
-            ),
+              return _buildPolicyContent(controller);
+            }),
           ),
         ],
       ),
+    );
+  }
+
+  // ================= CONTAINER DECORATION =================
+
+  BoxDecoration _mainContainerDecoration() {
+    return BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14.r),
+      border: Border.all(
+        color: const Color(0xFFF1E8E4),
+        width: 0.8.w,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.035),
+          blurRadius: 12.r,
+          offset: Offset(0, 3.h),
+        ),
+      ],
     );
   }
 
@@ -74,29 +93,36 @@ class SafetyandpolicyView extends StatelessWidget {
 
   Widget _buildShimmerLoading() {
     return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
       padding: EdgeInsets.fromLTRB(
         16.w,
-        16.h,
+        120.h,
         16.w,
-        40.h,
+        90.h,
       ),
-      child: Shimmer.fromColors(
-        baseColor: Colors.grey.shade300,
-        highlightColor: Colors.grey.shade100,
-        enabled: true,
-        child: Container(
-          padding: EdgeInsets.all(20.w),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.90),
-            borderRadius: BorderRadius.circular(18.r),
-          ),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.fromLTRB(
+          16.w,
+          20.h,
+          16.w,
+          20.h,
+        ),
+        decoration: _mainContainerDecoration(),
+        child: Shimmer.fromColors(
+          baseColor: Colors.grey.shade300,
+          highlightColor: Colors.grey.shade100,
+          enabled: true,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
                 width: 150.w,
                 height: 20.h,
-                color: Colors.white,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6.r),
+                ),
               ),
 
               SizedBox(height: 12.h),
@@ -104,10 +130,13 @@ class SafetyandpolicyView extends StatelessWidget {
               ...List.generate(
                 6,
                     (index) => Container(
-                  width: double.infinity,
+                  width: index == 5 ? 220.w : double.infinity,
                   height: 14.h,
                   margin: EdgeInsets.only(bottom: 8.h),
-                  color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(5.r),
+                  ),
                 ),
               ),
 
@@ -115,8 +144,11 @@ class SafetyandpolicyView extends StatelessWidget {
 
               Container(
                 width: 120.w,
-                height: 16.h,
-                color: Colors.white,
+                height: 18.h,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6.r),
+                ),
               ),
 
               SizedBox(height: 12.h),
@@ -124,10 +156,13 @@ class SafetyandpolicyView extends StatelessWidget {
               ...List.generate(
                 4,
                     (index) => Container(
-                  width: double.infinity,
+                  width: index == 3 ? 200.w : double.infinity,
                   height: 14.h,
                   margin: EdgeInsets.only(bottom: 8.h),
-                  color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(5.r),
+                  ),
                 ),
               ),
 
@@ -135,8 +170,11 @@ class SafetyandpolicyView extends StatelessWidget {
 
               Container(
                 width: 100.w,
-                height: 16.h,
-                color: Colors.white,
+                height: 18.h,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(6.r),
+                ),
               ),
 
               SizedBox(height: 12.h),
@@ -144,10 +182,13 @@ class SafetyandpolicyView extends StatelessWidget {
               ...List.generate(
                 3,
                     (index) => Container(
-                  width: double.infinity,
+                  width: index == 2 ? 180.w : double.infinity,
                   height: 14.h,
                   margin: EdgeInsets.only(bottom: 8.h),
-                  color: Colors.white,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(5.r),
+                  ),
                 ),
               ),
             ],
@@ -162,85 +203,93 @@ class SafetyandpolicyView extends StatelessWidget {
   Widget _buildErrorWidget(
       SafetyandpolicyController controller,
       ) {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w),
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(24.w),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.88),
-            borderRadius: BorderRadius.circular(18.r),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.75),
-              width: 0.6.w,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.04),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(
+        16.w,
+        120.h,
+        16.w,
+        90.h,
+      ),
+      child: Container(
+        width: double.infinity,
+        constraints: BoxConstraints(
+          minHeight:
+          MediaQuery.of(Get.context!).size.height - 210.h,
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: 20.w,
+          vertical: 24.h,
+        ),
+        decoration: _mainContainerDecoration(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 60.w,
+              height: 60.w,
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.08),
+                shape: BoxShape.circle,
               ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
+              child: Icon(
                 Icons.error_outline,
-                size: 60.sp,
+                size: 34.sp,
                 color: Colors.red.shade300,
               ),
+            ),
 
-              SizedBox(height: 16.h),
+            SizedBox(height: 16.h),
 
-              Text(
-                'Something went wrong',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
+            Text(
+              'Something went wrong',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
               ),
+            ),
 
-              SizedBox(height: 8.h),
+            SizedBox(height: 8.h),
 
-              Text(
-                controller.errorMessage.value,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  fontSize: 14.sp,
-                  color: Colors.grey.shade600,
-                ),
+            Text(
+              controller.errorMessage.value,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 12.sp,
+                height: 1.5,
+                color: Colors.grey.shade600,
               ),
+            ),
 
-              SizedBox(height: 20.h),
+            SizedBox(height: 18.h),
 
-              ElevatedButton(
+            SizedBox(
+              height: 44.h,
+              child: ElevatedButton(
                 onPressed: controller.retry,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xffFF6A00),
+                  foregroundColor: Colors.white,
                   elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
                   padding: EdgeInsets.symmetric(
                     horizontal: 32.w,
-                    vertical: 12.h,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
                 ),
                 child: Text(
                   'Retry',
                   style: GoogleFonts.poppins(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w500,
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
                     color: Colors.white,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -249,53 +298,65 @@ class SafetyandpolicyView extends StatelessWidget {
   // ================= EMPTY =================
 
   Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 20.w),
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(24.w),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.88),
-            borderRadius: BorderRadius.circular(18.r),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.75),
-              width: 0.6.w,
-            ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(
+        16.w,
+        120.h,
+        16.w,
+        90.h,
+      ),
+      child: Container(
+        width: double.infinity,
+        constraints: BoxConstraints(
+          minHeight:
+          MediaQuery.of(Get.context!).size.height - 210.h,
+        ),
+        padding: EdgeInsets.symmetric(
+          horizontal: 20.w,
+          vertical: 24.h,
+        ),
+        decoration: _mainContainerDecoration(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 60.w,
+              height: 60.w,
+              decoration: BoxDecoration(
+                color: const Color(0xffFF6A00).withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
                 Icons.shield_outlined,
-                size: 60.sp,
-                color: Colors.grey.shade400,
+                size: 34.sp,
+                color: const Color(0xffFF6A00),
               ),
+            ),
 
-              SizedBox(height: 16.h),
+            SizedBox(height: 16.h),
 
-              Text(
-                'No safety policy data available',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
-                ),
+            Text(
+              'No safety policy data available',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
               ),
+            ),
 
-              SizedBox(height: 8.h),
+            SizedBox(height: 8.h),
 
-              Text(
-                'Please check back later',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  fontSize: 14.sp,
-                  color: Colors.grey.shade600,
-                ),
+            Text(
+              'Please check back later',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 12.sp,
+                height: 1.5,
+                color: Colors.grey.shade600,
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -309,29 +370,22 @@ class SafetyandpolicyView extends StatelessWidget {
     final items = controller.safetyPolicyData;
 
     return SingleChildScrollView(
+      physics: const BouncingScrollPhysics(),
       padding: EdgeInsets.fromLTRB(
         16.w,
-        16.h,
+        120.h,
         16.w,
-        40.h,
+        90.h,
       ),
       child: Container(
-        padding: EdgeInsets.all(20.w),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.88),
-          borderRadius: BorderRadius.circular(18.r),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.75),
-            width: 0.6.w,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+        width: double.infinity,
+        padding: EdgeInsets.fromLTRB(
+          16.w,
+          20.h,
+          16.w,
+          20.h,
         ),
+        decoration: _mainContainerDecoration(),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: _buildPolicyItems(items),
@@ -404,7 +458,6 @@ class SafetyandpolicyView extends StatelessWidget {
 
       if (trimmed.isEmpty) continue;
 
-      // Bullet / Number
       if (trimmed.startsWith('•') ||
           trimmed.startsWith('-') ||
           trimmed.startsWith('*') ||
@@ -500,7 +553,6 @@ class SafetyandpolicyView extends StatelessWidget {
   String _cleanText(String text) {
     String cleaned = text;
 
-    // Remove HTML comments
     cleaned = cleaned.replaceAll(
       RegExp(
         r'<!--.*?-->',
@@ -509,7 +561,6 @@ class SafetyandpolicyView extends StatelessWidget {
       '',
     );
 
-    // Remove HTML tags
     cleaned = cleaned.replaceAll(
       RegExp(
         r'<[^>]*>',
@@ -518,7 +569,6 @@ class SafetyandpolicyView extends StatelessWidget {
       ' ',
     );
 
-    // Decode common HTML entities
     cleaned = cleaned
         .replaceAll('&nbsp;', ' ')
         .replaceAll('&amp;', '&')
@@ -529,7 +579,6 @@ class SafetyandpolicyView extends StatelessWidget {
         .replaceAll('&#x27;', "'")
         .replaceAll('&apos;', "'");
 
-    // Remove extra spaces
     cleaned = cleaned.replaceAll(
       RegExp(r'\s+'),
       ' ',

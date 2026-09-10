@@ -766,13 +766,13 @@ itemCount: 6,
 gridDelegate:
 SliverGridDelegateWithFixedCrossAxisCount(
 crossAxisCount:
-3,
+2,
 crossAxisSpacing:
 10.w,
 mainAxisSpacing:
 10.h,
 childAspectRatio:
-0.82,
+1.4,
 ),
 
 itemBuilder:

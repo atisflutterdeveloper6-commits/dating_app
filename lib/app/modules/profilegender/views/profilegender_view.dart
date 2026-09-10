@@ -433,661 +433,449 @@ children: [
 // MAIN CONTENT
 // ======================================================
 
-SafeArea(
-child: isFetching
-? const Center(
-child: Column(
-mainAxisAlignment:
-MainAxisAlignment.center,
-children: [
-CircularProgressIndicator(
-color:
-Color(0xffFF6A00),
-),
-SizedBox(height: 16),
-Text(
-'Loading...',
-style: TextStyle(
-color: Colors.grey,
-fontSize: 14,
-),
-),
-],
-),
-)
-    : Padding(
-padding:
-EdgeInsets.symmetric(
-horizontal: 28.w,
-),
-child: Column(
-crossAxisAlignment:
-CrossAxisAlignment.start,
-children: [
-SizedBox(height: 20.h),
+  SafeArea(
+    child: isFetching
+        ? const Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(
+            color: Color(0xffFF6A00),
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Loading...',
+            style: TextStyle(
+              color: Colors.grey,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    )
+        : Padding(
+      padding: EdgeInsets.symmetric(
+        horizontal: 28.w,
+      ),
+      child: Column(
+        children: [
+          // ==================================================
+          // CENTER CONTENT
+          // ==================================================
 
-// ==================================================
-// HEADER
-// ==================================================
+          Expanded(
+            child: Center(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // ==================================================
+                    // HEADER
+                    // ==================================================
 
-Row(
-crossAxisAlignment:
-CrossAxisAlignment.center,
-children: [
-Container(
-padding:
-EdgeInsets.all(8.w),
-decoration:
-BoxDecoration(
-shape:
-BoxShape.circle,
-border:
-Border.all(
-color:
-const Color(
-0xFFFFE0CC,
-),
-width: 1.2,
-),
-),
-child: Icon(
-Icons
-    .person_outline,
-color:
-const Color(
-0xFFFF6B00,
-),
-size: 22.sp,
-),
-),
+                    SizedBox(
+                      width: 320.w,
+                      child: Row(
+                        crossAxisAlignment:
+                        CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(8.w),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: const Color(0xFFFFE0CC),
+                                width: 1.2,
+                              ),
+                            ),
+                            child: Icon(
+                              Icons.person_outline,
+                              color: const Color(0xFFFF6B00),
+                              size: 22.sp,
+                            ),
+                          ),
 
-SizedBox(width: 20.w),
+                          SizedBox(width: 14.w),
 
-Expanded(
-child: Column(
-crossAxisAlignment:
-CrossAxisAlignment
-    .start,
-children: [
-Text(
-"Gender & Orientation",
-style:
-GoogleFonts
-    .poppins(
-fontSize: 14.sp,
-fontWeight:
-FontWeight
-    .w700,
-letterSpacing:
-1.2,
-),
-),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment:
+                              CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Gender & Orientation",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 1.2,
+                                  ),
+                                ),
 
-SizedBox(
-height: 8.h,
-),
+                                SizedBox(height: 4.h),
 
-Text(
-"Update your gender and sexual orientation.",
-style:
-GoogleFonts
-    .poppins(
-fontSize: 9.sp,
-color:
-Colors.black54,
-letterSpacing:
-0.5,
-),
-),
-],
-),
-),
-],
-),
+                                Text(
+                                  "Update your gender and sexual orientation.",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 9.sp,
+                                    color: Colors.black54,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
 
-SizedBox(height: 20.h),
+                    SizedBox(height: 12.h),
 
-// ==================================================
-// WHITE CONTENT CARD
-// ==================================================
+                    // ==================================================
+                    // WHITE CONTENT CARD
+                    // ==================================================
 
-Expanded(
-child:
-SingleChildScrollView(
-child: Container(
-width:
-double.infinity,
-padding:
-EdgeInsets.fromLTRB(
-16.w,
-30.h,
-16.w,
-30.h,
-),
-decoration:
-BoxDecoration(
-color: Colors.white,
-borderRadius:
-BorderRadius
-    .circular(
-14.r,
-),
-border:
-Border.all(
-color:
-const Color(
-0xFFF1E8E4,
-),
-width: 0.8,
-),
-boxShadow: [
-BoxShadow(
-color: Colors
-    .black
-    .withOpacity(
-0.035,
-),
-blurRadius: 12,
-offset:
-const Offset(
-0,
-3,
-),
-),
-],
-),
+                    Container(
+                      width: 320.w,
+                      padding: EdgeInsets.fromLTRB(
+                        16.w,
+                        30.h,
+                        16.w,
+                        30.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14.r),
+                        border: Border.all(
+                          color: const Color(0xFFF1E8E4),
+                          width: 0.8,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.035),
+                            blurRadius: 12,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
 
-child: Column(
-crossAxisAlignment:
-CrossAxisAlignment
-    .start,
-children: [
-// ==================================================
-// GENDER TITLE
-// ==================================================
+                      child: Column(
+                        crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                        children: [
+                          // ==================================================
+                          // GENDER TITLE
+                          // ==================================================
 
-Text(
-'Select your gender',
-style:
-GoogleFonts
-    .poppins(
-fontSize: 13.sp,
-fontWeight:
-FontWeight
-    .w500,
-color:
-const Color(
-0xff1F1F1F,
-),
-),
-),
+                          Text(
+                            'Select your gender',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xff1F1F1F),
+                            ),
+                          ),
 
-SizedBox(
-height: 12.h,
-),
+                          SizedBox(height: 12.h),
 
-// ==================================================
-// GENDER OPTIONS
-// ==================================================
+                          // ==================================================
+                          // GENDER OPTIONS
+                          // ==================================================
 
-...genders
-    .where(
-(gender) {
-final
-normalized =
-gender.gender
-    .trim()
-    .toLowerCase();
+                          ...genders
+                              .where((gender) {
+                            final normalized =
+                            gender.gender.trim().toLowerCase();
 
-return normalized ==
-'man' ||
-normalized ==
-'male' ||
-normalized ==
-'woman' ||
-normalized ==
-'female';
-},
-)
-    .map(
-(gender) {
-final
-isSelected =
-selectedGenderId ==
-gender.id;
+                            return normalized == 'man' ||
+                                normalized == 'male' ||
+                                normalized == 'woman' ||
+                                normalized == 'female';
+                          })
+                              .map((gender) {
+                            final isSelected =
+                                selectedGenderId == gender.id;
 
-final imagePath =
-_getGenderImagePath(
-gender.gender,
-);
+                            final imagePath =
+                            _getGenderImagePath(
+                              gender.gender,
+                            );
 
-return GestureDetector(
-onTap:
-isLoading
-? null
-    : () {
-setState(
-() {
-selectedGenderId =
-gender.id;
-selectedGenderTitle =
-gender.gender;
-},
-);
-},
-child:
-AnimatedContainer(
-duration:
-const Duration(
-milliseconds:
-180,
-),
-width:
-double.infinity,
-height:
-68.h,
-margin:
-EdgeInsets.only(
-bottom:
-10.h,
-),
-padding:
-EdgeInsets.symmetric(
-horizontal:
-14.w,
-),
-decoration:
-BoxDecoration(
-color: isSelected
-? const Color(
-0xFFFFF2E8,
-)
-    : Colors
-    .white,
-borderRadius:
-BorderRadius.circular(
-12.r,
-),
-border:
-Border.all(
-color: isSelected
-? const Color(
-0xffFF6B00,
-)
-    : const Color(
-0xffDCDCDC,
-),
-width:
-isSelected
-? 1.5
-    : 1,
-),
-),
-child:
-Row(
-children: [
-// ==================================
-// IMAGE
-// ==================================
+                            return GestureDetector(
+                              onTap: isLoading
+                                  ? null
+                                  : () {
+                                setState(() {
+                                  selectedGenderId =
+                                      gender.id;
+                                  selectedGenderTitle =
+                                      gender.gender;
+                                });
+                              },
+                              child: AnimatedContainer(
+                                duration: const Duration(
+                                  milliseconds: 180,
+                                ),
+                                width: double.infinity,
+                                height: 68.h,
+                                margin: EdgeInsets.only(
+                                  bottom: 10.h,
+                                ),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 14.w,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? const Color(0xFFFFF2E8)
+                                      : Colors.white,
+                                  borderRadius:
+                                  BorderRadius.circular(12.r),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? const Color(0xffFF6B00)
+                                        : const Color(0xffDCDCDC),
+                                    width: isSelected ? 1.5 : 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  children: [
+                                    // ==================================
+                                    // IMAGE
+                                    // ==================================
 
-Container(
-height:
-44.w,
-width:
-44.w,
-decoration:
-BoxDecoration(
-shape:
-BoxShape.circle,
-border:
-Border.all(
-color: isSelected
-? const Color(
-0xffFF6B00,
-)
-    : const Color(
-0xffE5E5E5,
-),
-width:
-1,
-),
-),
-child:
-ClipOval(
-child:
-Image.asset(
-imagePath,
-fit:
-BoxFit.cover,
-),
-),
-),
+                                    Container(
+                                      height: 44.w,
+                                      width: 44.w,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        border: Border.all(
+                                          color: isSelected
+                                              ? const Color(0xffFF6B00)
+                                              : const Color(0xffE5E5E5),
+                                          width: 1,
+                                        ),
+                                      ),
+                                      child: ClipOval(
+                                        child: Image.asset(
+                                          imagePath,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
 
-SizedBox(
-width:
-12.w,
-),
+                                    SizedBox(width: 12.w),
 
-// ==================================
-// GENDER NAME
-// ==================================
+                                    // ==================================
+                                    // GENDER NAME
+                                    // ==================================
 
-Expanded(
-child:
-Text(
-gender.gender,
-style:
-GoogleFonts.poppins(
-fontSize:
-12.sp,
-fontWeight:
-isSelected
-? FontWeight.w600
-    : FontWeight.w500,
-color:
-isSelected
-? const Color(
-0xffFF6B00,
-)
-    : const Color(
-0xff1E1E1E,
-),
-),
-),
-),
+                                    Expanded(
+                                      child: Text(
+                                        gender.gender,
+                                        style: GoogleFonts.poppins(
+                                          fontSize: 12.sp,
+                                          fontWeight: isSelected
+                                              ? FontWeight.w600
+                                              : FontWeight.w500,
+                                          color: isSelected
+                                              ? const Color(0xffFF6B00)
+                                              : const Color(0xff1E1E1E),
+                                        ),
+                                      ),
+                                    ),
 
-// ==================================
-// RADIO
-// ==================================
+                                    // ==================================
+                                    // RADIO
+                                    // ==================================
 
-Icon(
-isSelected
-? Icons
-    .radio_button_checked
-    : Icons
-    .radio_button_off,
-size:
-19.sp,
-color:
-isSelected
-? const Color(
-0xffFF6B00,
-)
-    : Colors
-    .grey
-    .shade400,
-),
-],
-),
-),
-);
-},
-),
+                                    Icon(
+                                      isSelected
+                                          ? Icons.radio_button_checked
+                                          : Icons.radio_button_off,
+                                      size: 19.sp,
+                                      color: isSelected
+                                          ? const Color(0xffFF6B00)
+                                          : Colors.grey.shade400,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }),
 
-SizedBox(height: 14.h),
+                          SizedBox(height: 14.h),
 
-// ==================================================
-// ORIENTATION TITLE
-// ==================================================
+                          // ==================================================
+                          // ORIENTATION TITLE
+                          // ==================================================
 
-Text(
-'Select your sexual orientation',
-style:
-GoogleFonts
-    .poppins(
-fontSize: 13.sp,
-fontWeight:
-FontWeight
-    .w500,
-color:
-const Color(
-0xff1F1F1F,
-),
-),
-),
+                          Text(
+                            'Select your sexual orientation',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w500,
+                              color: const Color(0xff1F1F1F),
+                            ),
+                          ),
 
-SizedBox(
-height: 12.h,
-),
+                          SizedBox(height: 12.h),
 
-// ==================================================
-// ORIENTATION DROPDOWN
-// ==================================================
+                          // ==================================================
+                          // ORIENTATION DROPDOWN
+                          // ==================================================
 
-Container(
-height: 50.h,
-width:
-double.infinity,
-padding:
-EdgeInsets
-    .symmetric(
-horizontal:
-14.w,
-),
-decoration:
-BoxDecoration(
-color:
-Colors.white,
-borderRadius:
-BorderRadius
-    .circular(
-12.r,
-),
-border:
-Border.all(
-color:
-const Color(
-0xffDCDCDC,
-),
-),
-),
-child:
-DropdownButtonHideUnderline(
-child:
-DropdownButton<
-String>(
-value:
-selectedOrientationId,
-isExpanded:
-true,
-icon:
-Icon(
-Icons
-    .keyboard_arrow_down,
-size:
-20.sp,
-color:
-const Color(
-0xff555555,
-),
-),
-style:
-GoogleFonts
-    .poppins(
-fontSize:
-13.sp,
-color:
-const Color(
-0xff444444,
-),
-),
-hint: Text(
-'Select your orientation',
-style:
-GoogleFonts
-    .poppins(
-fontSize:
-13.sp,
-color:
-const Color(
-0xff999999,
-),
-),
-),
-items:
-orientations
-    .map(
-(
-orientation,
-) {
-return DropdownMenuItem<
-String>(
-value:
-orientation.id,
-child:
-Text(
-orientation
-    .title,
-maxLines:
-1,
-overflow:
-TextOverflow.ellipsis,
-),
-);
-},
-).toList(),
-onChanged:
-isLoading
-? null
-    : (
-value,
-) {
-if (value !=
-null) {
-setState(
-() {
-selectedOrientationId =
-value;
+                          Container(
+                            height: 50.h,
+                            width: double.infinity,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 14.w,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius:
+                              BorderRadius.circular(12.r),
+                              border: Border.all(
+                                color: const Color(0xffDCDCDC),
+                              ),
+                            ),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: selectedOrientationId,
+                                isExpanded: true,
+                                icon: Icon(
+                                  Icons.keyboard_arrow_down,
+                                  size: 20.sp,
+                                  color: const Color(0xff555555),
+                                ),
+                                style: GoogleFonts.poppins(
+                                  fontSize: 13.sp,
+                                  color: const Color(0xff444444),
+                                ),
+                                hint: Text(
+                                  'Select your orientation',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 13.sp,
+                                    color: const Color(0xff999999),
+                                  ),
+                                ),
+                                items: orientations
+                                    .map((orientation) {
+                                  return DropdownMenuItem<String>(
+                                    value: orientation.id,
+                                    child: Text(
+                                      orientation.title,
+                                      maxLines: 1,
+                                      overflow:
+                                      TextOverflow.ellipsis,
+                                    ),
+                                  );
+                                }).toList(),
+                                onChanged: isLoading
+                                    ? null
+                                    : (value) {
+                                  if (value != null) {
+                                    setState(() {
+                                      selectedOrientationId =
+                                          value;
 
-final found =
-orientations.firstWhere(
-(o) =>
-o.id ==
-value,
-);
+                                      final found =
+                                      orientations.firstWhere(
+                                            (o) => o.id == value,
+                                      );
 
-selectedOrientationTitle =
-found.title;
-},
-);
-}
-},
-),
-),
-),
+                                      selectedOrientationTitle =
+                                          found.title;
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
 
-// ==================================================
-// CURRENT GENDER
-// ==================================================
+                          // ==================================================
+                          // CURRENT GENDER
+                          // ==================================================
 
-if (selectedGenderTitle !=
-null &&
-selectedGenderTitle!
-    .isNotEmpty)
-Padding(
-padding:
-EdgeInsets.only(
-top: 12.h,
-),
-child: Text(
-'Current gender: '
-'$selectedGenderTitle',
-style:
-GoogleFonts
-    .poppins(
-fontSize:
-10.sp,
-color:
-Colors
-    .grey[600],
-fontStyle:
-FontStyle
-    .italic,
-),
-),
-),
+                          if (selectedGenderTitle != null &&
+                              selectedGenderTitle!.isNotEmpty)
+                            Padding(
+                              padding: EdgeInsets.only(
+                                top: 12.h,
+                              ),
+                              child: Text(
+                                'Current gender: '
+                                    '$selectedGenderTitle',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 10.sp,
+                                  color: Colors.grey[600],
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ),
 
-// ==================================================
-// CURRENT ORIENTATION
-// ==================================================
+                          // ==================================================
+                          // CURRENT ORIENTATION
+                          // ==================================================
 
-if (selectedOrientationTitle !=
-null &&
-selectedOrientationTitle!
-    .isNotEmpty)
-Padding(
-padding:
-EdgeInsets.only(
-top: 6.h,
-),
-child: Text(
-'Current orientation: '
-'$selectedOrientationTitle',
-style:
-GoogleFonts
-    .poppins(
-fontSize:
-10.sp,
-color:
-Colors
-    .grey[600],
-fontStyle:
-FontStyle
-    .italic,
-),
-),
-),
-],
-),
-),
-),
-),
+                          if (selectedOrientationTitle != null &&
+                              selectedOrientationTitle!.isNotEmpty)
+                            Padding(
+                              padding: EdgeInsets.only(
+                                top: 6.h,
+                              ),
+                              child: Text(
+                                'Current orientation: '
+                                    '$selectedOrientationTitle',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 10.sp,
+                                  color: Colors.grey[600],
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
 
-SizedBox(height: 18.h),
+          // ==================================================
+          // UPDATE BUTTON
+          // ==================================================
 
-// ==================================================
-// UPDATE BUTTON
-// ==================================================
+          SafeArea(
+            top: false,
+            child: CustomButton(
+              text: "Update",
+              onPressed:
+              selectedGenderId == null ||
+                  selectedOrientationId == null ||
+                  isLoading
+                  ? () {}
+                  : updateGenderAndOrientation,
+              isLoading: isLoading,
+              backgroundColor:
+              selectedGenderId != null &&
+                  selectedOrientationId != null
+                  ? const Color(0xffFF6B00)
+                  : Colors.grey,
+              textColor: Colors.white,
+              borderRadius: 30.r,
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0,
+              showArrow: true,
+            ),
+          ),
 
-SafeArea(
-top: false,
-child: CustomButton(
-text: "Update",
-onPressed:
-selectedGenderId ==
-null ||
-selectedOrientationId ==
-null ||
-isLoading
-? () {}
-    : updateGenderAndOrientation,
-isLoading: isLoading,
-backgroundColor:
-selectedGenderId !=
-null &&
-selectedOrientationId !=
-null
-? const Color(
-0xffFF6B00,
-)
-    : Colors.grey,
-textColor: Colors.white,
-
-borderRadius: 30.r,
-fontSize: 11.sp,
-fontWeight:
-FontWeight.w600,
-letterSpacing: 0,
-showArrow: true,
-),
-),
-
-SizedBox(height: 90.h),
-],
-),
-),
-),
-
+          SizedBox(height: 90.h),
+        ],
+      ),
+    ),
+  ),
 // ============================================================
 // LOADING OVERLAY
 // ============================================================

@@ -83,12 +83,13 @@ class SettingsView extends StatelessWidget {
     try {
       Get.dialog(
         const Center(
-          child: CircularProgressIndicator(color:Colors.orange),
+          child: CircularProgressIndicator(
+            color: Colors.orange,
+          ),
         ),
         barrierDismissible: false,
       );
 
-      // 1. Update online status
       try {
         final chatService = Get.find<ChatService>();
         await chatService.updateOnlineStatus(false);
@@ -96,28 +97,27 @@ class SettingsView extends StatelessWidget {
         print('⚠️ Could not update online status: $e');
       }
 
-      // 2. Uninitialize call service
       try {
         await CallInvitationService.uninit();
       } catch (e) {
         print('⚠️ Could not uninit call service: $e');
       }
 
-      // 3. Firebase sign out
       try {
         await FirebaseAuth.instance.signOut();
       } catch (e) {
         print('⚠️ Firebase sign out error: $e');
       }
 
-      // 4. Clear local storage
       await _storage.clearAllIncludingPreferences();
 
       if (Get.isDialogOpen ?? false) {
         Get.back();
       }
 
-      CustomToast.success("Logged out successfully");
+      CustomToast.success(
+        "Logged out successfully",
+      );
 
       Get.offAllNamed("/login");
     } catch (e) {
@@ -150,10 +150,6 @@ class SettingsView extends StatelessWidget {
           borderRadius: BorderRadius.circular(20.r),
           child: Stack(
             children: [
-              // ==========================================================
-              // BACKGROUND IMAGE
-              // ==========================================================
-
               Positioned.fill(
                 child: Image.asset(
                   "assets/images/LoginBack2.png",
@@ -161,176 +157,179 @@ class SettingsView extends StatelessWidget {
                 ),
               ),
 
-              // ==========================================================
-              // WHITE OPACITY OVERLAY
-              // ==========================================================
-
               Positioned.fill(
                 child: Container(
                   color: Colors.white.withOpacity(0.70),
                 ),
               ),
 
-              // ==========================================================
-              // CONTENT
-              // ==========================================================
-
               Padding(
-                padding: EdgeInsets.all(20.w),
+                padding: EdgeInsets.all(16.w),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // ======================================================
-                    // LOGOUT ICON
-                    // ======================================================
-
                     Container(
-                      height: 70.w,
-                      width: 70.w,
+                      width: double.infinity,
+                      padding: EdgeInsets.fromLTRB(
+                        16.w,
+                        20.h,
+                        16.w,
+                        20.h,
+                      ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.78),
-                        shape: BoxShape.circle,
+                        color: Colors.white,
+                        borderRadius:
+                        BorderRadius.circular(14.r),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.85),
+                          color: const Color(0xFFF1E8E4),
                           width: 0.8.w,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.06),
-                            blurRadius: 12,
-                            offset: const Offset(0, 4),
+                            color:
+                            Colors.black.withOpacity(0.035),
+                            blurRadius: 12.r,
+                            offset: Offset(0, 3.h),
                           ),
                         ],
                       ),
-                      child: Icon(
-                        Icons.logout_rounded,
-                        size: 34.sp,
-                        color: const Color(0xffFF6B00),
-                      ),
-                    ),
-
-                    SizedBox(height: 16.h),
-
-                    // ======================================================
-                    // TITLE
-                    // ======================================================
-
-                    Text(
-                      "Logout",
-                      style: GoogleFonts.poppins(
-                        fontSize: 19.sp,
-                        fontWeight: FontWeight.w700,
-                        color: const Color(0xff222222),
-                      ),
-                    ),
-
-                    SizedBox(height: 8.h),
-
-                    // ======================================================
-                    // DESCRIPTION
-                    // ======================================================
-
-                    Text(
-                      "Are you sure you want to logout from your account?",
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.poppins(
-                        fontSize: 13.sp,
-                        color: const Color(0xff666666),
-                        height: 1.5,
-                      ),
-                    ),
-
-                    SizedBox(height: 22.h),
-
-                    // ======================================================
-                    // BUTTONS CARD
-                    // ======================================================
-
-                    Container(
-                      padding: EdgeInsets.all(10.w),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.55),
-                        borderRadius: BorderRadius.circular(16.r),
-                        border: Border.all(
-                          color: Colors.white.withOpacity(0.70),
-                          width: 0.7.w,
-                        ),
-                      ),
-                      child: Row(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          // ==================================================
-                          // CANCEL
-                          // ==================================================
-
-                          Expanded(
-                            child: SizedBox(
-                              height: 46.h,
-                              child: OutlinedButton(
-                                onPressed: () => Get.back(),
-                                style: OutlinedButton.styleFrom(
-                                  elevation: 0,
-                                  backgroundColor:
-                                  Colors.white.withOpacity(0.65),
-                                  foregroundColor:
-                                  const Color(0xff444444),
-                                  side: BorderSide(
-                                    color: Colors.grey.shade300,
-                                    width: 0.8,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                    BorderRadius.circular(30.r),
-                                  ),
-                                ),
-                                child: Text(
-                                  "Cancel",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.w500,
-                                    color: const Color(0xff444444),
-                                  ),
-                                ),
+                          Container(
+                            height: 55.w,
+                            width: 55.w,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF0E6),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color:
+                                const Color(0xFFFFE0CC),
+                                width: 0.8.w,
                               ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color:
+                                  Colors.black.withOpacity(0.06),
+                                  blurRadius: 12.r,
+                                  offset: Offset(0, 4.h),
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              Icons.logout_rounded,
+                              size: 22.sp,
+                              color:
+                              const Color(0xffFF6B00),
                             ),
                           ),
 
-                          SizedBox(width: 10.w),
+                          SizedBox(height: 16.h),
 
-                          // ==================================================
-                          // LOGOUT
-                          // ==================================================
+                          Text(
+                            "Logout",
+                            style: GoogleFonts.poppins(
+                              fontSize: 19.sp,
+                              fontWeight: FontWeight.w700,
+                              color:
+                              const Color(0xff222222),
+                            ),
+                          ),
 
-                          Expanded(
-                            child: SizedBox(
-                              height: 46.h,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  Get.back();
-                                  _logout();
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  elevation: 0,
-                                  backgroundColor:
-                                  const Color(0xffFF6B00),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius:
-                                    BorderRadius.circular(30.r),
-                                  ),
-                                ),
-                                child: Text(
-                                  "Logout",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ),
+                          SizedBox(height: 8.h),
+
+                          Text(
+                            "Are you sure you want to logout from your account?",
+                            textAlign: TextAlign.center,
+                            style: GoogleFonts.poppins(
+                              fontSize: 13.sp,
+                              color:
+                              const Color(0xff666666),
+                              height: 1.5,
                             ),
                           ),
                         ],
                       ),
+                    ),
+
+                    SizedBox(height: 14.h),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: SizedBox(
+                            height: 46.h,
+                            child: OutlinedButton(
+                              onPressed: () => Get.back(),
+                              style: OutlinedButton.styleFrom(
+                                elevation: 0,
+                                backgroundColor: Colors.white,
+                                foregroundColor:
+                                const Color(0xff444444),
+                                side: BorderSide(
+                                  color:
+                                  const Color(0xFFF1E8E4),
+                                  width: 0.8.w,
+                                ),
+                                shape:
+                                RoundedRectangleBorder(
+                                  borderRadius:
+                                  BorderRadius.circular(
+                                    30.r,
+                                  ),
+                                ),
+                              ),
+                              child: Text(
+                                "Cancel",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 13.sp,
+                                  fontWeight:
+                                  FontWeight.w500,
+                                  color:
+                                  const Color(0xff444444),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        SizedBox(width: 10.w),
+
+                        Expanded(
+                          child: SizedBox(
+                            height: 46.h,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Get.back();
+                                _logout();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                elevation: 0,
+                                backgroundColor:
+                                const Color(0xffFF6B00),
+                                foregroundColor:
+                                Colors.white,
+                                shape:
+                                RoundedRectangleBorder(
+                                  borderRadius:
+                                  BorderRadius.circular(
+                                    30.r,
+                                  ),
+                                ),
+                              ),
+                              child: Text(
+                                "Logout",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 13.sp,
+                                  fontWeight:
+                                  FontWeight.w600,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -342,6 +341,7 @@ class SettingsView extends StatelessWidget {
       barrierDismissible: false,
     );
   }
+
   // ============================================================
   // DELETE ACCOUNT
   // ============================================================
@@ -360,10 +360,6 @@ class SettingsView extends StatelessWidget {
             borderRadius: BorderRadius.circular(20.r),
             child: Stack(
               children: [
-                // ========================================================
-                // BACKGROUND IMAGE
-                // ========================================================
-
                 Positioned.fill(
                   child: Image.asset(
                     "assets/images/LoginBack2.png",
@@ -371,19 +367,11 @@ class SettingsView extends StatelessWidget {
                   ),
                 ),
 
-                // ========================================================
-                // WHITE OPACITY OVERLAY
-                // ========================================================
-
                 Positioned.fill(
                   child: Container(
                     color: Colors.white.withOpacity(0.70),
                   ),
                 ),
-
-                // ========================================================
-                // LOADING CONTENT
-                // ========================================================
 
                 Padding(
                   padding: EdgeInsets.symmetric(
@@ -397,15 +385,18 @@ class SettingsView extends StatelessWidget {
                         height: 65.w,
                         width: 65.w,
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.78),
+                          color:
+                          Colors.white.withOpacity(0.78),
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: Colors.white.withOpacity(0.85),
+                            color:
+                            Colors.white.withOpacity(0.85),
                             width: 0.8.w,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.black.withOpacity(0.06),
+                              color:
+                              Colors.black.withOpacity(0.06),
                               blurRadius: 12,
                               offset: const Offset(0, 4),
                             ),
@@ -426,7 +417,8 @@ class SettingsView extends StatelessWidget {
                         style: GoogleFonts.poppins(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
-                          color: const Color(0xff222222),
+                          color:
+                          const Color(0xff222222),
                         ),
                       ),
 
@@ -436,7 +428,8 @@ class SettingsView extends StatelessWidget {
                         "Please wait...",
                         style: GoogleFonts.poppins(
                           fontSize: 12.sp,
-                          color: const Color(0xff777777),
+                          color:
+                          const Color(0xff777777),
                         ),
                       ),
                     ],
@@ -450,7 +443,6 @@ class SettingsView extends StatelessWidget {
       );
 
       // TODO: Call delete account API
-      // await _deleteAccountApi();
 
       await _storage.clearAllIncludingPreferences();
 
@@ -475,6 +467,7 @@ class SettingsView extends StatelessWidget {
       print('❌ Delete account error: $e');
     }
   }
+
   // ============================================================
   // DELETE ACCOUNT DIALOG
   // ============================================================
@@ -492,10 +485,6 @@ class SettingsView extends StatelessWidget {
           borderRadius: BorderRadius.circular(20.r),
           child: Stack(
             children: [
-              // ========================================================
-              // BACKGROUND IMAGE
-              // ========================================================
-
               Positioned.fill(
                 child: Image.asset(
                   "assets/images/LoginBack2.png",
@@ -503,39 +492,33 @@ class SettingsView extends StatelessWidget {
                 ),
               ),
 
-              // ========================================================
-              // WHITE OPACITY OVERLAY
-              // ========================================================
-
               Positioned.fill(
                 child: Container(
                   color: Colors.white.withOpacity(0.70),
                 ),
               ),
 
-              // ========================================================
-              // CONTENT
-              // ========================================================
-
               Padding(
                 padding: EdgeInsets.all(20.w),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // DELETE ICON
                     Container(
                       height: 70.w,
                       width: 70.w,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.78),
+                        color:
+                        Colors.white.withOpacity(0.78),
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.85),
+                          color:
+                          Colors.white.withOpacity(0.85),
                           width: 0.8.w,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.06),
+                            color:
+                            Colors.black.withOpacity(0.06),
                             blurRadius: 12,
                             offset: const Offset(0, 4),
                           ),
@@ -544,7 +527,8 @@ class SettingsView extends StatelessWidget {
                       child: Icon(
                         Icons.delete_forever_rounded,
                         size: 34.sp,
-                        color: const Color(0xffFF6B00),
+                        color:
+                        const Color(0xffFF6B00),
                       ),
                     ),
 
@@ -555,7 +539,8 @@ class SettingsView extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: 19.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xff222222),
+                        color:
+                        const Color(0xff222222),
                       ),
                     ),
 
@@ -567,53 +552,65 @@ class SettingsView extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
                         fontSize: 13.sp,
-                        color: const Color(0xff666666),
+                        color:
+                        const Color(0xff666666),
                         height: 1.5,
                       ),
                     ),
 
                     SizedBox(height: 22.h),
 
-                    // BUTTONS GLASS CARD
                     Container(
                       padding: EdgeInsets.all(10.w),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.55),
-                        borderRadius: BorderRadius.circular(16.r),
+                        color:
+                        Colors.white.withOpacity(0.55),
+                        borderRadius:
+                        BorderRadius.circular(16.r),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.70),
+                          color:
+                          Colors.white.withOpacity(0.70),
                           width: 0.7.w,
                         ),
                       ),
                       child: Row(
                         children: [
-                          // CANCEL
                           Expanded(
                             child: SizedBox(
                               height: 46.h,
                               child: OutlinedButton(
                                 onPressed: () => Get.back(),
-                                style: OutlinedButton.styleFrom(
+                                style:
+                                OutlinedButton.styleFrom(
                                   elevation: 0,
                                   backgroundColor:
-                                  Colors.white.withOpacity(0.65),
+                                  Colors.white.withOpacity(
+                                    0.65,
+                                  ),
                                   foregroundColor:
                                   const Color(0xff444444),
                                   side: BorderSide(
-                                    color: Colors.grey.shade300,
+                                    color:
+                                    Colors.grey.shade300,
                                     width: 0.8,
                                   ),
-                                  shape: RoundedRectangleBorder(
+                                  shape:
+                                  RoundedRectangleBorder(
                                     borderRadius:
-                                    BorderRadius.circular(30.r),
+                                    BorderRadius.circular(
+                                      30.r,
+                                    ),
                                   ),
                                 ),
                                 child: Text(
                                   "Cancel",
-                                  style: GoogleFonts.poppins(
+                                  style:
+                                  GoogleFonts.poppins(
                                     fontSize: 13.sp,
-                                    fontWeight: FontWeight.w500,
-                                    color: const Color(0xff444444),
+                                    fontWeight:
+                                    FontWeight.w500,
+                                    color:
+                                    const Color(0xff444444),
                                   ),
                                 ),
                               ),
@@ -622,7 +619,6 @@ class SettingsView extends StatelessWidget {
 
                           SizedBox(width: 10.w),
 
-                          // DELETE
                           Expanded(
                             child: SizedBox(
                               height: 46.h,
@@ -631,21 +627,28 @@ class SettingsView extends StatelessWidget {
                                   Get.back();
                                   _deleteAccount();
                                 },
-                                style: ElevatedButton.styleFrom(
+                                style:
+                                ElevatedButton.styleFrom(
                                   elevation: 0,
                                   backgroundColor:
                                   const Color(0xffFF6B00),
-                                  foregroundColor: Colors.white,
-                                  shape: RoundedRectangleBorder(
+                                  foregroundColor:
+                                  Colors.white,
+                                  shape:
+                                  RoundedRectangleBorder(
                                     borderRadius:
-                                    BorderRadius.circular(30.r),
+                                    BorderRadius.circular(
+                                      30.r,
+                                    ),
                                   ),
                                 ),
                                 child: Text(
                                   "Delete",
-                                  style: GoogleFonts.poppins(
+                                  style:
+                                  GoogleFonts.poppins(
                                     fontSize: 13.sp,
-                                    fontWeight: FontWeight.w600,
+                                    fontWeight:
+                                    FontWeight.w600,
                                     color: Colors.white,
                                   ),
                                 ),
@@ -665,6 +668,7 @@ class SettingsView extends StatelessWidget {
       barrierDismissible: false,
     );
   }
+
   // ============================================================
   // INVOICE DIALOG
   // ============================================================
@@ -678,12 +682,10 @@ class SettingsView extends StatelessWidget {
           horizontal: 18.w,
           vertical: 24.h,
         ),
-        child:
-        ClipRRect(
+        child: ClipRRect(
           borderRadius: BorderRadius.circular(20.r),
           child: Stack(
             children: [
-              // 🔥 Background Image
               Positioned.fill(
                 child: Image.asset(
                   "assets/images/LoginBack2.png",
@@ -691,14 +693,12 @@ class SettingsView extends StatelessWidget {
                 ),
               ),
 
-              // 🔥 White Opacity Overlay
               Positioned.fill(
                 child: Container(
                   color: Colors.white.withOpacity(0.70),
                 ),
               ),
 
-              // 🔥 Dialog Content
               Padding(
                 padding: EdgeInsets.all(20.w),
                 child: Column(
@@ -708,16 +708,19 @@ class SettingsView extends StatelessWidget {
                       width: 80.w,
                       height: 80.w,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.75),
+                        color:
+                        Colors.white.withOpacity(0.75),
                         shape: BoxShape.circle,
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.8),
+                          color:
+                          Colors.white.withOpacity(0.8),
                         ),
                       ),
                       child: Icon(
                         Icons.receipt_long,
                         size: 40.sp,
-                        color: const Color(0xffFF6B00),
+                        color:
+                        const Color(0xffFF6B00),
                       ),
                     ),
 
@@ -728,7 +731,8 @@ class SettingsView extends StatelessWidget {
                       style: GoogleFonts.poppins(
                         fontSize: 20.sp,
                         fontWeight: FontWeight.w700,
-                        color: const Color(0xff1E1E1E),
+                        color:
+                        const Color(0xff1E1E1E),
                       ),
                     ),
 
@@ -739,45 +743,66 @@ class SettingsView extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: GoogleFonts.poppins(
                         fontSize: 14.sp,
-                        color: const Color(0xff666666),
+                        color:
+                        const Color(0xff666666),
                         height: 1.4,
                       ),
                     ),
 
                     SizedBox(height: 24.h),
 
-                    // Invoice Details Card
                     Container(
                       width: double.infinity,
                       padding: EdgeInsets.all(16.w),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.82),
-                        borderRadius: BorderRadius.circular(14.r),
+                        color: Colors.white,
+                        borderRadius:
+                        BorderRadius.circular(14.r),
                         border: Border.all(
-                          color: Colors.white.withOpacity(0.8),
-                          width: 0.7.w,
+                          color:
+                          const Color(0xFFF1E8E4),
+                          width: 0.8.w,
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color:
+                            Colors.black.withOpacity(0.035),
+                            blurRadius: 12.r,
+                            offset: Offset(0, 3.h),
+                          ),
+                        ],
                       ),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment:
+                        CrossAxisAlignment.start,
                         children: [
                           Row(
+                            crossAxisAlignment:
+                            CrossAxisAlignment.start,
                             mainAxisAlignment:
                             MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                "Invoice #INV-2024-001",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xff1E1E1E),
+                              Flexible(
+                                child: Text(
+                                  "Invoice #INV-2024-001",
+                                  style:
+                                  GoogleFonts.poppins(
+                                    fontSize: 12.sp,
+                                    fontWeight:
+                                    FontWeight.w600,
+                                    color:
+                                    const Color(0xff1E1E1E),
+                                  ),
                                 ),
                               ),
+                              SizedBox(width: 8.w),
                               Text(
                                 "Date: 15 Jan 2024",
-                                style: GoogleFonts.poppins(
+                                style:
+                                GoogleFonts.poppins(
                                   fontSize: 12.sp,
-                                  color: const Color(0xff666666),
+                                  color:
+                                  const Color(0xff666666),
                                 ),
                               ),
                             ],
@@ -793,17 +818,12 @@ class SettingsView extends StatelessWidget {
 
                           _buildInvoiceRow(
                             "Premium Plan",
-                            "\$29.99",
+                            "₹499",
                           ),
 
                           _buildInvoiceRow(
                             "Duration",
                             "1 Month",
-                          ),
-
-                          _buildInvoiceRow(
-                            "Tax (10%)",
-                            "\$3.00",
                           ),
 
                           Divider(
@@ -812,16 +832,17 @@ class SettingsView extends StatelessWidget {
 
                           _buildInvoiceRow(
                             "Total",
-                            "\$32.99",
+                            "₹499",
                             isTotal: true,
                           ),
+
+
                         ],
                       ),
                     ),
 
                     SizedBox(height: 24.h),
 
-                    // View Full Invoice
                     SizedBox(
                       width: double.infinity,
                       child: CustomButton(
@@ -830,12 +851,12 @@ class SettingsView extends StatelessWidget {
                           Get.back();
                           _viewInvoice();
                         },
-
                         borderRadius: 30.r,
                         fontSize: 12.sp,
                         fontWeight: FontWeight.w600,
                         textColor: Colors.white,
-                        backgroundColor: const Color(0xffFF6B00),
+                        backgroundColor:
+                        const Color(0xffFF6B00),
                         showArrow: false,
                         prefixIcon: Icon(
                           Icons.visibility_outlined,
@@ -844,9 +865,9 @@ class SettingsView extends StatelessWidget {
                         ),
                       ),
                     ),
+
                     SizedBox(height: 12.h),
 
-                    // Download Invoice
                     SizedBox(
                       width: double.infinity,
                       height: 48.h,
@@ -863,7 +884,8 @@ class SettingsView extends StatelessWidget {
                           ),
                           backgroundColor:
                           Colors.white.withOpacity(0.55),
-                          shape: RoundedRectangleBorder(
+                          shape:
+                          RoundedRectangleBorder(
                             borderRadius:
                             BorderRadius.circular(30.r),
                           ),
@@ -875,15 +897,19 @@ class SettingsView extends StatelessWidget {
                             Icon(
                               Icons.download_outlined,
                               size: 20.sp,
-                              color: const Color(0xffFF6B00),
+                              color:
+                              const Color(0xffFF6B00),
                             ),
                             SizedBox(width: 10.w),
                             Text(
                               "Download Invoice",
-                              style: GoogleFonts.poppins(
+                              style:
+                              GoogleFonts.poppins(
                                 fontSize: 14.sp,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xffFF6B00),
+                                fontWeight:
+                                FontWeight.w600,
+                                color:
+                                const Color(0xffFF6B00),
                               ),
                             ),
                           ],
@@ -893,14 +919,14 @@ class SettingsView extends StatelessWidget {
 
                     SizedBox(height: 8.h),
 
-                    // Cancel
                     TextButton(
                       onPressed: () => Get.back(),
                       child: Text(
                         "Cancel",
                         style: GoogleFonts.poppins(
                           fontSize: 14.sp,
-                          color: const Color(0xff999999),
+                          color:
+                          const Color(0xff999999),
                         ),
                       ),
                     ),
@@ -913,6 +939,7 @@ class SettingsView extends StatelessWidget {
       ),
     );
   }
+
   // ============================================================
   // INVOICE ROW
   // ============================================================
@@ -1007,25 +1034,19 @@ class SettingsView extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.transparent,
 
-      // ========================================================
-      // APP BAR
-      // ========================================================
-
       appBar: CustomAppBar(
         title: "Settings",
         subtitle: "Manage your account",
         onBackPressed: () {
           Get.find<DashboardController>().changeTab(5);
         },
-
       ),
-
-      // ========================================================
-      // BODY
-      // ========================================================
 
       body: Stack(
         children: [
+          // ========================================================
+          // BACKGROUND
+          // ========================================================
 
           Positioned.fill(
             child: Image.asset(
@@ -1034,9 +1055,9 @@ class SettingsView extends StatelessWidget {
             ),
           ),
 
-// ======================================================
-// WHITE OVERLAY
-// ======================================================
+          // ========================================================
+          // WHITE OVERLAY
+          // ========================================================
 
           Positioned.fill(
             child: Container(
@@ -1044,8 +1065,10 @@ class SettingsView extends StatelessWidget {
             ),
           ),
 
+          // ========================================================
+          // CONTENT
+          // ========================================================
 
-          // Main content
           SafeArea(
             child: Padding(
               padding: EdgeInsets.symmetric(
@@ -1054,125 +1077,178 @@ class SettingsView extends StatelessWidget {
               child: Column(
                 children: [
                   Expanded(
-                    child: ListView.builder(
+                    child: SingleChildScrollView(
                       padding: EdgeInsets.only(
                         top: 14.h,
+                        bottom: 10.h,
                       ),
-                      itemCount: settings.length,
-                      itemBuilder: (context, index) {
-                        final item = settings[index];
+                      child: Container(
+                        width: double.infinity,
 
-                        final bool isInvoice =
-                            item["isInvoice"] ?? false;
+                        // ==================================================
+                        // WHITE MAIN CONTAINER
+                        // ==================================================
 
-                        return GestureDetector(
-                          onTap: () {
-                            if (isInvoice) {
-                              _showInvoiceDialog(
-                                context,
-                              );
-                            } else if (item["page"] !=
-                                null) {
-                              Get.to(item["page"]);
-                            }
-                          },
-                          child: Container(
-                            height: 56.h,
-                            margin: EdgeInsets.only(
-                              bottom: 12.h,
-                            ),
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 14.w,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius:
-                              BorderRadius.circular(
-                                14.r,
+                        padding: EdgeInsets.fromLTRB(
+                          12.w,
+                          14.h,
+                          12.w,
+                          14.h,
+                        ),
+
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius:
+                          BorderRadius.circular(14.r),
+                          border: Border.all(
+                            color:
+                            const Color(0xFFF1E8E4),
+                            width: 0.8.w,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color:
+                              Colors.black.withOpacity(
+                                0.035,
                               ),
-                              border: Border.all(
-                                color:
-                                const Color(0xffEFEFEF),
-                              ),
+                              blurRadius: 12.r,
+                              offset: Offset(0, 3.h),
                             ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  item["icon"],
-                                  size: 20.sp,
-                                  color:
-                                  const Color(0xffFF6A00),
-                                ),
+                          ],
+                        ),
 
-                                SizedBox(width: 12.w),
+                        child: Column(
+                          children: [
+                            // ==================================================
+                            // SETTINGS ITEMS
+                            // ==================================================
 
-                                Expanded(
-                                  child: Text(
-                                    item["title"],
-                                    style: TextStyle(
-                                      letterSpacing: 1.5.w,
-                                      fontSize: 14.sp,
-                                      fontWeight:
-                                      FontWeight.w400,
-                                      color: const Color(
-                                        0xff444444,
+                            ...List.generate(
+                              settings.length,
+                                  (index) {
+                                final item =
+                                settings[index];
+
+                                final bool isInvoice =
+                                    item["isInvoice"] ??
+                                        false;
+
+                                final bool isLast =
+                                    index ==
+                                        settings.length - 1;
+
+                                return GestureDetector(
+                                  onTap: () {
+                                    if (isInvoice) {
+                                      _showInvoiceDialog(
+                                        context,
+                                      );
+                                    } else if (item["page"] !=
+                                        null) {
+                                      Get.to(
+                                        item["page"],
+                                      );
+                                    }
+                                  },
+                                  child: Container(
+                                    height: 56.h,
+                                    margin: EdgeInsets.only(
+                                      bottom:
+                                      isLast ? 0 : 12.h,
+                                    ),
+                                    padding:
+                                    EdgeInsets.symmetric(
+                                      horizontal: 14.w,
+                                    ),
+                                    decoration:
+                                    BoxDecoration(
+                                      color:
+                                      const Color(
+                                        0xFFFFFCFB,
+                                      ),
+                                      borderRadius:
+                                      BorderRadius
+                                          .circular(
+                                        12.r,
+                                      ),
+                                      border: Border.all(
+                                        color:
+                                        const Color(
+                                          0xFFF1E8E4,
+                                        ),
+                                        width: 0.8.w,
                                       ),
                                     ),
-                                  ),
-                                ),
+                                    child: Row(
+                                      children: [
+                                        // ICON
+                                        Icon(
+                                          item["icon"],
+                                          size: 20.sp,
+                                          color:
+                                          const Color(
+                                            0xffFF6A00,
+                                          ),
+                                        ),
 
-                                if (item["verified"] ==
-                                    true)
-                                  Icon(
-                                    Icons.check_circle,
-                                    color: Colors.green,
-                                    size: 18.sp,
-                                  )
-                                else
-                                  Icon(
-                                    Icons
-                                        .keyboard_arrow_right,
-                                    color: const Color(
-                                      0xffB5B5B5,
+                                        SizedBox(
+                                          width: 12.w,
+                                        ),
+
+                                        // TITLE
+                                        Expanded(
+                                          child: Text(
+                                            item["title"],
+                                            style:
+                                            GoogleFonts
+                                                .poppins(
+                                              letterSpacing:
+                                              0.8.w,
+                                              fontSize:
+                                              13.sp,
+                                              fontWeight:
+                                              FontWeight
+                                                  .w400,
+                                              color:
+                                              const Color(
+                                                0xff444444,
+                                              ),
+                                            ),
+                                            maxLines: 1,
+                                            overflow:
+                                            TextOverflow
+                                                .ellipsis,
+                                          ),
+                                        ),
+
+                                        // VERIFIED / ARROW
+                                        if (item[
+                                        "verified"] ==
+                                            true)
+                                          Icon(
+                                            Icons
+                                                .check_circle,
+                                            color:
+                                            Colors.green,
+                                            size: 18.sp,
+                                          )
+                                        else
+                                          Icon(
+                                            Icons
+                                                .keyboard_arrow_right,
+                                            color:
+                                            const Color(
+                                              0xffB5B5B5,
+                                            ),
+                                            size: 20.sp,
+                                          ),
+                                      ],
                                     ),
-                                    size: 20.sp,
                                   ),
-                              ],
+                                );
+                              },
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-
-                  SizedBox(height: 15.h),
-
-                  // ==================================================
-                  // LOGOUT BUTTON — SAME AS BEFORE
-                  // ==================================================
-
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50.h,
-                    child: OutlinedButton(
-                      onPressed: () =>
-                          _showLogoutDialog(context),
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(
-                          color: Color(0xffFF6A00),
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius:
-                          BorderRadius.circular(30.r),
-                        ),
-                      ),
-                      child: Text(
-                        "Logout",
-                        style: TextStyle(
-                          letterSpacing: 1.5.w,
-                          fontSize: 14.sp,
-                          color: const Color(0xffFF6A00),
-                          fontWeight: FontWeight.w600,
+                          ],
                         ),
                       ),
                     ),
@@ -1180,21 +1256,58 @@ class SettingsView extends StatelessWidget {
 
                   SizedBox(height: 12.h),
 
-                  // ==================================================
-                  // DELETE ACCOUNT — CUSTOM BUTTON
-                  // ==================================================
+                  // ========================================================
+                  // LOGOUT BUTTON
+                  // ========================================================
+
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50.h,
+                    child: OutlinedButton(
+                      onPressed: () {
+                        _showLogoutDialog(context);
+                      },
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(
+                          color: Color(0xffFF6A00),
+                        ),
+                        shape:
+                        RoundedRectangleBorder(
+                          borderRadius:
+                          BorderRadius.circular(30.r),
+                        ),
+                      ),
+                      child: Text(
+                        "Logout",
+                        style: GoogleFonts.poppins(
+                          letterSpacing: 1.2.w,
+                          fontSize: 14.sp,
+                          color:
+                          const Color(0xffFF6A00),
+                          fontWeight:
+                          FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  SizedBox(height: 12.h),
+
+                  // ========================================================
+                  // DELETE ACCOUNT
+                  // ========================================================
 
                   CustomButton(
                     text: "Delete Account",
                     onPressed: () {
-                      _showDeleteAccountDialog(context);
+                      _showDeleteAccountDialog(
+                        context,
+                      );
                     },
                     backgroundColor:
                     const Color(0xffFF6B00),
                     textColor: Colors.white,
-
                     borderRadius: 30.r,
-
                     fontWeight: FontWeight.w600,
                     letterSpacing: 1.5.w,
                     showArrow: true,

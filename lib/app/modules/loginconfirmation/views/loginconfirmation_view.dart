@@ -381,7 +381,7 @@ class LoginconfirmationView extends GetView<LoginconfirmationController> {
                                             12.r,
                                           ),
                                           child: Image.asset(
-                                            'assets/icons/app_icon.jpeg',
+                                            'assets/icons/app_icon.png',
                                             width: 48.w,
                                             height: 48.w,
                                             fit: BoxFit.contain,

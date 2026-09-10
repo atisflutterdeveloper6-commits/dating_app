@@ -14,6 +14,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:shimmer/shimmer.dart';
@@ -21,6 +22,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 import '../../../custom_widget/custom_button.dart';
+import '../../../custom_widget/storage_services.dart';
 import '../../paymentplan/controllers/paymentplan_controller.dart';
 
 class HomepageView extends StatefulWidget {
@@ -114,12 +116,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
       }
     });
   }
-  String getAppName() {
-    if (Get.isRegistered<PaymentplanController>()) {
-      return Get.find<PaymentplanController>().getSubscription().appName;
-    }
-    return "Vibely"; // fallback
-  }
+
   // Filter state variables
   String _selectedDistance = "40km";
   String _selectedAgeRange = "22-30";
@@ -1065,6 +1062,12 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
     // ✅ Apply all filters (this calls fetchProfilesWithFilters which combines both)
     controller.fetchProfilesWithFilters();
   }
+
+// ============================================================================
+// ============================================================================
+// ALL FILTER
+// ============================================================================
+
   void _showAllFilter() {
     showModalBottomSheet(
       context: context,
@@ -1078,7 +1081,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                 alignment: Alignment.topCenter,
                 children: [
                   Positioned(
-                    top: 300,
+                    top: 300.h,
                     left: 0,
                     right: 0,
                     bottom: 0,
@@ -1088,7 +1091,6 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                       ),
                       child: Stack(
                         children: [
-                          // 🔥 Background Image
                           Positioned.fill(
                             child: Image.asset(
                               "assets/images/LoginBack2.png",
@@ -1096,134 +1098,201 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                             ),
                           ),
 
-                          // 🔥 White Opacity Overlay
                           Positioned.fill(
                             child: Container(
                               color: Colors.white.withOpacity(0.70),
                             ),
                           ),
 
-                          // 🔥 Bottom Sheet Content
-                          Container(
-                            child: Column(
-                              children: [
-                                SizedBox(height: 35.h),
+                          Center(
+                            child: SingleChildScrollView(
+                              physics: const BouncingScrollPhysics(),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 18.w,
+                                vertical: 20.h,
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    "All Filters",
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 20.sp,
+                                      fontWeight: FontWeight.w700,
+                                      color: const Color(0xff1E1E1E),
+                                    ),
+                                  ),
 
-                                Padding(
-                                  padding:
-                                  EdgeInsets.symmetric(horizontal: 20.w),
-                                  child: Row(
-                                    children: [
-                                      SizedBox(width: 60.w),
+                                  SizedBox(height: 20.h),
 
-                                      Expanded(
-                                        child: Text(
-                                          "All Filters",
-                                          textAlign: TextAlign.center,
-                                          style: TextStyle(
-                                            fontSize: 22.sp,
-                                            fontWeight: FontWeight.w700,
-                                          ),
-                                        ),
+                                  Container(
+                                    width: double.infinity,
+                                    padding: EdgeInsets.fromLTRB(
+                                      16.w,
+                                      18.h,
+                                      16.w,
+                                      16.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius:
+                                      BorderRadius.circular(20.r),
+                                      border: Border.all(
+                                        color: const Color(0xFFF1E8E4),
+                                        width: 0.8.w,
                                       ),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color:
+                                          Colors.black.withOpacity(0.06),
+                                          blurRadius: 15.r,
+                                          offset: Offset(0, 4.h),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            SizedBox(width: 55.w),
 
-                                      SizedBox(
-                                        width: 60.w,
-                                        child: TextButton(
-                                          onPressed: () {
-                                            setModalState(() {
-                                              _selectedDistance =
-                                              "Select Distance";
-                                              _selectedAgeRange =
-                                              "Select Age";
-                                            });
+                                            Expanded(
+                                              child: Text(
+                                                "Filters",
+                                                textAlign: TextAlign.center,
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 16.sp,
+                                                  fontWeight: FontWeight.w600,
+                                                  color:
+                                                  const Color(0xff222222),
+                                                ),
+                                              ),
+                                            ),
 
-                                            setState(() {
-                                              _selectedDistance =
-                                              "Select Distance";
-                                              _selectedAgeRange =
-                                              "Select Age";
-                                            });
+                                            SizedBox(
+                                              width: 55.w,
+                                              child: TextButton(
+                                                onPressed: () {
+                                                  setModalState(() {
+                                                    _selectedDistance =
+                                                    "Select Distance";
+                                                    _selectedAgeRange =
+                                                    "Select Age";
+                                                  });
 
-                                            controller.selectedDistance.value =
-                                            "40km";
-                                            controller.selectedAgeRange.value =
-                                            "22-30";
+                                                  setState(() {
+                                                    _selectedDistance =
+                                                    "Select Distance";
+                                                    _selectedAgeRange =
+                                                    "Select Age";
+                                                  });
 
-                                            _forceRefreshProfiles();
-                                          },
-                                          style: TextButton.styleFrom(
-                                            padding: EdgeInsets.zero,
-                                          ),
-                                          child: Text(
-                                            "Reset",
-                                            style: TextStyle(
-                                              color: Colors.orange,
-                                              fontSize: 14.sp,
-                                              fontWeight: FontWeight.w600,
+                                                  controller.selectedDistance
+                                                      .value = "40km";
+
+                                                  controller.selectedAgeRange
+                                                      .value = "22-30";
+
+                                                  _forceRefreshProfiles();
+                                                },
+                                                style: TextButton.styleFrom(
+                                                  padding: EdgeInsets.zero,
+                                                  minimumSize: Size.zero,
+                                                  tapTargetSize:
+                                                  MaterialTapTargetSize
+                                                      .shrinkWrap,
+                                                ),
+                                                child: Text(
+                                                  "Reset",
+                                                  style: GoogleFonts.poppins(
+                                                    color:
+                                                    const Color(0xffFF6B00),
+                                                    fontSize: 12.sp,
+                                                    fontWeight:
+                                                    FontWeight.w600,
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+
+                                        SizedBox(height: 14.h),
+
+                                        Container(
+                                          width: double.infinity,
+                                          padding: EdgeInsets.all(10.w),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFFFFCFB),
+                                            borderRadius:
+                                            BorderRadius.circular(16.r),
+                                            border: Border.all(
+                                              color:
+                                              const Color(0xFFF1E8E4),
+                                              width: 0.8.w,
                                             ),
                                           ),
+                                          child: Column(
+                                            children: [
+                                              _filterTile(
+                                                title: "Distance",
+                                                value: _selectedDistance,
+                                                onTap: () {
+                                                  Navigator.pop(context);
+                                                  _showDistanceFilter();
+                                                },
+                                              ),
+
+                                              SizedBox(height: 8.h),
+
+                                              _filterTile(
+                                                title: "Age Range",
+                                                value: _selectedAgeRange,
+                                                onTap: () {
+                                                  Navigator.pop(context);
+                                                  _showAgeFilter();
+                                                },
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
 
-                                SizedBox(height: 22.h),
+                                        SizedBox(height: 20.h),
 
-                                Expanded(
-                                  child: ListView(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 20.w,
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: CustomButton(
+                                            text:
+                                            "Apply Filters (${_getFilterCount()})",
+                                            onPressed: () {
+                                              Navigator.pop(context);
+
+                                              controller.selectedDistance
+                                                  .value =
+                                                  _selectedDistance;
+
+                                              controller.selectedAgeRange
+                                                  .value =
+                                                  _selectedAgeRange;
+
+                                              controller.applyFilters();
+                                            },
+                                            textColor: Colors.white,
+                                            backgroundColor:
+                                            const Color(0xffFF6B00),
+                                            borderRadius: 30.r,
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.w600,
+                                            showArrow: true,
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    children: [
-                                      _filterTile(
-                                        title: "Distance",
-                                        value: _selectedDistance,
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                          _showDistanceFilter();
-                                        },
-                                      ),
-
-                                      _filterTile(
-                                        title: "Age Range",
-                                        value: _selectedAgeRange,
-                                        onTap: () {
-                                          Navigator.pop(context);
-                                          _showAgeFilter();
-                                        },
-                                      ),
-                                    ],
                                   ),
-                                ),
-
-                                Padding(
-                                  padding: EdgeInsets.fromLTRB(
-                                    20.w,
-                                    10.h,
-                                    20.w,
-                                    25.h,
-                                  ),
-                                  child: CustomButton(
-                                    text:
-                                    "Apply Filters (${_getFilterCount()})",
-                                    onPressed: () {
-                                      Navigator.pop(context);
-
-                                      controller.selectedDistance.value =
-                                          _selectedDistance;
-                                      controller.selectedAgeRange.value =
-                                          _selectedAgeRange;
-
-                                      controller.applyFilters();
-                                    },
-                                    textColor: Colors.white,
-                                    borderRadius: 30.r,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -1232,7 +1301,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                   ),
 
                   Positioned(
-                    top: 265,
+                    top: 270.h,
                     child: GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Container(
@@ -1259,15 +1328,18 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
     );
   }
 
+// ============================================================================
+// DISTANCE FILTER
+// ============================================================================
 
   void _showDistanceFilter() {
-    List<String> distances = [
+    final List<String> distances = [
       "10km",
       "20km",
       "30km",
       "40km",
       "50km",
-      "100km"
+      "100km",
     ];
 
     showModalBottomSheet(
@@ -1282,7 +1354,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                 alignment: Alignment.topCenter,
                 children: [
                   Positioned(
-                    top: 300,
+                    top: 295.h,
                     left: 0,
                     right: 0,
                     bottom: 0,
@@ -1292,7 +1364,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                       ),
                       child: Stack(
                         children: [
-                          // 🔥 Background Image
+                          // BACKGROUND
                           Positioned.fill(
                             child: Image.asset(
                               "assets/images/LoginBack2.png",
@@ -1300,75 +1372,145 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                             ),
                           ),
 
-                          // 🔥 White Opacity Overlay
+                          // OVERLAY
                           Positioned.fill(
                             child: Container(
                               color: Colors.white.withOpacity(0.70),
                             ),
                           ),
 
-                          // 🔥 Bottom Sheet Content
-                          Container(
-                            child: Column(
-                              children: [
-                                SizedBox(height: 35.h),
-
-                                Text(
-                                  "Select Distance",
-                                  style: TextStyle(
-                                    fontSize: 22.sp,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                          // CENTER CONTENT
+                          Padding(
+                            padding: const EdgeInsets.only(top:28.0),
+                            child: Center(
+                              child: SingleChildScrollView(
+                                physics: const BouncingScrollPhysics(),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 18.w,
+                                  vertical: 20.h,
                                 ),
-
-                                SizedBox(height: 22.h),
-
-                                Expanded(
-                                  child: ListView(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 20.w,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    // TITLE
+                                    Text(
+                                      "Select Distance",
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 20.sp,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xff1E1E1E),
+                                      ),
                                     ),
-                                    children: distances.map((distance) {
-                                      return _locationTile(
-                                        title: distance,
-                                        subtitle:
-                                        "Show people within $distance",
-                                        icon: Icons.location_on,
-                                        isSelected:
-                                        _selectedDistance == distance,
-                                        onTap: () {
-                                          setModalState(() {
-                                            _selectedDistance = distance;
-                                          });
 
-                                          controller.selectedDistance.value =
-                                              distance;
-                                        },
-                                      );
-                                    }).toList(),
-                                  ),
-                                ),
+                                    SizedBox(height: 14.h),
 
-                                Padding(
-                                  padding: EdgeInsets.fromLTRB(
-                                    20.w,
-                                    10.h,
-                                    20.w,
-                                    25.h,
-                                  ),
-                                  child: CustomButton(
-                                    text: "Apply Distance",
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      controller
-                                          .fetchProfilesWithDistanceFilter();
-                                    },
-                                    textColor: Colors.white,
-                                    borderRadius: 30.r,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                    // WHITE CONTAINER
+                                    Container(
+                                      width: double.infinity,
+                                      padding: EdgeInsets.fromLTRB(
+                                        16.w,
+                                        18.h,
+                                        16.w,
+                                        16.h,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius:
+                                        BorderRadius.circular(20.r),
+                                        border: Border.all(
+                                          color: const Color(0xFFF1E8E4),
+                                          width: 0.8.w,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                            Colors.black.withOpacity(0.06),
+                                            blurRadius: 15.r,
+                                            offset: Offset(0, 4.h),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          // INNER OPTIONS
+                                          Container(
+                                            width: double.infinity,
+                                            padding: EdgeInsets.all(10.w),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFFFFCFB),
+                                              borderRadius:
+                                              BorderRadius.circular(16.r),
+                                              border: Border.all(
+                                                color:
+                                                const Color(0xFFF1E8E4),
+                                                width: 0.8.w,
+                                              ),
+                                            ),
+                                            child: Column(
+                                              children:
+                                              distances.map((distance) {
+                                                return Padding(
+                                                  padding: EdgeInsets.only(
+                                                    bottom:
+                                                    distance ==
+                                                        distances.last
+                                                        ? 0
+                                                        : 8.h,
+                                                  ),
+                                                  child: _locationTile(
+                                                    title: distance,
+                                                    subtitle:
+                                                    "Show people within $distance",
+                                                    icon: Icons.location_on,
+                                                    isSelected:
+                                                    _selectedDistance ==
+                                                        distance,
+                                                    onTap: () {
+                                                      setModalState(() {
+                                                        _selectedDistance =
+                                                            distance;
+                                                      });
+
+                                                      controller
+                                                          .selectedDistance
+                                                          .value = distance;
+                                                    },
+                                                  ),
+                                                );
+                                              }).toList(),
+                                            ),
+                                          ),
+
+                                          SizedBox(height: 20.h),
+
+                                          // APPLY
+                                          SizedBox(
+                                            width: double.infinity,
+                                            child: CustomButton(
+                                              text: "Apply Distance",
+                                              onPressed: () {
+                                                Navigator.pop(context);
+
+                                                controller
+                                                    .fetchProfilesWithDistanceFilter();
+                                              },
+                                              textColor: Colors.white,
+                                              backgroundColor:
+                                              const Color(0xffFF6B00),
+                                              borderRadius: 30.r,
+                                              fontSize: 14.sp,
+                                              fontWeight: FontWeight.w600,
+                                              showArrow: true,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
+                              ),
                             ),
                           ),
                         ],
@@ -1376,8 +1518,9 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                     ),
                   ),
 
+                  // CLOSE
                   Positioned(
-                    top: 265,
+                    top: 265.h,
                     child: GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Container(
@@ -1404,14 +1547,32 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
     );
   }
 
+// ============================================================================
+// AGE FILTER
+// ============================================================================
 
   void _showAgeFilter() {
-    List<Map<String, String>> ageRanges = [
-      {"label": "18-22", "subtitle": "Young adults"},
-      {"label": "22-30", "subtitle": "Adults"},
-      {"label": "30-40", "subtitle": "Mature adults"},
-      {"label": "40+", "subtitle": "40 and above"},
-      {"label": "Any", "subtitle": "All ages"},
+    final List<Map<String, String>> ageRanges = [
+      {
+        "label": "18-22",
+        "subtitle": "Young adults",
+      },
+      {
+        "label": "22-30",
+        "subtitle": "Adults",
+      },
+      {
+        "label": "30-40",
+        "subtitle": "Mature adults",
+      },
+      {
+        "label": "40+",
+        "subtitle": "40 and above",
+      },
+      {
+        "label": "Any",
+        "subtitle": "All ages",
+      },
     ];
 
     showModalBottomSheet(
@@ -1426,7 +1587,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                 alignment: Alignment.topCenter,
                 children: [
                   Positioned(
-                    top: 300,
+                    top: 295.h,
                     left: 0,
                     right: 0,
                     bottom: 0,
@@ -1436,7 +1597,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                       ),
                       child: Stack(
                         children: [
-                          // 🔥 Background Image
+                          // BACKGROUND
                           Positioned.fill(
                             child: Image.asset(
                               "assets/images/LoginBack2.png",
@@ -1444,76 +1605,148 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                             ),
                           ),
 
-                          // 🔥 White Opacity Overlay
+                          // OVERLAY
                           Positioned.fill(
                             child: Container(
                               color: Colors.white.withOpacity(0.70),
                             ),
                           ),
-
-                          // 🔥 Bottom Sheet Content
-                          Container(
-                            child: Column(
-                              children: [
-                                SizedBox(height: 35.h),
-
-                                Text(
-                                  "Select Age Range",
-                                  style: TextStyle(
-                                    fontSize: 22.sp,
-                                    fontWeight: FontWeight.w700,
-                                  ),
+                          SizedBox(height: 14.h),
+                          // CENTER CONTENT
+                          Padding(
+                            padding: const EdgeInsets.only(top:28.0),
+                            child: Center(
+                              child: SingleChildScrollView(
+                                physics: const BouncingScrollPhysics(),
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 18.w,
+                                  vertical: 20.h,
                                 ),
-
-                                SizedBox(height: 22.h),
-
-                                Expanded(
-                                  child: ListView(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: 20.w,
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    // TITLE
+                                    Text(
+                                      "Select Age Range",
+                                      textAlign: TextAlign.center,
+                                      style: GoogleFonts.poppins(
+                                        fontSize: 18.sp,
+                                        fontWeight: FontWeight.w700,
+                                        color: const Color(0xff1E1E1E),
+                                      ),
                                     ),
-                                    children: ageRanges.map((ageRange) {
-                                      return _locationTile(
-                                        title: ageRange["label"]!,
-                                        subtitle: ageRange["subtitle"]!,
-                                        icon: Icons.cake,
-                                        isSelected:
-                                        _selectedAgeRange ==
-                                            ageRange["label"],
-                                        onTap: () {
-                                          setModalState(() {
-                                            _selectedAgeRange =
-                                            ageRange["label"]!;
-                                          });
 
-                                          controller.selectedAgeRange.value =
-                                          ageRange["label"]!;
-                                        },
-                                      );
-                                    }).toList(),
-                                  ),
+                                    SizedBox(height: 14.h),
+
+                                    // WHITE CONTAINER
+                                    Container(
+                                      width: double.infinity,
+                                      padding: EdgeInsets.fromLTRB(
+                                        16.w,
+                                        18.h,
+                                        16.w,
+                                        16.h,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white,
+                                        borderRadius:
+                                        BorderRadius.circular(20.r),
+                                        border: Border.all(
+                                          color: const Color(0xFFF1E8E4),
+                                          width: 0.8.w,
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                            Colors.black.withOpacity(0.06),
+                                            blurRadius: 15.r,
+                                            offset: Offset(0, 4.h),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          // INNER OPTIONS
+                                          Container(
+                                            width: double.infinity,
+                                            padding: EdgeInsets.all(10.w),
+                                            decoration: BoxDecoration(
+                                              color: const Color(0xFFFFFCFB),
+                                              borderRadius:
+                                              BorderRadius.circular(16.r),
+                                              border: Border.all(
+                                                color:
+                                                const Color(0xFFF1E8E4),
+                                                width: 0.8.w,
+                                              ),
+                                            ),
+                                            child: Column(
+                                              children:
+                                              ageRanges.map((ageRange) {
+                                                final String label =
+                                                ageRange["label"]!;
+
+                                                return Padding(
+                                                  padding: EdgeInsets.only(
+                                                    bottom:
+                                                    label ==
+                                                        ageRanges.last[
+                                                        "label"]
+                                                        ? 0
+                                                        : 8.h,
+                                                  ),
+                                                  child: _locationTile(
+                                                    title: label,
+                                                    subtitle:
+                                                    ageRange["subtitle"]!,
+                                                    icon: Icons.cake,
+                                                    isSelected:
+                                                    _selectedAgeRange ==
+                                                        label,
+                                                    onTap: () {
+                                                      setModalState(() {
+                                                        _selectedAgeRange =
+                                                            label;
+                                                      });
+
+                                                      controller
+                                                          .selectedAgeRange
+                                                          .value = label;
+                                                    },
+                                                  ),
+                                                );
+                                              }).toList(),
+                                            ),
+                                          ),
+
+                                          SizedBox(height: 20.h),
+
+                                          // APPLY
+                                          SizedBox(
+                                            width: double.infinity,
+                                            child: CustomButton(
+                                              text: "Apply Age Range",
+                                              onPressed: () {
+                                                Navigator.pop(context);
+
+                                                _applyFilters();
+                                              },
+                                              textColor: Colors.white,
+                                              backgroundColor:
+                                              const Color(0xffFF6B00),
+                                              borderRadius: 30.r,
+                                              fontSize: 14.sp,
+                                              fontWeight: FontWeight.w600,
+                                              showArrow: true,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
                                 ),
-
-                                Padding(
-                                  padding: EdgeInsets.fromLTRB(
-                                    20.w,
-                                    10.h,
-                                    20.w,
-                                    25.h,
-                                  ),
-                                  child: CustomButton(
-                                    text: "Apply Age Range",
-                                    onPressed: () {
-                                      Navigator.pop(context);
-
-                                      _applyFilters();
-                                    },
-                                    textColor: Colors.white,
-                                    borderRadius: 30.r,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
                           ),
                         ],
@@ -1521,8 +1754,9 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                     ),
                   ),
 
+                  // CLOSE
                   Positioned(
-                    top: 265,
+                    top: 265.h,
                     child: GestureDetector(
                       onTap: () => Navigator.pop(context),
                       child: Container(
@@ -1548,6 +1782,26 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
       },
     );
   }
+
+// ============================================================================
+// LOCATION TILE
+// ============================================================================
+
+
+// ============================================================================
+// LOCATION TILE
+// ============================================================================
+
+
+// ============================================================================
+// DISTANCE FILTER
+// ============================================================================
+
+
+// ============================================================================
+// AGE FILTER
+// ============================================================================
+
 
   // 🔥🔥🔥 UPDATED: Show location picker with Google Places search
   // 🔥🔥🔥 UPDATED: Show location picker with Google Places search
@@ -2038,7 +2292,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                       Text(
                         title.isNotEmpty ? title : 'Unknown',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 12,
                           fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
                           color: isSelected ? Colors.orange : Colors.black,
                         ),
@@ -2050,7 +2304,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                         subtitle.isNotEmpty ? subtitle : 'Tap to select',
                         style: const TextStyle(
                           color: Colors.grey,
-                          fontSize: 13,
+                          fontSize: 10,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -2628,17 +2882,16 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                     ),
                   ),
 
-                  Text(
-                    getShortAppName(
-                      getAppName(),
-                    ),
-                    maxLines: 1,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFFFF6B00),
-                      letterSpacing: .3,
-                    ),
+          Text(
+            StorageService().getAppName(),
+            maxLines: 1,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w700,
+              color: const Color(0xFFFF6B00),
+              letterSpacing: .3,
+            ),
+
                   ),
                 ],
               ),
@@ -3302,7 +3555,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
       style: TextStyle(
         letterSpacing: 1.5,
         color: Colors.white,
-        fontSize: 20.sp,
+        fontSize: 18.sp,
         fontWeight: FontWeight.bold,
       ),
     ),
@@ -3349,14 +3602,14 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                         Icon(
                           Icons.location_on,
                           color: Colors.white,
-                          size: 18.sp,
+                          size: 13.sp,
                         ),
                         SizedBox(width: 5.w),
                         Text(
                           "${profile.distance} away (${profile.location})",
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 12.sp,
+                            fontSize: 10.sp,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -3399,7 +3652,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                                   "Place to meet",
                                   style: TextStyle(
                                     color: Colors.white,
-                                    fontSize: 12.sp,
+                                    fontSize: 10.sp,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -3449,7 +3702,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                                     profile.placeToMeet ? "Yes" : "No",
                                     style: TextStyle(
                                       color: Colors.white,
-                                      fontSize: 12.sp,
+                                      fontSize: 10.sp,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -3460,7 +3713,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                         ],
                       ),
 
-                      SizedBox(height: 5.h),
+
                     ],
                   ),
                 ],
@@ -3479,7 +3732,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                       Icons.close_rounded,
                       Colors.white,
                       const Color(0xFF64748B),
-                      size: 65,
+                      size: 50,
                       onTap: () {
                         setState(() {
                           _isButtonTapAction = true;
@@ -3495,7 +3748,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                       Icons.favorite,
                       Colors.transparent,
                       Colors.white,
-                      size: 80,
+                      size: 60,
                       isLike: true,
                       onTap: () {
                         setState(() {
@@ -3512,7 +3765,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
                       Icons.chat_bubble,
                       Colors.white,
                       const Color(0xFF4285F4),
-                      size: 65,
+                      size: 50,
                       imagePath: 'assets/icons/message.png',
                       onTap: () {
                         if (profile.id.isEmpty) {
@@ -3700,7 +3953,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
     final bool firstChip = isFilter;
 
     return Padding(
-      padding: const EdgeInsets.only(right: 10),
+      padding: EdgeInsets.only(right: 10.w),
       child: GestureDetector(
         onTap: onTap,
         child: Chip(
@@ -3709,19 +3962,19 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
             children: [
               Icon(
                 icon,
-                size: 17,
+                size: 16.sp,
                 color: firstChip
                     ? Colors.white
                     : Colors.black,
               ),
 
-              const SizedBox(width: 5),
+              SizedBox(width: 5.w),
 
               Text(
                 title,
                 style: TextStyle(
-                  fontSize: 12,
-                  letterSpacing: 1.5,
+                  fontSize: 10.sp,
+                  letterSpacing: 1.5.w,
                   color: firstChip
                       ? Colors.white
                       : Colors.black,
@@ -3733,20 +3986,20 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
 
               if (firstChip && _getFilterCount() > 0)
                 Container(
-                  margin: const EdgeInsets.only(left: 5),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 5,
-                    vertical: 2,
+                  margin: EdgeInsets.only(left: 5.w),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 5.w,
+                    vertical: 2.h,
                   ),
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(10.r),
                   ),
                   child: Text(
                     _getFilterCount().toString(),
-                    style: const TextStyle(
-                      color: Color(0xffFF6B00),
-                      fontSize: 10,
+                    style: TextStyle(
+                      color: const Color(0xffFF6B00),
+                      fontSize: 10.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -3761,20 +4014,20 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
               : Colors.white,
 
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(20.r),
             side: BorderSide(
               color: firstChip
                   ? const Color(0xffFF6B00)
                   : selected
                   ? Colors.orange
                   : Colors.grey.shade300,
-              width: 1,
+              width: 1.w,
             ),
           ),
 
-          padding: const EdgeInsets.symmetric(
-            horizontal: 11,
-            vertical: 7,
+          padding: EdgeInsets.symmetric(
+            horizontal: 11.w,
+            vertical: 7.h,
           ),
         ),
       ),
@@ -3785,7 +4038,7 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
       IconData icon,
       Color bg,
       Color iconColor, {
-        double size = 65,
+        double size = 40,
         VoidCallback? onTap,
         bool isLike = false,
         String? imagePath,
@@ -3793,8 +4046,8 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: size,
-        height: size,
+        width: size.w,
+        height: size.w,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
 
@@ -3816,20 +4069,20 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
               ? [
             BoxShadow(
               color: const Color(0xFFFF6100).withOpacity(0.65),
-              blurRadius: 18,
-              spreadRadius: 4,
+              blurRadius: 18.r,
+              spreadRadius: 4.r,
             ),
             BoxShadow(
               color: Colors.black.withOpacity(0.15),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
+              blurRadius: 10.r,
+              offset: Offset(0, 4.h),
             ),
           ]
               : [
             BoxShadow(
               color: Colors.black.withOpacity(0.12),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
+              blurRadius: 10.r,
+              offset: Offset(0, 3.h),
             ),
           ],
         ),
@@ -3838,14 +4091,14 @@ class _HomepageViewState extends State<HomepageView> with TickerProviderStateMix
           child: imagePath != null
               ? Image.asset(
             imagePath,
-            width: size * 0.70,
-            height: size * 0.70,
+            width: size.w * 0.70,
+            height: size.w * 0.70,
             fit: BoxFit.contain,
           )
               : Icon(
             icon,
             color: iconColor,
-            size: size * 0.45,
+            size: size.sp * 0.45,
           ),
         ),
       ),
@@ -3939,7 +4192,7 @@ Widget _buildOnlineStatusBadge(String profileId) {
                   Text(
                     isOnline ? "Active" : "Offline",
                     style: const TextStyle(
-                      fontSize: 12,
+                      fontSize: 10,
                       color: Colors.white,
                       fontWeight: FontWeight.w600,
                       letterSpacing: 0.3,

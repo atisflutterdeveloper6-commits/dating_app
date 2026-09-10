@@ -275,6 +275,7 @@ class PaymentplanController extends GetxController {
               final planData = jsonData['data']['subscriptionPlan'];
               final subData = SubscriptionData.fromJson(planData);
               subscription.value = subData;
+              await _storage.saveAppName(subData.appName);
               await initializeVideo(subData.backgroundVideo);
             }
             return true;

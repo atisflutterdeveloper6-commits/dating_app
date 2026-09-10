@@ -1,3 +1,6 @@
+
+import 'dart:ui';
+
 import 'package:dating_app/app/modules/dashboard/controllers/dashboard_controller.dart';
 import 'package:dating_app/app/modules/homepage/views/homepage_view.dart';
 import 'package:dating_app/app/modules/inbox/views/inbox_view.dart';
@@ -5,34 +8,42 @@ import 'package:dating_app/app/modules/like/views/like_view.dart';
 import 'package:dating_app/app/modules/premium/views/premium_view.dart';
 import 'package:dating_app/app/modules/profile/views/profile_view.dart';
 import 'package:dating_app/app/modules/settings/views/settings_view.dart';
-import 'package:dating_app/app/modules/discover/views/discover_view.dart'; // Create this view
+import 'package:dating_app/app/modules/discover/views/discover_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 class DashboardView extends GetView<DashboardController> {
-  const DashboardView({super.key});
+const DashboardView({super.key});
 
-  @override
-  Widget build(BuildContext context) {
-    // Original pages list — same order/index as before
-    final List<Widget> pages = [
-      const HomepageView(), // index 0
-      InboxView(),          // index 1
-      const LikeView(),     // index 2
-      const HomepageView(), // index 3 - MIDDLE BUTTON (Match) — replace with DiscoverView() if needed
-      PremiumView(),         // index 4
-      ProfileView(),          // index 5
-      SettingsView(),          // index 6
-    ];
+@override
+Widget build(BuildContext context) {
+final List<Widget> pages = [
+const HomepageView(), // index 0
+InboxView(),          // index 1
+const LikeView(),     // index 2
+const HomepageView(), // index 3 - Match
+PremiumView(),        // index 4
+ProfileView(),        // index 5
+SettingsView(),       // index 6
+];
 
-    return Scaffold(
-      backgroundColor: const Color(0xffF5F5F5),
-      extendBody: true,
-      body: Obx(() => pages[controller.currentIndex.value]),
-      bottomNavigationBar: _buildBottomBar(context),
-    );
-  }
+return Scaffold(
+backgroundColor: const Color(0xffF5F5F5),
+extendBody: true,
+
+body: Obx(
+() => pages[controller.currentIndex.value],
+),
+
+bottomNavigationBar: _buildBottomBar(context),
+);
+}
+
+// ==============================================================
+// BOTTOM NAVIGATION BAR
+// ==============================================================
 
   Widget _buildBottomBar(BuildContext context) {
     return SafeArea(
@@ -43,7 +54,10 @@ class DashboardView extends GetView<DashboardController> {
           clipBehavior: Clip.none,
           alignment: Alignment.topCenter,
           children: [
-            // ── Background bar ──
+            // ==========================================================
+            // BACKGROUND BAR
+            // ==========================================================
+
             Positioned(
               left: 10,
               right: 10,
@@ -64,26 +78,29 @@ class DashboardView extends GetView<DashboardController> {
                 child: Obx(
                       () => Row(
                     children: [
-                      // Home button (optional - commented like before)
-                      // _navItem(index: 0, svgPath: 'assets/icons/home.svg', title: "Home"),
-
                       _navItem(
                         index: 1,
                         svgPath: 'assets/icons/inbox.svg',
                         title: "Inbox",
                       ),
+
                       _navItem(
                         index: 2,
                         svgPath: 'assets/icons/heart.svg',
                         title: "Like",
                       ),
-                      // Empty space reserved for the floating Match button
-                      const Expanded(child: SizedBox()),
+
+                      // Center button space
+                      const Expanded(
+                        child: SizedBox(),
+                      ),
+
                       _navItem(
                         index: 4,
                         svgPath: 'assets/icons/primium.svg',
                         title: "Premium",
                       ),
+
                       _navItem(
                         index: 5,
                         svgPath: 'assets/icons/person.svg',
@@ -95,57 +112,59 @@ class DashboardView extends GetView<DashboardController> {
               ),
             ),
 
-            // ── Floating gradient Match button (index 3) ──
-            // ── Floating Orange Match button (index 3) ──
+            // ==========================================================
+            // FLOATING MATCH BUTTON
+            // ==========================================================
+
             Positioned(
               top: 0,
-              child: Obx(() {
-                final bool selected = controller.currentIndex.value == 3;
+              child: Obx(
+                    () {
+                  final bool selected =
+                      controller.currentIndex.value == 3;
 
-                return GestureDetector(
-                  onTap: () => controller.changeTab(3),
-                  child: Container(
-                    width: 62,
-                    height: 62,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-
-                      // 🟠 Orange button
-                      color: const Color(0xffFF6100),
-
-                      // 🟠 Active = Orange outline
-                      // ⚪ Inactive = White outline
-                      border: Border.all(
-                        color: selected
-                            ? const Color(0xffFF6100)
-                            : Colors.white,
-                        width: 4,
-                      ),
-
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xffFF6100).withOpacity(
-                            selected ? 0.55 : 0.40,
-                          ),
-                          blurRadius: selected ? 16 : 12,
-                          offset: const Offset(0, 4),
+                  return GestureDetector(
+                    onTap: () => controller.changeTab(3),
+                    child: Container(
+                      width: 58,
+                      height: 58,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: const Color(0xffFF6100),
+                        border: Border.all(
+                          color: selected
+                              ? const Color(0xffFF6100)
+                              : Colors.white,
+                          width: 4,
                         ),
-                      ],
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xffFF6100).withOpacity(
+                              selected ? 0.55 : 0.40,
+                            ),
+                            blurRadius: selected ? 16 : 12,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.favorite_rounded,
+                        color: Colors.white,
+                        size: 28,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.favorite_rounded,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                  ),
-                );
-              }),
+                  );
+                },
+              ),
             ),
           ],
         ),
       ),
     );
   }
+// ==============================================================
+// NAV ITEM
+// ==============================================================
 
   Widget _navItem({
     required int index,
@@ -157,36 +176,44 @@ class DashboardView extends GetView<DashboardController> {
 
     return Expanded(
       child: InkWell(
-        onTap: () => controller.changeTab(index),
+        onTap: () {
+          controller.changeTab(index);
+        },
+        borderRadius: BorderRadius.circular(20.r),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SvgPicture.asset(
-              svgPath,
-              width: 22,
-              height: 22,
+              svgPath, // same Inbox icon
+              width: 18.w, // changed from 19.w
+              height: 18.h, // changed from 19.w
               colorFilter: ColorFilter.mode(
                 selected ? activeColor : const Color(0xff6B3F2A),
                 BlendMode.srcIn,
               ),
             ),
-            const SizedBox(height: 4),
+
+            SizedBox(height: 4.h),
+
             Text(
               title,
               style: TextStyle(
-                fontSize: 10,
-                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: selected ? activeColor : Colors.black87,
+                fontSize: 8.sp, // changed from 10.sp
+                fontWeight:
+                selected ? FontWeight.w700 : FontWeight.w500,
+                color: selected ? activeColor : Colors.black,
               ),
             ),
-            const SizedBox(height: 2),
+
+            SizedBox(height: 2.h),
+
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              height: 3,
-              width: selected ? 16 : 0,
+              height: 3.h,
+              width: selected ? 16.w : 0,
               decoration: BoxDecoration(
                 color: activeColor,
-                borderRadius: BorderRadius.circular(2),
+                borderRadius: BorderRadius.circular(2.r),
               ),
             ),
           ],

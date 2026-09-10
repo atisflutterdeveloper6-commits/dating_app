@@ -68,7 +68,7 @@ color: const Color(0xFFFFF0E6).withOpacity(0.10),
 
 SafeArea(
 child: Padding(
-padding: EdgeInsets.symmetric(horizontal: 28.w),
+padding: EdgeInsets.symmetric(horizontal: 22.w),
 child: Column(
 crossAxisAlignment: CrossAxisAlignment.start,
 children: [
@@ -215,7 +215,7 @@ controller.continueToBirthday();
 },
 ),
 
-SizedBox(height: 110.h),
+SizedBox(height: 120.h),
 ],
 ],
 ),

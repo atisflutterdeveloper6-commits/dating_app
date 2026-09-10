@@ -255,7 +255,7 @@ children: [
 // HEADER
 // ==================================================
 
-SizedBox(height: 40.h),
+SizedBox(height: 20.h),
 
 Row(
 crossAxisAlignment: CrossAxisAlignment.center,
@@ -308,7 +308,7 @@ letterSpacing: 0.5,
 ],
 ),
 
-SizedBox(height: 30.h),
+SizedBox(height: 10.h),
 
 // ==================================================
 // WHITE OUTER CONTAINER
@@ -581,6 +581,7 @@ color: Colors.black,
 // NEXT BUTTON
 // ==================================================
 
+  SizedBox(height: 12.h),
 SafeArea(
 top: false,
 child: Padding(
@@ -596,7 +597,7 @@ onPressed: _goToNext,
 // BOTTOM SPACE
 // ==================================================
 
-SizedBox(height: 80.h),
+SizedBox(height: 120.h),
 ],
 ),
 ),

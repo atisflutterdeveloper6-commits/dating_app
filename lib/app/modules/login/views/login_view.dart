@@ -8,6 +8,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'countrypicker.dart';
+
 class LoginView extends StatefulWidget {
 const LoginView({super.key});
 
@@ -21,7 +23,7 @@ late AnimationController controller;
 
 final TextEditingController phoneController =
 TextEditingController();
-
+String selectedFlagEmoji = '🇮🇳'; // default India
 String selectedDialCode = '+91';
 
 bool isLoading = false;
@@ -356,31 +358,35 @@ height: 1.25,
       ),
       child: Row(
         children: [
-          CountryCodePicker(
-            onChanged: (country) {
-              setState(() {
-                selectedDialCode = country.dialCode ?? '+91';
-              });
+          GestureDetector(
+            onTap: () {
+              showCustomCountryPicker(
+                context: context,
+                onSelect: (country) {
+                  setState(() {
+                    selectedDialCode = '+${country.phoneCode}';
+                    selectedFlagEmoji = country.flagEmoji; // niche state var add karo
+                  });
+                },
+              );
             },
-            initialSelection: 'IN',
-            favorite: const [
-              '+91',
-              'IN',
-            ],
-            showCountryOnly: false,
-            showOnlyCountryWhenClosed: false,
-            alignLeft: false,
-            padding: EdgeInsets.only(left: 8.w),
-
-            dialogTextStyle: poppins(
-              size: 11,
-              color: mainTextColor,
-            ),
-
-            textStyle: poppins(
-              size: 12,
-              weight: FontWeight.w500,
-              color: mainTextColor,
+            child: Padding(
+              padding: EdgeInsets.only(left: 12.w, right: 8.w),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    selectedFlagEmoji,
+                    style: TextStyle(fontSize: 18.sp),
+                  ),
+                  SizedBox(width: 6.w),
+                  Text(
+                    selectedDialCode,
+                    style: poppins(size: 12, weight: FontWeight.w500),
+                  ),
+                  Icon(Icons.arrow_drop_down, size: 18.sp, color: lightGreyText),
+                ],
+              ),
             ),
           ),
 
@@ -1165,5 +1171,7 @@ onTap: () {
 ),
 );
 }
+
+
 }
 

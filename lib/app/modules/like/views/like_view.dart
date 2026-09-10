@@ -1,4 +1,3 @@
-
 import 'package:dating_app/app/custom_widget/custom_appbar.dart';
 import 'package:dating_app/app/custom_widget/custom_button.dart';
 import 'package:dating_app/app/modules/dashboard/controllers/dashboard_controller.dart';
@@ -9,243 +8,288 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class LikeView extends StatelessWidget {
-const LikeView({super.key});
+  const LikeView({super.key});
 
-static const Color orangeColor = Color(0xffFF6B00);
+  static const Color orangeColor = Color(0xffFF6B00);
 
-@override
-Widget build(BuildContext context) {
-ScreenUtil.init(
-context,
-designSize: const Size(375, 812),
-minTextAdapt: true,
-splitScreenMode: true,
-);
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF7F7F7),
+      extendBodyBehindAppBar: true,
+      extendBody: false,
 
-return Scaffold(
-backgroundColor: Colors.transparent,
-extendBodyBehindAppBar: true,
-extendBody: true,
+      // ==========================================================
+      // APP BAR
+      // ==========================================================
 
-appBar: CustomAppBar(
-title: "Like",
-onBackPressed: () {
-Get.find<DashboardController>().changeTab(0);
-},
-),
+      appBar: CustomAppBar(
+        title: "Like",
+        subtitle: "Your Likes",
+        onBackPressed: () {
+          Get.find<DashboardController>().changeTab(0);
+        },
+      ),
 
-body: Stack(
-fit: StackFit.expand,
-children: [
-// ==========================================================
-// BACKGROUND IMAGE
-// ==========================================================
+      // ==========================================================
+      // BODY
+      // ==========================================================
 
-Positioned.fill(
-child: Image.asset(
-"assets/images/LoginBack2.png",
-fit: BoxFit.cover,
-),
-),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // ==========================================================
+          // FALLBACK BACKGROUND
+          // ==========================================================
 
-// ==========================================================
-// WHITE OPACITY OVERLAY
-// ==========================================================
+          Positioned.fill(
+            child: Container(
+              color: const Color(0xFFF7F7F7),
+            ),
+          ),
 
-Positioned.fill(
-child: Container(
-color: Colors.white.withOpacity(0.70),
-),
-),
+          // ==========================================================
+          // BACKGROUND IMAGE
+          // ==========================================================
 
-// ==========================================================
-// CONTENT
-// ==========================================================
+          Positioned.fill(
+            child: Image.asset(
+              "assets/images/LoginBack2.png",
+              fit: BoxFit.cover,
+            ),
+          ),
 
-Positioned.fill(
-child: SafeArea(
-child: Padding(
-padding: EdgeInsets.fromLTRB(
-14.w,
-14.h,
-14.w,
-30.h,
-),
-child: Column(
-crossAxisAlignment: CrossAxisAlignment.start,
-children: [
-// ==================================================
-// HEADER CARD
-// ==================================================
+          // ==========================================================
+          // WHITE OVERLAY
+          // ==========================================================
 
-Container(
-width: double.infinity,
-padding: EdgeInsets.all(18.w),
-decoration: BoxDecoration(
-color: Colors.white.withOpacity(0.88),
-borderRadius: BorderRadius.circular(18.r),
-border: Border.all(
-color: Colors.white.withOpacity(0.75),
-width: 0.8.w,
-),
-boxShadow: [
-BoxShadow(
-color: Colors.black.withOpacity(0.06),
-blurRadius: 15.r,
-offset: Offset(0, 5.h),
-),
-],
-),
-child: Column(
-crossAxisAlignment: CrossAxisAlignment.start,
-children: [
-Text(
-"Liked You",
-style: GoogleFonts.poppins(
-letterSpacing: 1.5.w,
-fontSize: 16.sp,
-fontWeight: FontWeight.w700,
-color: const Color(0xff222222),
-),
-),
+          Positioned.fill(
+            child: Container(
+              color: Colors.white.withOpacity(0.70),
+            ),
+          ),
 
-SizedBox(height: 7.h),
+          // ==========================================================
+          // CONTENT
+          // ==========================================================
 
-Text(
-"They're into you! If you're into them too, "
-"like them back to match instantly.",
-style: GoogleFonts.poppins(
-fontSize: 12.sp,
-color: const Color(0xff7B7B7B),
-height: 1.5,
-),
-),
-],
-),
-),
+          Positioned.fill(
+            child: SafeArea(
+              child: Center(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  padding: EdgeInsets.fromLTRB(
+                    14.w,
+                    14.h,
+                    14.w,
+                    30.h,
+                  ),
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.fromLTRB(
+                      12.w,
+                      14.h,
+                      12.w,
+                      14.h,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14.r),
+                      border: Border.all(
+                        color: const Color(0xFFF1E8E4),
+                        width: 0.8.w,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.035),
+                          blurRadius: 12.r,
+                          offset: Offset(0, 3.h),
+                        ),
+                      ],
+                    ),
 
-const Spacer(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // ==================================================
+                        // HEADER CARD
+                        // ==================================================
 
-// ==================================================
-// SPOTLIGHT CARD
-// ==================================================
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(18.w),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFFCFB),
+                            borderRadius: BorderRadius.circular(18.r),
+                            border: Border.all(
+                              color: const Color(0xFFF1E8E4),
+                              width: 0.8.w,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.035),
+                                blurRadius: 10.r,
+                                offset: Offset(0, 3.h),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Your Likes",
+                                style: GoogleFonts.poppins(
+                                  letterSpacing: 1.5.w,
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xff222222),
+                                ),
+                              ),
 
-Container(
-width: double.infinity,
-padding: EdgeInsets.fromLTRB(
-18.w,
-24.h,
-18.w,
-20.h,
-),
-decoration: BoxDecoration(
-color: Colors.white.withOpacity(0.88),
-borderRadius: BorderRadius.circular(20.r),
-border: Border.all(
-color: Colors.white.withOpacity(0.75),
-width: 0.8.w,
-),
-boxShadow: [
-BoxShadow(
-color: Colors.black.withOpacity(0.08),
-blurRadius: 18.r,
-offset: Offset(0, 6.h),
-),
-],
-),
-child: Column(
-children: [
-// ==========================================
-// PROFILE IMAGE
-// ==========================================
+                              SizedBox(height: 7.h),
 
-Container(
-height: 76.w,
-width: 76.w,
-padding: EdgeInsets.all(2.w),
-decoration: BoxDecoration(
-shape: BoxShape.circle,
-border: Border.all(
-color: orangeColor.withOpacity(0.55),
-width: 2.w,
-),
-),
-child: ClipOval(
-child: Image.asset(
-"assets/images/profile1.png",
-fit: BoxFit.cover,
-),
-),
-),
+                              Text(
+                                "See the people you've liked and "
+                                    "check your connections.",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12.sp,
+                                  color: const Color(0xff7B7B7B),
+                                  height: 1.5,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
 
-SizedBox(height: 18.h),
+                        SizedBox(height: 25.h),
 
-// ==========================================
-// TITLE
-// ==========================================
+                        // ==================================================
+                        // YOUR LIKES CARD
+                        // ==================================================
 
-Text(
-"Be seen by up to 10x more people",
-textAlign: TextAlign.center,
-style: GoogleFonts.poppins(
-letterSpacing: 1.1.w,
-fontSize: 16.sp,
-fontWeight: FontWeight.w700,
-color: const Color(0xff222222),
-),
-),
+                        Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.fromLTRB(
+                            18.w,
+                            24.h,
+                            18.w,
+                            20.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFFFCFB),
+                            borderRadius: BorderRadius.circular(20.r),
+                            border: Border.all(
+                              color: const Color(0xFFF1E8E4),
+                              width: 0.8.w,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.045),
+                                blurRadius: 12.r,
+                                offset: Offset(0, 4.h),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            children: [
+                              // ==================================================
+                              // LIKE ICON
+                              // ==================================================
 
-SizedBox(height: 10.h),
+                              Container(
+                                height: 76.w,
+                                width: 76.w,
+                                padding: EdgeInsets.all(2.w),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: orangeColor.withOpacity(0.55),
+                                    width: 2.w,
+                                  ),
+                                ),
+                                child: ClipOval(
+                                  child: Container(
+                                    color: orangeColor.withOpacity(0.08),
+                                    child: Icon(
+                                      Icons.favorite,
+                                      size: 38.sp,
+                                      color: orangeColor,
+                                    ),
+                                  ),
+                                ),
+                              ),
 
-// ==========================================
-// DESCRIPTION
-// ==========================================
+                              SizedBox(height: 18.h),
 
-Text(
-"With Spotlights you'll be seen by more people "
-"so you get even more chances to connect.",
-textAlign: TextAlign.center,
-style: GoogleFonts.poppins(
-fontSize: 12.sp,
-color: const Color(0xff8A8A8A),
-height: 1.6,
-),
-),
+                              // ==================================================
+                              // TITLE
+                              // ==================================================
 
-SizedBox(height: 24.h),
+                              Text(
+                                "People You Liked",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.poppins(
+                                  letterSpacing: 1.1.w,
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xff222222),
+                                ),
+                              ),
 
-// ==========================================
-// CUSTOM BUTTON
-// ==========================================
+                              SizedBox(height: 10.h),
 
-CustomButton(
-text: "Try a spotlight",
-  showArrow: true,
-onPressed: () {
-Get.to(() => Like2View());
-},
-backgroundColor: orangeColor,
-textColor: Colors.white,
-height: 50,
-borderRadius: 30,
-fontSize: 14,
-fontWeight: FontWeight.w600,
-letterSpacing: 0,
+                              // ==================================================
+                              // DESCRIPTION
+                              // ==================================================
 
-),
-],
-),
-),
+                              Text(
+                                "Here are the profiles you've liked. "
+                                    "Check their profiles and see if you've "
+                                    "made a match.",
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.poppins(
+                                  fontSize: 12.sp,
+                                  color: const Color(0xff8A8A8A),
+                                  height: 1.6,
+                                ),
+                              ),
 
-const Spacer(),
-],
-),
-),
-),
-),
-],
-),
-);
+                              SizedBox(height: 24.h),
+
+                              // ==================================================
+                              // BUTTON
+                              // ==================================================
+
+                              CustomButton(
+                                text: "View Your Likes",
+                                showArrow: true,
+                                onPressed: () {
+                                  Get.to(
+                                        () => const Like2View(),
+                                  );
+                                },
+                                backgroundColor: orangeColor,
+                                textColor: Colors.white,
+                                height: 50,
+                                borderRadius: 30,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                letterSpacing: 0,
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        SizedBox(height: 20.h),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
-}
-

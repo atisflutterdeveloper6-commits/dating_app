@@ -42,9 +42,9 @@ class SplashView extends GetView<SplashController> {
               // ==================================================
 
               Image.asset(
-                'assets/icons/app_icon.jpeg',
-                width: 140,
-                height: 140,
+                'assets/icons/app_icon.png',
+                width: 100,
+                height: 100,
                 fit: BoxFit.contain,
               ),
 

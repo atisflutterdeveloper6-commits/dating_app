@@ -90,122 +90,167 @@ class EditprofileView extends GetView<EditprofileController> {
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 28.w),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 20.h),
+                  // ==================================================
+                  // CENTER CONTENT
+                  // ==================================================
 
-                  // Header - same style as Intrestedin
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(8.w),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: const Color(0xFFFFE0CC),
-                            width: 1.2,
-                          ),
-                        ),
-                        child: Icon(
-                          Icons.person_outline_rounded,
-                          color: const Color(0xFFFF6B00),
-                          size: 22.sp,
-                        ),
-                      ),
-
-                      SizedBox(width: 20.w),
-
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Personal Information",
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w700,
-                                letterSpacing: 1.2,
-                              ),
-                            ),
-                            SizedBox(height: 8.h),
-                            Text(
-                              "Update your profile details.",
-                              style: TextStyle(
-                                fontSize: 9.sp,
-                                color: Colors.black54,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 20.h),
-
-                  // White card - same outer style as Intrestedin
                   Expanded(
-                    child: SingleChildScrollView(
-                      child: Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.fromLTRB(
-                          16.w,
-                          40.h,
-                          16.w,
-                          40.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14.r),
-                          border: Border.all(
-                            color: const Color(0xFFF1E8E4),
-                            width: 0.8,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.035),
-                              blurRadius: 12,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-
-                        // IMPORTANT:
-                        // Text fields bilkul original Edit Profile jaise hain.
+                    child: Center(
+                      child: SingleChildScrollView(
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            _buildField(
-                              title: 'First Name',
-                              controller: controller.firstNameController,
-                              hint: 'Enter your first name',
+                            // ==================================================
+                            // HEADER
+                            // ==================================================
+
+                            SizedBox(
+                              width: 320.w,
+                              child: Row(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    padding: EdgeInsets.all(8.w),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: const Color(0xFFFFE0CC),
+                                        width: 1.2,
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.person_outline_rounded,
+                                      color: const Color(0xFFFF6B00),
+                                      size: 22.sp,
+                                    ),
+                                  ),
+
+                                  SizedBox(width: 14.w),
+
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                      CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          "Personal Information",
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 14.sp,
+                                            fontWeight: FontWeight.w700,
+                                            letterSpacing: 1.2,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+
+                                        SizedBox(height: 4.h),
+
+                                        Text(
+                                          "Update your profile details.",
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 9.sp,
+                                            color: Colors.black54,
+                                            letterSpacing: 0.5,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
 
-                            SizedBox(height: 18.h),
+                            SizedBox(height: 12.h),
 
-                            _buildField(
-                              title: 'Last Name',
-                              controller: controller.lastNameController,
-                              hint: 'Enter your last name',
-                            ),
+                            // ==================================================
+                            // WHITE CONTENT CARD
+                            // ==================================================
 
-                            SizedBox(height: 18.h),
+                            Container(
+                              width: 320.w,
+                              padding: EdgeInsets.fromLTRB(
+                                16.w,
+                                30.h,
+                                16.w,
+                                30.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius:
+                                BorderRadius.circular(14.r),
+                                border: Border.all(
+                                  color: const Color(0xFFF1E8E4),
+                                  width: 0.8,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color:
+                                    Colors.black.withOpacity(0.035),
+                                    blurRadius: 12,
+                                    offset: const Offset(0, 3),
+                                  ),
+                                ],
+                              ),
 
-                            _buildField(
-                              title: 'Nick Name',
-                              controller: controller.nickNameController,
-                              hint: 'Enter your nickname',
-                            ),
+                              child: Column(
+                                crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                                children: [
+                                  // ==================================================
+                                  // FIRST NAME
+                                  // ==================================================
 
-                            SizedBox(height: 18.h),
+                                  _buildField(
+                                    title: 'First Name',
+                                    controller:
+                                    controller.firstNameController,
+                                    hint: 'Enter your first name',
+                                  ),
 
-                            _buildField(
-                              title: 'Mobile Number',
-                              controller: controller.mobileController,
-                              hint: 'Enter your mobile number',
-                              keyboardType: TextInputType.phone,
+                                  SizedBox(height: 18.h),
+
+                                  // ==================================================
+                                  // LAST NAME
+                                  // ==================================================
+
+                                  _buildField(
+                                    title: 'Last Name',
+                                    controller:
+                                    controller.lastNameController,
+                                    hint: 'Enter your last name',
+                                  ),
+
+                                  SizedBox(height: 18.h),
+
+                                  // ==================================================
+                                  // NICK NAME
+                                  // ==================================================
+
+                                  _buildField(
+                                    title: 'Nick Name',
+                                    controller:
+                                    controller.nickNameController,
+                                    hint: 'Enter your nickname',
+                                  ),
+
+                                  SizedBox(height: 18.h),
+
+                                  // ==================================================
+                                  // MOBILE NUMBER
+                                  // ==================================================
+
+                                  _buildField(
+                                    title: 'Mobile Number',
+                                    controller:
+                                    controller.mobileController,
+                                    hint: 'Enter your mobile number',
+                                    keyboardType:
+                                    TextInputType.phone,
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
@@ -213,18 +258,19 @@ class EditprofileView extends GetView<EditprofileController> {
                     ),
                   ),
 
-                  SizedBox(height: 18.h),
+                  // ==================================================
+                  // UPDATE BUTTON
+                  // ==================================================
 
-                  // Update Button
-                  // Update Button - ORIGINAL GRADIENT
                   SafeArea(
                     top: false,
                     child: CustomButton(
                       text: "Update Profile",
-                      onPressed: () => controller.updateProfile(),
-                      backgroundColor: const Color(0xFFFF5C00),
+                      onPressed: () =>
+                          controller.updateProfile(),
+                      backgroundColor:
+                      const Color(0xFFFF5C00),
                       textColor: Colors.white,
-
                       borderRadius: 30.r,
                       fontSize: 11.sp,
                       fontWeight: FontWeight.w600,
@@ -232,12 +278,12 @@ class EditprofileView extends GetView<EditprofileController> {
                       showArrow: true,
                     ),
                   ),
+
                   SizedBox(height: 90.h),
                 ],
               ),
             ),
           ),
-
           // Loading overlay
           Obx(() {
             if (!controller.isLoading.value) {

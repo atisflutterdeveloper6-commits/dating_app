@@ -379,98 +379,7 @@ class _BottomDecorationPainter extends CustomPainter {
 // LEAF DECORATION (bottom-left / bottom-right branch with leaves)
 // ============================================================
 
-class LeafDecoration extends StatelessWidget {
-  final bool flip;
-  final double width;
-  final double height;
 
-  const LeafDecoration({
-    super.key,
-    this.flip = false,
-    this.width = 70,
-    this.height = 95,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    Widget painter = CustomPaint(
-      size: Size(width.w, height.h),
-      painter: _LeafPainter(),
-    );
-
-    if (flip) {
-      painter = Transform(
-        alignment: Alignment.center,
-        transform: Matrix4.rotationY(math.pi),
-        child: painter,
-      );
-    }
-
-    return IgnorePointer(child: painter);
-  }
-}
-
-class _LeafPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final stemPaint = Paint()
-      ..color = const Color(0xFFF3B489)
-      ..strokeWidth = 1.6
-      ..style = PaintingStyle.stroke;
-
-    final leafPaintDark = Paint()
-      ..color = const Color(0xFFFFC9A0)
-      ..style = PaintingStyle.fill;
-
-    final leafPaintLight = Paint()
-      ..color = const Color(0xFFFFE1C7)
-      ..style = PaintingStyle.fill;
-
-    // Curved stem rising from bottom-left corner of the box.
-    final stem = Path()
-      ..moveTo(size.width * 0.08, size.height)
-      ..quadraticBezierTo(
-        size.width * 0.55,
-        size.height * 0.55,
-        size.width * 0.85,
-        size.height * 0.02,
-      );
-
-    canvas.drawPath(stem, stemPaint);
-
-    final metric = stem.computeMetrics().first;
-
-    void drawLeaf(double t, double angleOffset, double scale, Paint paint) {
-      final tangent = metric.getTangentForOffset(metric.length * t);
-      if (tangent == null) return;
-
-      canvas.save();
-      canvas.translate(tangent.position.dx, tangent.position.dy);
-      canvas.rotate(tangent.angle + angleOffset);
-
-      final leafPath = Path()
-        ..moveTo(0, 0)
-        ..quadraticBezierTo(9 * scale, -7 * scale, 18 * scale, 0)
-        ..quadraticBezierTo(9 * scale, 7 * scale, 0, 0)
-        ..close();
-
-      canvas.drawPath(leafPath, paint);
-      canvas.restore();
-    }
-
-    drawLeaf(0.15, -1.0, 1.0, leafPaintDark);
-    drawLeaf(0.32, 1.1, 0.85, leafPaintLight);
-    drawLeaf(0.50, -0.9, 0.95, leafPaintDark);
-    drawLeaf(0.68, 1.0, 0.8, leafPaintLight);
-    drawLeaf(0.85, -0.85, 0.75, leafPaintDark);
-    drawLeaf(0.97, 0.9, 0.6, leafPaintLight);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-// ============================================================
 // MAIN VIEW
 // ============================================================
 
@@ -800,30 +709,10 @@ class _ProfilesetupViewState
           // ========================================================
           // BOTTOM DECORATION (wave)
           // ========================================================
-          const Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: BottomDecoration(),
-          ),
 
           // ========================================================
           // LEFT LEAVES
-          // ========================================================
-          Positioned(
-            left: 2.w,
-            bottom: 26.h,
-            child: const LeafDecoration(),
-          ),
 
-          // ========================================================
-          // RIGHT LEAVES
-          // ========================================================
-          Positioned(
-            right: 2.w,
-            bottom: 26.h,
-            child: const LeafDecoration(flip: true),
-          ),
 
           Padding(
             padding:
@@ -837,7 +726,7 @@ class _ProfilesetupViewState
                 // ==================================================
 
                 SizedBox(
-                  height: 150.h,
+                  height: 100.h,
                 ),
 
                 Stack(
@@ -976,23 +865,9 @@ class _ProfilesetupViewState
                 // DESCRIPTION
                 // ==================================================
 
-                Text(
-                  "Add more photos so people can get\n"
-                      "to know you better.",
-                  textAlign:
-                  TextAlign.center,
-                  style:
-                  poppins(
-                    size: 8,
-                    color:
-                    greyText,
-                  ).copyWith(
-                    height: 1.45,
-                  ),
-                ),
 
                 SizedBox(
-                  height: 40.h,
+                  height: 10.h,
                 ),
 
                 // ==================================================
@@ -1043,33 +918,21 @@ class _ProfilesetupViewState
                   ),
                   child:
                   GridView.builder(
-                    shrinkWrap:
-                    true,
-                    padding:
-                    EdgeInsets.zero,
-                    physics:
-                    const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    padding: EdgeInsets.zero,
+                    physics: const NeverScrollableScrollPhysics(),
                     itemCount: 6,
-                    gridDelegate:
-                    SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount:
-                      3,
-                      crossAxisSpacing:
-                      9.w,
-                      mainAxisSpacing:
-                      10.h,
-                      childAspectRatio:
-                      0.85,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 10.w,
+                      mainAxisSpacing: 10.h,
+                      childAspectRatio: 1.48,
                     ),
-                    itemBuilder:
-                        (
+                    itemBuilder: (
                         context,
                         index,
                         ) {
-                      final File?
-                      imageFile =
-                      photos[
-                      index];
+                      final File? imageFile = photos[index];
 
                       // ==========================================
                       // SHIMMER
@@ -1077,26 +940,12 @@ class _ProfilesetupViewState
 
                       if (isLoading) {
                         return ShimmerEffect(
-                          baseColor:
-                          const Color(
-                            0xFFF2F2F2,
-                          ),
-                          highlightColor:
-                          Colors
-                              .white,
-                          child:
-                          Container(
-                            decoration:
-                            BoxDecoration(
-                              color:
-                              const Color(
-                                0xFFF2F2F2,
-                              ),
-                              borderRadius:
-                              BorderRadius
-                                  .circular(
-                                13.r,
-                              ),
+                          baseColor: const Color(0xFFF2F2F2),
+                          highlightColor: Colors.white,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF2F2F2),
+                              borderRadius: BorderRadius.circular(13.r),
                             ),
                           ),
                         );
@@ -1107,191 +956,119 @@ class _ProfilesetupViewState
                       // ==========================================
 
                       return GestureDetector(
-                        onTap: () =>
-                            pickImage(
-                              index,
+                        onTap: () => pickImage(index),
+                        child: DottedBorder(
+                          color: imageFile != null
+                              ? orange.withOpacity(0.35)
+                              : const Color(0xFFECE3DE),
+                          strokeWidth: 1,
+                          radius: 14.r,
+                          dashWidth: 6,
+                          dashSpace: 4,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFFCFA),
+                              borderRadius: BorderRadius.circular(14.r),
                             ),
-                        child:
-                        DottedBorder(
-                          color:
-                          imageFile !=
-                              null
-                              ? orange
-                              .withOpacity(
-                            0.35,
-                          )
-                              : const Color(
-                            0xFFECE3DE,
-                          ),
-                          strokeWidth:
-                          1,
-                          radius:
-                          13.r,
-                          dashWidth:
-                          5,
-                          dashSpace:
-                          4,
-                          child:
-                          Container(
-                            decoration:
-                            BoxDecoration(
-                              color:
-                              const Color(
-                                0xFFFFFCFA,
-                              ),
-                              borderRadius:
-                              BorderRadius
-                                  .circular(
-                                13.r,
-                              ),
-                            ),
-                            child:
-                            Stack(
+                            child: Stack(
                               children: [
+
                                 // ==================================
                                 // IMAGE
                                 // ==================================
 
-                                if (imageFile !=
-                                    null)
-                                  ClipRRect(
+                                Positioned.fill(
+                                  child: imageFile != null
+                                      ? ClipRRect(
                                     borderRadius:
-                                    BorderRadius
-                                        .circular(
-                                      13.r,
-                                    ),
-                                    child:
-                                    Image.file(
+                                    BorderRadius.circular(14.r),
+                                    child: Image.file(
                                       imageFile,
-                                      fit:
-                                      BoxFit.cover,
-                                      width:
-                                      double.infinity,
-                                      height:
-                                      double.infinity,
+                                      fit: BoxFit.cover,
+                                      width: double.infinity,
+                                      height: double.infinity,
                                     ),
                                   )
-                                else
-                                  Center(
-                                    child:
-                                    Icon(
-                                      Icons
-                                          .photo_camera_outlined,
-                                      size:
-                                      17.sp,
-                                      color:
-                                      const Color(
-                                        0xFFBDB8B5,
-                                      ),
+                                      : Center(
+                                    child: Icon(
+                                      Icons.camera_alt_outlined,
+                                      size: 28.sp,
+                                      color: const Color(0xFFD2D1D1),
                                     ),
                                   ),
+                                ),
 
                                 // ==================================
-                                // PLUS / REMOVE
+                                // ADD / REMOVE BUTTON
                                 // ==================================
 
                                 Positioned(
-                                  right:
-                                  5.w,
-                                  bottom:
-                                  5.h,
-                                  child:
-                                  GestureDetector(
-                                    onTap:
-                                    isLoading
+                                  right: 6.w,
+                                  bottom: 6.h,
+                                  child: GestureDetector(
+                                    onTap: isLoading
                                         ? null
                                         : () {
-                                      if (imageFile !=
-                                          null) {
-                                        removeImage(
-                                          index,
-                                        );
+                                      if (imageFile != null) {
+                                        removeImage(index);
                                       } else {
-                                        pickImage(
-                                          index,
-                                        );
+                                        pickImage(index);
                                       }
                                     },
-                                    child:
-                                    Container(
-                                      height:
-                                      23.w,
-                                      width:
-                                      23.w,
-                                      decoration:
-                                      BoxDecoration(
-                                        color:
-                                        Colors.white,
-                                        shape:
-                                        BoxShape.circle,
+                                    child: Container(
+                                      height: 26.w,
+                                      width: 26.w,
+                                      decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle,
                                         boxShadow: [
                                           BoxShadow(
-                                            color: Colors
-                                                .black
-                                                .withOpacity(
-                                              0.08,
-                                            ),
-                                            blurRadius:
-                                            5,
+                                            color: Colors.black12,
+                                            blurRadius: 5,
+                                            offset: Offset(0, 2),
                                           ),
                                         ],
                                       ),
-                                      child:
-                                      Icon(
-                                        imageFile ==
-                                            null
-                                            ? Icons
-                                            .add
-                                            : Icons
-                                            .close,
-                                        size:
-                                        15.sp,
-                                        color:
-                                        orange,
+                                      child: Icon(
+                                        imageFile == null
+                                            ? Icons.add
+                                            : Icons.close,
+                                        size: 16.sp,
+                                        color: orange,
                                       ),
                                     ),
                                   ),
                                 ),
 
                                 // ==================================
-                                // REMOVE ON IMAGE TOP
+                                // REMOVE BUTTON ON TOP
                                 // ==================================
 
-                                if (imageFile !=
-                                    null)
+                                if (imageFile != null)
                                   Positioned(
-                                    right:
-                                    3.w,
-                                    top:
-                                    3.h,
-                                    child:
-                                    GestureDetector(
-                                      onTap:
-                                          () =>
-                                          removeImage(
-                                            index,
-                                          ),
-                                      child:
-                                      Container(
-                                        height:
-                                        20.w,
-                                        width:
-                                        20.w,
-                                        decoration:
-                                        const BoxDecoration(
-                                          color:
-                                          Colors.white,
-                                          shape:
-                                          BoxShape.circle,
+                                    right: 5.w,
+                                    top: 5.h,
+                                    child: GestureDetector(
+                                      onTap: isLoading
+                                          ? null
+                                          : () => removeImage(index),
+                                      child: Container(
+                                        height: 22.w,
+                                        width: 22.w,
+                                        decoration: const BoxDecoration(
+                                          color: Colors.white,
+                                          shape: BoxShape.circle,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black12,
+                                              blurRadius: 4,
+                                            ),
+                                          ],
                                         ),
-                                        child:
-                                        Icon(
-                                          Icons
-                                              .close,
-                                          size:
-                                          13.sp,
-                                          color:
-                                          orange,
+                                        child: Icon(
+                                          Icons.close,
+                                          size: 14.sp,
+                                          color: orange,
                                         ),
                                       ),
                                     ),
@@ -1320,19 +1097,16 @@ class _ProfilesetupViewState
                 CustomButton(
                   text: "Continue",
                   onPressed: continueToTellmeabout,
-                  height: 43,
-                  borderRadius: 30,
-                  backgroundColor: orange,
-                  textColor: Colors.white,
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: 0,
-                  isLoading: isLoading,
-                  enabled: hasMinimumPhotos,
+
+
+
+
                   showArrow: true,
                 ),
 
-
+                SizedBox(
+                  height: 20.h,
+                ),
               ],
             ),
           ),

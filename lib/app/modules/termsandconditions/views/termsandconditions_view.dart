@@ -30,14 +30,13 @@ class TermsandconditionsView extends StatelessWidget {
 
       appBar: const CustomAppBar(
         title: "Terms & Conditions",
+          subtitle: "Please read our terms and conditions carefully before using the app."
       ),
 
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // =========================================================
-          // BACKGROUND IMAGE
-          // =========================================================
+          // Background Image
           Positioned.fill(
             child: Image.asset(
               "assets/images/LoginBack2.png",
@@ -45,38 +44,31 @@ class TermsandconditionsView extends StatelessWidget {
             ),
           ),
 
-          // =========================================================
-          // WHITE OPACITY OVERLAY
-          // NO BLUR
-          // =========================================================
+          // Background Overlay
           Positioned.fill(
             child: Container(
               color: Colors.white.withOpacity(0.70),
             ),
           ),
 
-          // =========================================================
-          // CONTENT
-          // =========================================================
+          // Page Content
           Positioned.fill(
-            child: SafeArea(
-              child: Obx(
-                    () {
-                  if (controller.isLoading.value) {
-                    return _buildShimmerLoading();
-                  }
+            child: Obx(
+                  () {
+                if (controller.isLoading.value) {
+                  return _buildShimmerLoading();
+                }
 
-                  if (controller.errorMessage.value.isNotEmpty) {
-                    return _buildErrorWidget(controller);
-                  }
+                if (controller.errorMessage.value.isNotEmpty) {
+                  return _buildErrorWidget(controller);
+                }
 
-                  if (controller.termsData.isEmpty) {
-                    return _buildEmptyState();
-                  }
+                if (controller.termsData.isEmpty) {
+                  return _buildEmptyState();
+                }
 
-                  return _buildContent(controller);
-                },
-              ),
+                return _buildContent(controller);
+              },
             ),
           ),
         ],
@@ -84,33 +76,58 @@ class TermsandconditionsView extends StatelessWidget {
     );
   }
 
-  // =================================================================
-  // SHIMMER
-  // =================================================================
+  // ============================================================
+  // SAME CONTAINER DECORATION AS PRIVACY POLICY
+  // ============================================================
+
+  BoxDecoration _mainContainerDecoration() {
+    return BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(14.r),
+
+      border: Border.all(
+        color: const Color(0xFFF1E8E4),
+        width: 0.8.w,
+      ),
+
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withOpacity(0.035),
+          blurRadius: 12.r,
+          offset: Offset(0, 3.h),
+        ),
+      ],
+    );
+  }
+
+  // ============================================================
+  // SHIMMER LOADING
+  // ============================================================
+
   Widget _buildShimmerLoading() {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       padding: EdgeInsets.fromLTRB(
         16.w,
-        16.h,
+        120.h,
         16.w,
-        40.h,
+        90.h,
       ),
-      child: Shimmer.fromColors(
-        baseColor: Colors.grey.shade300,
-        highlightColor: Colors.grey.shade100,
-        enabled: true,
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(20.w),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.88),
-            borderRadius: BorderRadius.circular(18.r),
-          ),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.fromLTRB(
+          16.w,
+          20.h,
+          16.w,
+          20.h,
+        ),
+        decoration: _mainContainerDecoration(),
+        child: Shimmer.fromColors(
+          baseColor: Colors.grey.shade300,
+          highlightColor: Colors.grey.shade100,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Heading
               Container(
                 width: 140.w,
                 height: 22.h,
@@ -122,7 +139,6 @@ class TermsandconditionsView extends StatelessWidget {
 
               SizedBox(height: 14.h),
 
-              // Content
               ...List.generate(
                 7,
                     (index) {
@@ -136,8 +152,7 @@ class TermsandconditionsView extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius:
-                      BorderRadius.circular(5.r),
+                      borderRadius: BorderRadius.circular(5.r),
                     ),
                   );
                 },
@@ -145,14 +160,12 @@ class TermsandconditionsView extends StatelessWidget {
 
               SizedBox(height: 22.h),
 
-              // Second heading
               Container(
                 width: 160.w,
                 height: 20.h,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius:
-                  BorderRadius.circular(6.r),
+                  borderRadius: BorderRadius.circular(6.r),
                 ),
               ),
 
@@ -171,8 +184,7 @@ class TermsandconditionsView extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius:
-                      BorderRadius.circular(5.r),
+                      borderRadius: BorderRadius.circular(5.r),
                     ),
                   );
                 },
@@ -180,14 +192,12 @@ class TermsandconditionsView extends StatelessWidget {
 
               SizedBox(height: 22.h),
 
-              // Third heading
               Container(
                 width: 120.w,
                 height: 18.h,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius:
-                  BorderRadius.circular(5.r),
+                  borderRadius: BorderRadius.circular(5.r),
                 ),
               ),
 
@@ -206,8 +216,7 @@ class TermsandconditionsView extends StatelessWidget {
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius:
-                      BorderRadius.circular(5.r),
+                      borderRadius: BorderRadius.circular(5.r),
                     ),
                   );
                 },
@@ -219,154 +228,159 @@ class TermsandconditionsView extends StatelessWidget {
     );
   }
 
-  // =================================================================
-  // ERROR
-  // =================================================================
+  // ============================================================
+  // ERROR STATE
+  // ============================================================
+
   Widget _buildErrorWidget(
       TermsandconditionsController controller,
       ) {
-    return Center(
-      child: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(
-          horizontal: 24.w,
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(
+        16.w,
+        120.h,
+        16.w,
+        90.h,
+      ),
+      child: Container(
+        width: double.infinity,
+        constraints: BoxConstraints(
+          minHeight:
+          MediaQuery.of(Get.context!).size.height - 210.h,
         ),
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(
-            horizontal: 20.w,
-            vertical: 24.h,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.88),
-            borderRadius: BorderRadius.circular(18.r),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.8),
-              width: 0.6.w,
+        padding: EdgeInsets.symmetric(
+          horizontal: 20.w,
+          vertical: 24.h,
+        ),
+        decoration: _mainContainerDecoration(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 60.w,
+              height: 60.w,
+              decoration: BoxDecoration(
+                color: Colors.red.withOpacity(0.08),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.error_outline,
+                size: 34.sp,
+                color: Colors.red.shade300,
+              ),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 12,
-                offset: const Offset(0, 5),
+
+            SizedBox(height: 16.h),
+
+            Text(
+              'Something went wrong',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
               ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 60.w,
-                height: 60.w,
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.08),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.error_outline,
-                  size: 34.sp,
-                  color: Colors.red.shade300,
-                ),
+            ),
+
+            SizedBox(height: 8.h),
+
+            Text(
+              controller.errorMessage.value,
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 12.sp,
+                height: 1.5,
+                color: Colors.grey.shade600,
               ),
+            ),
 
-              SizedBox(height: 16.h),
+            SizedBox(height: 18.h),
 
-              Text(
-                'Something went wrong',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
-
-              SizedBox(height: 8.h),
-
-              Text(
-                controller.errorMessage.value,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.poppins(
-                  fontSize: 12.sp,
-                  height: 1.5,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-
-              SizedBox(height: 18.h),
-
-              SizedBox(
-                height: 44.h,
-                child: ElevatedButton(
-                  onPressed: controller.retry,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                    const Color(0xffFF6A00),
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 32.w,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius:
-                      BorderRadius.circular(12.r),
-                    ),
+            SizedBox(
+              height: 44.h,
+              child: ElevatedButton(
+                onPressed: controller.retry,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor:
+                  const Color(0xffFF6A00),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 32.w,
                   ),
-                  child: Text(
-                    'Retry',
-                    style: GoogleFonts.poppins(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                    BorderRadius.circular(12.r),
+                  ),
+                ),
+                child: Text(
+                  'Retry',
+                  style: GoogleFonts.poppins(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  // =================================================================
+  // ============================================================
   // EMPTY STATE
-  // =================================================================
+  // ============================================================
+
   Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: 24.w,
+    return SingleChildScrollView(
+      padding: EdgeInsets.fromLTRB(
+        16.w,
+        120.h,
+        16.w,
+        90.h,
+      ),
+      child: Container(
+        width: double.infinity,
+        constraints: BoxConstraints(
+          minHeight:
+          MediaQuery.of(Get.context!).size.height - 210.h,
         ),
-        child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(
-            horizontal: 20.w,
-            vertical: 22.h,
-          ),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.88),
-            borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.8),
-              width: 0.6.w,
+        padding: EdgeInsets.symmetric(
+          horizontal: 20.w,
+          vertical: 22.h,
+        ),
+        decoration: _mainContainerDecoration(),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.description_outlined,
+              size: 55.sp,
+              color: Colors.grey.shade400,
             ),
-          ),
-          child: Text(
-            'No terms & conditions available',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.poppins(
-              fontSize: 13.sp,
-              color: Colors.grey.shade600,
+
+            SizedBox(height: 14.h),
+
+            Text(
+              'No terms & conditions available',
+              textAlign: TextAlign.center,
+              style: GoogleFonts.poppins(
+                fontSize: 13.sp,
+                color: Colors.grey.shade600,
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
   }
 
-  // =================================================================
-  // CONTENT
-  // =================================================================
+  // ============================================================
+  // MAIN CONTENT
+  // ============================================================
+
   Widget _buildContent(
       TermsandconditionsController controller,
       ) {
@@ -380,30 +394,29 @@ class TermsandconditionsView extends StatelessWidget {
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
+
+      // Same spacing as Privacy Policy
       padding: EdgeInsets.fromLTRB(
         16.w,
-        16.h,
+        120.h,
         16.w,
-        40.h,
+        90.h,
       ),
+
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.all(20.w),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.88),
-          borderRadius: BorderRadius.circular(18.r),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.8),
-            width: 0.6.w,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
-          ],
+
+        // Same inner padding
+        padding: EdgeInsets.fromLTRB(
+          16.w,
+          20.h,
+          16.w,
+          20.h,
         ),
+
+        // Same border + radius + shadow
+        decoration: _mainContainerDecoration(),
+
         child: Column(
           crossAxisAlignment:
           CrossAxisAlignment.start,
@@ -413,21 +426,17 @@ class TermsandconditionsView extends StatelessWidget {
     );
   }
 
-  // =================================================================
+  // ============================================================
   // PARSE CONTENT
-  // =================================================================
-  List<Widget> _parseContent(
-      String content,
-      ) {
+  // ============================================================
+
+  List<Widget> _parseContent(String content) {
     if (content.trim().isEmpty) {
       return [];
     }
 
     final List<Widget> widgets = [];
 
-    // ---------------------------------------------------------------
-    // Remove script/style
-    // ---------------------------------------------------------------
     String cleanedContent = content.replaceAll(
       RegExp(
         r'<(script|style)[^>]*>.*?</\1>',
@@ -437,53 +446,47 @@ class TermsandconditionsView extends StatelessWidget {
       '',
     );
 
-    // ---------------------------------------------------------------
-    // HTML UL / LI
-    // ---------------------------------------------------------------
     final ulRegex = RegExp(
       r'<ul[^>]*>(.*?)</ul>',
       dotAll: true,
       caseSensitive: false,
     );
 
-    cleanedContent =
-        cleanedContent.replaceAllMapped(
-          ulRegex,
-              (match) {
-            final ulContent =
-                match.group(1) ?? '';
+    cleanedContent = cleanedContent.replaceAllMapped(
+      ulRegex,
+          (match) {
+        final ulContent =
+            match.group(1) ?? '';
 
-            final liRegex = RegExp(
-              r'<li[^>]*>(.*?)</li>',
-              dotAll: true,
-              caseSensitive: false,
-            );
-
-            final List<String> items = [];
-
-            for (final li in
-            liRegex.allMatches(ulContent)) {
-              final item =
-              _cleanText(li.group(1) ?? '');
-
-              if (item.isNotEmpty) {
-                items.add(item);
-              }
-            }
-
-            if (items.isNotEmpty) {
-              widgets.addAll(
-                _buildListItems(items),
-              );
-            }
-
-            return '';
-          },
+        final liRegex = RegExp(
+          r'<li[^>]*>(.*?)</li>',
+          dotAll: true,
+          caseSensitive: false,
         );
 
-    // ---------------------------------------------------------------
-    // BLOCK HTML TAGS
-    // ---------------------------------------------------------------
+        final List<String> items = [];
+
+        for (final li
+        in liRegex.allMatches(ulContent)) {
+          final item = _cleanText(
+            li.group(1) ?? '',
+          );
+
+          if (item.isNotEmpty) {
+            items.add(item);
+          }
+        }
+
+        if (items.isNotEmpty) {
+          widgets.addAll(
+            _buildListItems(items),
+          );
+        }
+
+        return '';
+      },
+    );
+
     final blockRegex = RegExp(
       r'<(h1|h2|h3|h4|p|div|br)[^>]*>(.*?)</\1>',
       dotAll: true,
@@ -491,10 +494,11 @@ class TermsandconditionsView extends StatelessWidget {
     );
 
     final matches =
-    blockRegex.allMatches(cleanedContent).toList();
+    blockRegex.allMatches(
+      cleanedContent,
+    ).toList();
 
     if (matches.isEmpty) {
-      // Fallback if API content is plain text
       final plainText =
       _cleanText(cleanedContent);
 
@@ -505,11 +509,12 @@ class TermsandconditionsView extends StatelessWidget {
         for (final line in lines) {
           final value = line.trim();
 
-          if (value.isEmpty) continue;
+          if (value.isEmpty) {
+            continue;
+          }
 
-          if (RegExp(
-            r'^\d+\.\s*',
-          ).hasMatch(value)) {
+          if (RegExp(r'^\d+\.\s*')
+              .hasMatch(value)) {
             widgets.add(
               _buildHeading(value),
             );
@@ -532,9 +537,6 @@ class TermsandconditionsView extends StatelessWidget {
     int lastPosition = 0;
 
     for (final match in matches) {
-      // -------------------------------------------------------------
-      // Text before tag
-      // -------------------------------------------------------------
       if (match.start > lastPosition) {
         final before =
         cleanedContent.substring(
@@ -603,17 +605,13 @@ class TermsandconditionsView extends StatelessWidget {
 
           case 'p':
             widgets.add(
-              _buildRichParagraph(
-                inner,
-              ),
+              _buildRichParagraph(inner),
             );
             break;
 
           case 'div':
             widgets.add(
-              _buildRichParagraph(
-                inner,
-              ),
+              _buildRichParagraph(inner),
             );
             break;
 
@@ -628,9 +626,6 @@ class TermsandconditionsView extends StatelessWidget {
       lastPosition = match.end;
     }
 
-    // ---------------------------------------------------------------
-    // Remaining content
-    // ---------------------------------------------------------------
     if (lastPosition <
         cleanedContent.length) {
       final remaining =
@@ -648,11 +643,12 @@ class TermsandconditionsView extends StatelessWidget {
         for (final line in lines) {
           final value = line.trim();
 
-          if (value.isEmpty) continue;
+          if (value.isEmpty) {
+            continue;
+          }
 
-          if (RegExp(
-            r'^\d+\.\s*',
-          ).hasMatch(value)) {
+          if (RegExp(r'^\d+\.\s*')
+              .hasMatch(value)) {
             widgets.add(
               _buildHeading(value),
             );
@@ -668,9 +664,10 @@ class TermsandconditionsView extends StatelessWidget {
     return widgets;
   }
 
-  // =================================================================
+  // ============================================================
   // HEADING
-  // =================================================================
+  // ============================================================
+
   Widget _buildHeading(
       String text, {
         double? fontSize,
@@ -684,8 +681,10 @@ class TermsandconditionsView extends StatelessWidget {
         _cleanText(text),
         style: GoogleFonts.poppins(
           letterSpacing: 1.0.w,
-          fontSize: fontSize ?? 16.sp,
-          fontWeight: FontWeight.w600,
+          fontSize:
+          fontSize ?? 16.sp,
+          fontWeight:
+          FontWeight.w600,
           color: Colors.black87,
           height: 1.5,
         ),
@@ -693,9 +692,10 @@ class TermsandconditionsView extends StatelessWidget {
     );
   }
 
-  // =================================================================
+  // ============================================================
   // PARAGRAPH
-  // =================================================================
+  // ============================================================
+
   Widget _buildParagraph(
       String text,
       ) {
@@ -721,9 +721,10 @@ class TermsandconditionsView extends StatelessWidget {
     );
   }
 
-  // =================================================================
+  // ============================================================
   // RICH PARAGRAPH
-  // =================================================================
+  // ============================================================
+
   Widget _buildRichParagraph(
       String text,
       ) {
@@ -751,9 +752,10 @@ class TermsandconditionsView extends StatelessWidget {
     );
   }
 
-  // =================================================================
+  // ============================================================
   // BOLD TEXT
-  // =================================================================
+  // ============================================================
+
   Widget _buildBoldText(
       String text,
       ) {
@@ -773,7 +775,8 @@ class TermsandconditionsView extends StatelessWidget {
         cleaned,
         style: GoogleFonts.poppins(
           fontSize: 13.sp,
-          fontWeight: FontWeight.w600,
+          fontWeight:
+          FontWeight.w600,
           height: 1.7,
           color: Colors.grey.shade800,
         ),
@@ -781,9 +784,10 @@ class TermsandconditionsView extends StatelessWidget {
     );
   }
 
-  // =================================================================
+  // ============================================================
   // LIST ITEMS
-  // =================================================================
+  // ============================================================
+
   List<Widget> _buildListItems(
       List<String> items,
       ) {
@@ -811,10 +815,10 @@ class TermsandconditionsView extends StatelessWidget {
                 '•',
                 style: GoogleFonts.poppins(
                   fontSize: 15.sp,
-                  fontWeight: FontWeight.bold,
-                  color: const Color(
-                    0xffFF6A00,
-                  ),
+                  fontWeight:
+                  FontWeight.bold,
+                  color:
+                  const Color(0xffFF6A00),
                   height: 1.7,
                 ),
               ),
@@ -824,10 +828,12 @@ class TermsandconditionsView extends StatelessWidget {
               Expanded(
                 child: Text(
                   cleaned,
-                  style: GoogleFonts.poppins(
+                  style:
+                  GoogleFonts.poppins(
                     fontSize: 13.sp,
                     height: 1.7,
-                    color: Colors.grey.shade700,
+                    color:
+                    Colors.grey.shade700,
                   ),
                 ),
               ),
@@ -840,9 +846,10 @@ class TermsandconditionsView extends StatelessWidget {
     return widgets;
   }
 
-  // =================================================================
+  // ============================================================
   // PROCESS BOLD HTML
-  // =================================================================
+  // ============================================================
+
   List<TextSpan> _processBoldText(
       String text,
       ) {
@@ -875,9 +882,6 @@ class TermsandconditionsView extends StatelessWidget {
     int position = 0;
 
     for (final match in matches) {
-      // -------------------------------------------------------------
-      // Normal text before bold
-      // -------------------------------------------------------------
       if (match.start > position) {
         final before =
         text.substring(
@@ -897,9 +901,6 @@ class TermsandconditionsView extends StatelessWidget {
         }
       }
 
-      // -------------------------------------------------------------
-      // Bold text
-      // -------------------------------------------------------------
       final boldText =
           match.group(1) ?? '';
 
@@ -911,7 +912,8 @@ class TermsandconditionsView extends StatelessWidget {
           TextSpan(
             text: cleanedBold,
             style: const TextStyle(
-              fontWeight: FontWeight.w600,
+              fontWeight:
+              FontWeight.w600,
               color: Colors.black87,
             ),
           ),
@@ -921,9 +923,6 @@ class TermsandconditionsView extends StatelessWidget {
       position = match.end;
     }
 
-    // -------------------------------------------------------------
-    // Remaining text
-    // -------------------------------------------------------------
     if (position < text.length) {
       final after =
       text.substring(position);
@@ -943,13 +942,15 @@ class TermsandconditionsView extends StatelessWidget {
     return spans;
   }
 
-  // =================================================================
-  // CLEAN ALL HTML TAGS
-  // =================================================================
-  String _cleanText(String text) {
+  // ============================================================
+  // CLEAN HTML
+  // ============================================================
+
+  String _cleanText(
+      String text,
+      ) {
     String cleaned = text;
 
-    // Remove comments
     cleaned = cleaned.replaceAll(
       RegExp(
         r'<!--.*?-->',
@@ -958,7 +959,6 @@ class TermsandconditionsView extends StatelessWidget {
       '',
     );
 
-    // Remove ALL HTML tags
     cleaned = cleaned.replaceAll(
       RegExp(
         r'<[^>]*>',
@@ -967,7 +967,6 @@ class TermsandconditionsView extends StatelessWidget {
       ' ',
     );
 
-    // Decode HTML entities
     cleaned = cleaned
         .replaceAll('&nbsp;', ' ')
         .replaceAll('&amp;', '&')
@@ -978,7 +977,6 @@ class TermsandconditionsView extends StatelessWidget {
         .replaceAll('&#x27;', "'")
         .replaceAll('&apos;', "'");
 
-    // Multiple spaces
     cleaned = cleaned.replaceAll(
       RegExp(r'\s+'),
       ' ',

@@ -228,9 +228,31 @@ class _ProfileViewState extends State<ProfileView> {
                   }),
 
                   SizedBox(height: 26.h),
-
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.w),
+                child: Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.fromLTRB(
+                    16.w,
+                    20.h,
+                    16.w,
+                    20.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14.r),
+                    border: Border.all(
+                      color: const Color(0xFFF1E8E4),
+                      width: 0.8,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.035),
+                        blurRadius: 12,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
                     child: Column(
                       children: List.generate(
                         menuList.length,
@@ -284,13 +306,18 @@ class _ProfileViewState extends State<ProfileView> {
                         },
                       ),
                     ),
+
                   ),
 
-                  SizedBox(height: 10.h),
-                ],
+
+              )],
+
+
               ),
+
             ),
           ),
+
         ],
       ),
     );

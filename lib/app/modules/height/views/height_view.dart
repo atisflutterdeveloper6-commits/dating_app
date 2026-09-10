@@ -269,229 +269,195 @@ children: [
 SizedBox(height: 20.h),
 
 // Header
-Row(
-crossAxisAlignment:
-CrossAxisAlignment.center,
-children: [
-Container(
-padding: EdgeInsets.all(8.w),
-decoration: BoxDecoration(
-shape: BoxShape.circle,
-border: Border.all(
-color:
-const Color(0xFFFFE0CC),
-width: 1.2,
-),
-),
-child: Icon(
-Icons.height_rounded,
-color:
-const Color(0xFFFF6B00),
-size: 22.sp,
-),
-),
 
-SizedBox(width: 20.w),
-
-Expanded(
-child: Column(
-crossAxisAlignment:
-CrossAxisAlignment.start,
-children: [
-Text(
-"Height",
-style: GoogleFonts.poppins(
-fontSize: 14.sp,
-fontWeight:
-FontWeight.w700,
-letterSpacing: 1.2,
-),
-),
-SizedBox(height: 8.h),
-Text(
-"Update your height.",
-style: GoogleFonts.poppins(
-fontSize: 9.sp,
-color: Colors.black54,
-letterSpacing: 0.5,
-),
-),
-],
-),
-),
-],
-),
 
 SizedBox(height: 20.h),
 
 // White content card
-Expanded(
-child: SingleChildScrollView(
-child: Container(
-width: double.infinity,
-padding: EdgeInsets.fromLTRB(
-16.w,
-30.h,
-16.w,
-30.h,
-),
-decoration: BoxDecoration(
-color: Colors.white,
-borderRadius:
-BorderRadius.circular(14.r),
-border: Border.all(
-color:
-const Color(0xFFF1E8E4),
-width: 0.8,
-),
-boxShadow: [
-BoxShadow(
-color: Colors.black
-    .withOpacity(0.035),
-blurRadius: 12,
-offset:
-const Offset(0, 3),
-),
-],
-),
-child: Column(
-crossAxisAlignment:
-CrossAxisAlignment.start,
-children: [
-Text(
-'Select your height',
-style:
-GoogleFonts.poppins(
-fontSize: 13.sp,
-fontWeight:
-FontWeight.w500,
-color:
-const Color(0xff1F1F1F),
-),
-),
+  Expanded(
+    child: Center(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
 
-SizedBox(height: 12.h),
+            // ==========================================
+            // HEADER - WHITE BOX KE JUST UPAR
+            // ==========================================
+            SizedBox(
+              width: 320.w,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(8.w),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: const Color(0xFFFFE0CC),
+                        width: 1.2,
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.height_rounded,
+                      color: const Color(0xFFFF6B00),
+                      size: 22.sp,
+                    ),
+                  ),
 
-// Height dropdown
-Container(
-height: 50.h,
-width: double.infinity,
-padding:
-EdgeInsets.symmetric(
-horizontal: 14.w,
-),
-decoration: BoxDecoration(
-color: Colors.white,
-borderRadius:
-BorderRadius.circular(
-12.r,
-),
-border: Border.all(
-color:
-const Color(0xffDCDCDC),
-),
-),
-child:
-DropdownButtonHideUnderline(
-child:
-DropdownButton<String?>(
-value:
-selectedHeight.value,
-isExpanded: true,
-icon: Icon(
-Icons
-    .keyboard_arrow_down,
-size: 20.sp,
-color:
-const Color(
-0xff555555,
-),
-),
-style:
-GoogleFonts.poppins(
-fontSize: 13.sp,
-color:
-const Color(
-0xff444444,
-),
-),
-hint: Text(
-'Select your height',
-style:
-GoogleFonts.poppins(
-fontSize: 13.sp,
-color:
-const Color(
-0xff999999,
-),
-),
-),
-items: heights.map(
-(height) {
-return DropdownMenuItem<
-String?>(
-value: height,
-child: Text(
-height,
-maxLines: 1,
-overflow:
-TextOverflow
-    .ellipsis,
-),
-);
-},
-).toList(),
-onChanged:
-isLoading.value
-? null
-    : (newValue) {
-if (newValue !=
-null) {
-selectedHeight
-    .value =
-newValue;
-}
-},
-),
-),
-),
+                  SizedBox(width: 14.w),
 
-// Current height
-if (profileService
-    .profile
-    .value
-    .height !=
-null &&
-profileService
-    .profile
-    .value
-    .height!
-    .isNotEmpty)
-Padding(
-padding: EdgeInsets.only(
-top: 12.h,
-),
-child: Text(
-'Current: ${profileService.profile.value.height}',
-style:
-GoogleFonts.poppins(
-fontSize: 10.sp,
-color:
-Colors.grey[600],
-fontStyle:
-FontStyle.italic,
-),
-maxLines: 1,
-overflow:
-TextOverflow.ellipsis,
-),
-),
-],
-),
-),
-),
-),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Height",
+                        style: GoogleFonts.poppins(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
 
+                      SizedBox(height: 4.h),
+
+                      Text(
+                        "Update your height.",
+                        style: GoogleFonts.poppins(
+                          fontSize: 9.sp,
+                          color: Colors.black54,
+                          letterSpacing: 0.5,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            // Header aur white box ke beech gap
+            SizedBox(height: 12.h),
+
+            // ==========================================
+            // WHITE CENTER BOX
+            // ==========================================
+            Container(
+              width: 320.w,
+              padding: EdgeInsets.fromLTRB(
+                16.w,
+                30.h,
+                16.w,
+                30.h,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14.r),
+                border: Border.all(
+                  color: const Color(0xFFF1E8E4),
+                  width: 0.8,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.035),
+                    blurRadius: 12,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Select your height',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w500,
+                      color: const Color(0xff1F1F1F),
+                    ),
+                  ),
+
+                  SizedBox(height: 12.h),
+
+                  // Height dropdown
+                  Container(
+                    height: 50.h,
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 14.w,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(
+                        color: const Color(0xffDCDCDC),
+                      ),
+                    ),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String?>(
+                        value: selectedHeight.value,
+                        isExpanded: true,
+                        icon: Icon(
+                          Icons.keyboard_arrow_down,
+                          size: 20.sp,
+                          color: const Color(0xff555555),
+                        ),
+                        style: GoogleFonts.poppins(
+                          fontSize: 13.sp,
+                          color: const Color(0xff444444),
+                        ),
+                        hint: Text(
+                          'Select your height',
+                          style: GoogleFonts.poppins(
+                            fontSize: 13.sp,
+                            color: const Color(0xff999999),
+                          ),
+                        ),
+                        items: heights.map((height) {
+                          return DropdownMenuItem<String?>(
+                            value: height,
+                            child: Text(
+                              height,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          );
+                        }).toList(),
+                        onChanged: isLoading.value
+                            ? null
+                            : (newValue) {
+                          if (newValue != null) {
+                            selectedHeight.value = newValue;
+                          }
+                        },
+                      ),
+                    ),
+                  ),
+
+                  // Current height
+                  if (profileService.profile.value.height != null &&
+                      profileService.profile.value.height!.isNotEmpty)
+                    Padding(
+                      padding: EdgeInsets.only(top: 12.h),
+                      child: Text(
+                        'Current: ${profileService.profile.value.height}',
+                        style: GoogleFonts.poppins(
+                          fontSize: 10.sp,
+                          color: Colors.grey[600],
+                          fontStyle: FontStyle.italic,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  ),
 SizedBox(height: 18.h),
 
 // Update button

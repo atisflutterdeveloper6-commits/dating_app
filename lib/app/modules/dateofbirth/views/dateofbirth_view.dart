@@ -340,259 +340,275 @@ fontSize: 14,
 }
 
 return Padding(
-padding: EdgeInsets.symmetric(
-horizontal: 28.w,
-),
-child: Column(
-crossAxisAlignment:
-CrossAxisAlignment.start,
-children: [
-SizedBox(height: 20.h),
+  padding: EdgeInsets.symmetric(
+    horizontal: 28.w,
+  ),
+  child: Column(
+    children: [
+      // ==================================================
+      // CENTER CONTENT
+      // ==================================================
 
-// Header
-Row(
-crossAxisAlignment:
-CrossAxisAlignment.center,
-children: [
-Container(
-padding: EdgeInsets.all(8.w),
-decoration: BoxDecoration(
-shape: BoxShape.circle,
-border: Border.all(
-color:
-const Color(0xFFFFE0CC),
-width: 1.2,
-),
-),
-child: Icon(
-Icons.cake_outlined,
-color:
-const Color(0xFFFF6B00),
-size: 22.sp,
-),
-),
+      Expanded(
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // ==================================================
+                // HEADER
+                // ==================================================
 
-SizedBox(width: 20.w),
+                SizedBox(
+                  width: 320.w,
+                  child: Row(
+                    crossAxisAlignment:
+                    CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(8.w),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0xFFFFE0CC),
+                            width: 1.2,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.cake_outlined,
+                          color: const Color(0xFFFF6B00),
+                          size: 22.sp,
+                        ),
+                      ),
 
-Expanded(
-child: Column(
-crossAxisAlignment:
-CrossAxisAlignment.start,
-children: [
-Text(
-"Date of Birth",
-style: GoogleFonts.poppins(
-fontSize: 14.sp,
-fontWeight:
-FontWeight.w700,
-letterSpacing: 1.2,
-),
-),
-SizedBox(height: 8.h),
-Text(
-"Update your date of birth.",
-style: GoogleFonts.poppins(
-fontSize: 9.sp,
-color: Colors.black54,
-letterSpacing: 0.5,
-),
-),
-],
-),
-),
-],
-),
+                      SizedBox(width: 14.w),
 
-SizedBox(height: 20.h),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment:
+                          CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Date of Birth",
+                              style: GoogleFonts.poppins(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.2,
+                              ),
+                            ),
 
-// Main white card
-Expanded(
-child: SingleChildScrollView(
-child: Container(
-width: double.infinity,
-padding: EdgeInsets.fromLTRB(
-16.w,
-30.h,
-16.w,
-30.h,
-),
-decoration: BoxDecoration(
-color: Colors.white,
-borderRadius:
-BorderRadius.circular(14.r),
-border: Border.all(
-color:
-const Color(0xFFF1E8E4),
-width: 0.8,
-),
-boxShadow: [
-BoxShadow(
-color: Colors.black
-    .withOpacity(0.035),
-blurRadius: 12,
-offset:
-const Offset(0, 3),
-),
-],
-),
-child: Column(
-crossAxisAlignment:
-CrossAxisAlignment.start,
-children: [
-Text(
-'Select your date of birth',
-style:
-GoogleFonts.poppins(
-fontSize: 13.sp,
-fontWeight:
-FontWeight.w500,
-color:
-const Color(0xff1F1F1F),
-),
-),
+                            SizedBox(height: 4.h),
 
-SizedBox(height: 18.h),
+                            Text(
+                              "Update your date of birth.",
+                              style: GoogleFonts.poppins(
+                                fontSize: 9.sp,
+                                color: Colors.black54,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
 
-// DOB Dropdowns
-Row(
-crossAxisAlignment:
-CrossAxisAlignment.start,
-children: [
-Expanded(
-flex: 3,
-child: _buildDropdown(
-title: 'Day',
-value: selectedDay,
-items: days,
-),
-),
+                SizedBox(height: 12.h),
 
-SizedBox(width: 10.w),
+                // ==================================================
+                // WHITE CONTENT CARD
+                // ==================================================
 
-Expanded(
-flex: 5,
-child: _buildDropdown(
-title: 'Month',
-value: selectedMonth,
-items: months,
-),
-),
+                Container(
+                  width: 320.w,
+                  padding: EdgeInsets.fromLTRB(
+                    16.w,
+                    30.h,
+                    16.w,
+                    30.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius:
+                    BorderRadius.circular(14.r),
+                    border: Border.all(
+                      color: const Color(0xFFF1E8E4),
+                      width: 0.8,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color:
+                        Colors.black.withOpacity(0.035),
+                        blurRadius: 12,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
 
-SizedBox(width: 10.w),
+                  child: Column(
+                    crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                    children: [
+                      // ==================================================
+                      // TITLE
+                      // ==================================================
 
-Expanded(
-flex: 3,
-child: _buildDropdown(
-title: 'Year',
-value: selectedYear,
-items: years,
-),
-),
-],
-),
+                      Text(
+                        'Select your date of birth',
+                        style: GoogleFonts.poppins(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xff1F1F1F),
+                        ),
+                      ),
 
-SizedBox(height: 22.h),
+                      SizedBox(height: 18.h),
 
-// Age card
-Obx(
-() => Container(
-height: 48.h,
-width: double.infinity,
-padding:
-EdgeInsets.symmetric(
-horizontal: 16.w,
-),
-alignment:
-Alignment.centerLeft,
-decoration: BoxDecoration(
-color:
-const Color(0xffFFF0E6),
-borderRadius:
-BorderRadius.circular(
-12.r,
-),
-border: Border.all(
-color:
-const Color(0xffFFE0CC),
-width: 1.w,
-),
-),
-child: Text(
-'You are ${getAge()} years old',
-style:
-GoogleFonts.poppins(
-fontSize: 13.sp,
-fontWeight:
-FontWeight.w500,
-color:
-const Color(0xff3A3A3A),
-),
-),
-),
-),
+                      // ==================================================
+                      // DOB DROPDOWNS
+                      // ==================================================
 
-// Current DOB
-if (profileService
-    .profile
-    .value
-    .birthday !=
-null &&
-profileService
-    .profile
-    .value
-    .birthday!
-    .isNotEmpty)
-Padding(
-padding: EdgeInsets.only(
-top: 12.h,
-),
-child: Text(
-'Current: ${_parseDateString(profileService.profile.value.birthday!)}',
-style:
-GoogleFonts.poppins(
-fontSize: 10.sp,
-color:
-Colors.grey[600],
-fontStyle:
-FontStyle.italic,
-),
-maxLines: 1,
-overflow:
-TextOverflow.ellipsis,
-),
-),
-],
-),
-),
-),
-),
+                      Row(
+                        crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            flex: 3,
+                            child: _buildDropdown(
+                              title: 'Day',
+                              value: selectedDay,
+                              items: days,
+                            ),
+                          ),
 
-SizedBox(height: 18.h),
+                          SizedBox(width: 10.w),
 
-// Update button
-SafeArea(
-top: false,
-child: CustomButton(
-text: "Update",
-onPressed: isLoading.value
-? () {}
-    : updateDateOfBirth,
-isLoading: isLoading.value,
-backgroundColor:
-const Color(0xffFF6B00),
-textColor: Colors.white,
+                          Expanded(
+                            flex: 5,
+                            child: _buildDropdown(
+                              title: 'Month',
+                              value: selectedMonth,
+                              items: months,
+                            ),
+                          ),
 
-borderRadius: 30.r,
-fontSize: 11.sp,
-fontWeight: FontWeight.w600,
-letterSpacing: 0,
-showArrow: true,
-),
-),
+                          SizedBox(width: 10.w),
 
-SizedBox(height: 90.h),
-],
-),
+                          Expanded(
+                            flex: 3,
+                            child: _buildDropdown(
+                              title: 'Year',
+                              value: selectedYear,
+                              items: years,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      SizedBox(height: 22.h),
+
+                      // ==================================================
+                      // AGE CARD
+                      // ==================================================
+
+                      Obx(
+                            () => Container(
+                          height: 48.h,
+                          width: double.infinity,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 16.w,
+                          ),
+                          alignment: Alignment.centerLeft,
+                          decoration: BoxDecoration(
+                            color: const Color(0xffFFF0E6),
+                            borderRadius:
+                            BorderRadius.circular(12.r),
+                            border: Border.all(
+                              color:
+                              const Color(0xffFFE0CC),
+                              width: 1.w,
+                            ),
+                          ),
+                          child: Text(
+                            'You are ${getAge()} years old',
+                            style: GoogleFonts.poppins(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w500,
+                              color:
+                              const Color(0xff3A3A3A),
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      // ==================================================
+                      // CURRENT DOB
+                      // ==================================================
+
+                      if (profileService
+                          .profile
+                          .value
+                          .birthday !=
+                          null &&
+                          profileService
+                              .profile
+                              .value
+                              .birthday!
+                              .isNotEmpty)
+                        Padding(
+                          padding: EdgeInsets.only(
+                            top: 12.h,
+                          ),
+                          child: Text(
+                            'Current: ${_parseDateString(profileService.profile.value.birthday!)}',
+                            style: GoogleFonts.poppins(
+                              fontSize: 10.sp,
+                              color: Colors.grey[600],
+                              fontStyle:
+                              FontStyle.italic,
+                            ),
+                            maxLines: 1,
+                            overflow:
+                            TextOverflow.ellipsis,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+
+      // ==================================================
+      // UPDATE BUTTON
+      // ==================================================
+
+      SafeArea(
+        top: false,
+        child: CustomButton(
+          text: "Update",
+          onPressed: isLoading.value
+              ? () {}
+              : updateDateOfBirth,
+          isLoading: isLoading.value,
+          backgroundColor:
+          const Color(0xffFF6B00),
+          textColor: Colors.white,
+          borderRadius: 30.r,
+          fontSize: 11.sp,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0,
+          showArrow: true,
+        ),
+      ),
+
+      SizedBox(height: 90.h),
+    ],
+  ),
 );
 },
 ),

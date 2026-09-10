@@ -98,233 +98,304 @@ class ProfilebioView extends GetView<ProfilebioController> {
                   final keyboardOpen =
                       MediaQuery.of(context).viewInsets.bottom > 0;
 
-                  // Keyboard open hone par height reduce
                   final double bioHeight =
                   keyboardOpen ? 150.h : 220.h;
 
                   return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SizedBox(height: 20.h),
+                      // ==================================================
+                      // CENTER CONTENT
+                      // ==================================================
 
-                      // ================= HEADER =================
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: EdgeInsets.all(8.w),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: const Color(0xFFFFE0CC),
-                                width: 1.2,
-                              ),
-                            ),
-                            child: Icon(
-                              Icons.edit_note_rounded,
-                              color: const Color(0xFFFF6B00),
-                              size: 22.sp,
-                            ),
-                          ),
-
-                          SizedBox(width: 20.w),
-
-                          Expanded(
+                      Expanded(
+                        child: Center(
+                          child: SingleChildScrollView(
                             child: Column(
+                              mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment:
-                              CrossAxisAlignment.start,
+                              CrossAxisAlignment.center,
                               children: [
-                                Text(
-                                  "Your Bio",
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w700,
-                                    letterSpacing: 1.2,
-                                    color: Colors.black,
-                                  ),
-                                ),
+                                // ==================================================
+                                // HEADER
+                                // ==================================================
 
-                                SizedBox(height: 8.h),
-
-                                Text(
-                                  "Write something that tells people about you.",
-                                  style: TextStyle(
-                                    fontSize: 9.sp,
-                                    color: Colors.black54,
-                                    letterSpacing: 0.5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      SizedBox(height: 20.h),
-
-                      // ================= WHITE CARD =================
-                      Container(
-                        width: double.infinity,
-                        padding: EdgeInsets.fromLTRB(
-                          16.w,
-                          20.h,
-                          16.w,
-                          12.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(14.r),
-                          border: Border.all(
-                            color: const Color(0xFFF1E8E4),
-                            width: 0.8,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.035),
-                              blurRadius: 12,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment:
-                          CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              "Tell us about yourself",
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xff1F1F1F),
-                              ),
-                            ),
-
-                            SizedBox(height: 10.h),
-
-                            // ================= BIO FIELD =================
-                            Container(
-                              width: double.infinity,
-                              height: bioHeight,
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 12.w,
-                                vertical: 10.h,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xffFAFAFA),
-                                borderRadius:
-                                BorderRadius.circular(12.r),
-                                border: Border.all(
-                                  color: const Color(0xffDCDCDC),
-                                  width: 1,
-                                ),
-                              ),
-                              child: Stack(
-                                children: [
-                                  TextField(
-                                    controller:
-                                    controller.bioController,
-                                    maxLines: null,
-                                    maxLength: 500,
-                                    expands: true,
-                                    textAlignVertical:
-                                    TextAlignVertical.top,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 11.sp,
-                                      height: 1.5,
-                                      color: Colors.black87,
-                                    ),
-                                    decoration: InputDecoration(
-                                      counterText: "",
-                                      hintText:
-                                      "Write something about yourself...",
-                                      hintStyle:
-                                      GoogleFonts.poppins(
-                                        fontSize: 10.sp,
-                                        color: Colors.grey.shade500,
+                                SizedBox(
+                                  width: 320.w,
+                                  child: Row(
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        padding: EdgeInsets.all(8.w),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color:
+                                            const Color(0xFFFFE0CC),
+                                            width: 1.2,
+                                          ),
+                                        ),
+                                        child: Icon(
+                                          Icons.edit_note_rounded,
+                                          color:
+                                          const Color(0xFFFF6B00),
+                                          size: 22.sp,
+                                        ),
                                       ),
-                                      contentPadding: EdgeInsets.zero,
-                                      border: InputBorder.none,
-                                      enabledBorder: InputBorder.none,
-                                      focusedBorder: InputBorder.none,
-                                    ),
-                                  ),
 
-                                  Positioned(
-                                    bottom: 0,
-                                    right: 0,
-                                    child: Icon(
-                                      Icons.edit_outlined,
-                                      size: 16.sp,
-                                      color: Colors.grey.shade500,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                                      SizedBox(width: 14.w),
 
-                            SizedBox(height: 6.h),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Your Bio",
+                                              style:
+                                              GoogleFonts.poppins(
+                                                fontSize: 14.sp,
+                                                fontWeight:
+                                                FontWeight.w700,
+                                                letterSpacing: 1.2,
+                                                color: Colors.black,
+                                              ),
+                                            ),
 
-                            // ================= CHARACTER COUNT =================
-                            Row(
-                              mainAxisAlignment:
-                              MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  '${controller.count.value} characters',
-                                  style: TextStyle(
-                                    color:
-                                    controller.count.value > 450
-                                        ? Colors.orange
-                                        : Colors.green,
-                                    fontSize: 8.sp,
+                                            SizedBox(height: 4.h),
+
+                                            Text(
+                                              "Write something that tells people about you.",
+                                              style:
+                                              GoogleFonts.poppins(
+                                                fontSize: 9.sp,
+                                                color: Colors.black54,
+                                                letterSpacing: 0.5,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
+
+                                SizedBox(height: 12.h),
+
+                                // ==================================================
+                                // WHITE CONTENT CARD
+                                // ==================================================
+
+                                Container(
+                                  width: 320.w,
+                                  padding: EdgeInsets.fromLTRB(
+                                    16.w,
+                                    30.h,
+                                    16.w,
+                                    30.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius:
+                                    BorderRadius.circular(14.r),
+                                    border: Border.all(
+                                      color:
+                                      const Color(0xFFF1E8E4),
+                                      width: 0.8,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black
+                                            .withOpacity(0.035),
+                                        blurRadius: 12,
+                                        offset:
+                                        const Offset(0, 3),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment:
+                                    CrossAxisAlignment.start,
+                                    children: [
+                                      // ==================================================
+                                      // TITLE
+                                      // ==================================================
+
+                                      Text(
+                                        "Tell us about yourself",
+                                        style:
+                                        GoogleFonts.poppins(
+                                          fontSize: 13.sp,
+                                          fontWeight:
+                                          FontWeight.w500,
+                                          color:
+                                          const Color(0xff1F1F1F),
+                                        ),
+                                      ),
+
+                                      SizedBox(height: 12.h),
+
+                                      // ==================================================
+                                      // BIO FIELD
+                                      // ==================================================
+
+                                      Container(
+                                        width: double.infinity,
+                                        height: bioHeight,
+                                        padding:
+                                        EdgeInsets.symmetric(
+                                          horizontal: 12.w,
+                                          vertical: 10.h,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color:
+                                          const Color(0xffFAFAFA),
+                                          borderRadius:
+                                          BorderRadius.circular(
+                                              12.r),
+                                          border: Border.all(
+                                            color:
+                                            const Color(
+                                                0xffDCDCDC),
+                                            width: 1,
+                                          ),
+                                        ),
+                                        child: Stack(
+                                          children: [
+                                            TextField(
+                                              controller:
+                                              controller
+                                                  .bioController,
+                                              maxLines: null,
+                                              maxLength: 500,
+                                              expands: true,
+                                              textAlignVertical:
+                                              TextAlignVertical.top,
+                                              style:
+                                              GoogleFonts.poppins(
+                                                fontSize: 11.sp,
+                                                height: 1.5,
+                                                color:
+                                                Colors.black87,
+                                              ),
+                                              decoration:
+                                              InputDecoration(
+                                                counterText: "",
+                                                hintText:
+                                                "Write something about yourself...",
+                                                hintStyle:
+                                                GoogleFonts.poppins(
+                                                  fontSize: 10.sp,
+                                                  color: Colors
+                                                      .grey.shade500,
+                                                ),
+                                                contentPadding:
+                                                EdgeInsets.zero,
+                                                border:
+                                                InputBorder.none,
+                                                enabledBorder:
+                                                InputBorder.none,
+                                                focusedBorder:
+                                                InputBorder.none,
+                                              ),
+                                            ),
+
+                                            // Edit icon
+                                            Positioned(
+                                              bottom: 0,
+                                              right: 0,
+                                              child: Icon(
+                                                Icons.edit_outlined,
+                                                size: 16.sp,
+                                                color: Colors
+                                                    .grey.shade500,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+
+                                      SizedBox(height: 6.h),
+
+                                      // ==================================================
+                                      // CHARACTER COUNT
+                                      // ==================================================
+
+                                      Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment
+                                            .spaceBetween,
+                                        children: [
+                                          Text(
+                                            '${controller.count.value} characters',
+                                            style:
+                                            GoogleFonts.poppins(
+                                              color:
+                                              controller.count
+                                                  .value >
+                                                  450
+                                                  ? Colors.orange
+                                                  : Colors.green,
+                                              fontSize: 8.sp,
+                                            ),
+                                          ),
+
+                                          Text(
+                                            "/500",
+                                            style:
+                                            GoogleFonts.poppins(
+                                              color: Colors
+                                                  .grey.shade500,
+                                              fontSize: 8.sp,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+
+                                SizedBox(height: 12.h),
+
+                                // ==================================================
+                                // AI HELP
+                                // ==================================================
+
                                 Text(
-                                  "/500",
-                                  style: TextStyle(
-                                    color: Colors.grey.shade500,
-                                    fontSize: 8.sp,
+                                  "✨ Need help? Use AI to write bio",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 10.sp,
+                                    color:
+                                    const Color(0xffFF6B00),
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
                             ),
-                          ],
-                        ),
-                      ),
-
-                      SizedBox(height: 14.h),
-
-                      // ================= AI HELP =================
-                      Center(
-                        child: Text(
-                          "✨ Need help? Use AI to write bio",
-                          style: TextStyle(
-                            fontSize: 10.sp,
-                            color: const Color(0xffFF6B00),
-                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
 
-                      // ================= SPACER =================
-                      const Spacer(),
+                      // ==================================================
+                      // UPDATE BUTTON
+                      // ==================================================
 
-                      // ================= UPDATE BUTTON =================
                       SafeArea(
                         top: false,
                         child: CustomButton(
                           text: controller.isLoading.value
                               ? "Updating..."
                               : "Update",
-                          onPressed: controller.isLoading.value
+                          onPressed:
+                          controller.isLoading.value
                               ? () {}
                               : controller.updateBio,
-                          isLoading: controller.isLoading.value,
+                          isLoading:
+                          controller.isLoading.value,
                           backgroundColor:
                           const Color(0xffFF6B00),
                           textColor: Colors.white,
-
                           borderRadius: 30.r,
                           fontSize: 11.sp,
                           fontWeight: FontWeight.w600,
@@ -333,8 +404,10 @@ class ProfilebioView extends GetView<ProfilebioController> {
                         ),
                       ),
 
-                      // Keyboard open = small gap
-                      // Keyboard closed = 80.h
+                      // ==================================================
+                      // BOTTOM GAP
+                      // ==================================================
+
                       SizedBox(
                         height: keyboardOpen ? 8.h : 80.h,
                       ),

@@ -17,6 +17,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../../../custom_widget/custom_button.dart';
 import '../../profilesetup/views/profilesetup_view.dart';
 
 class ProfiledetailView extends StatefulWidget {
@@ -44,71 +45,264 @@ class _ProfiledetailViewState extends State<ProfiledetailView> {
     super.dispose();
   }
 
+
   void _showAddReviewDialog() {
     _reviewController.clear();
-    showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setDialogState) {
-          return Dialog(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-            child: Padding(
-              padding: EdgeInsets.all(20.w),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Write a Review',
-                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 12.h),
-                  TextField(
-                    controller: _reviewController,
-                    maxLines: 4,
-                    decoration: InputDecoration(
-                      hintText: 'Share your experience...',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12.r),
+
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        insetPadding: EdgeInsets.symmetric(
+          horizontal: 18.w,
+          vertical: 24.h,
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20.r),
+          child: Stack(
+            children: [
+              // =====================================================
+              // BACKGROUND IMAGE
+              // =====================================================
+              Positioned.fill(
+                child: Image.asset(
+                  "assets/images/LoginBack2.png",
+                  fit: BoxFit.cover,
+                ),
+              ),
+
+              // =====================================================
+              // WHITE OVERLAY
+              // =====================================================
+              Positioned.fill(
+                child: Container(
+                  color: Colors.white.withOpacity(0.70),
+                ),
+              ),
+
+              // =====================================================
+              // CONTENT
+              // =====================================================
+              Padding(
+                padding: EdgeInsets.all(20.w),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // =================================================
+                    // REVIEW ICON
+                    // =================================================
+                    Container(
+                      width: 80.w,
+                      height: 80.w,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.75),
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: Colors.white.withOpacity(0.8),
+                        ),
+                      ),
+                      child: Icon(
+                        Icons.rate_review_outlined,
+                        size: 40.sp,
+                        color: const Color(0xffFF6B00),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 16.h),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextButton(
-                          onPressed: () => Navigator.pop(context),
-                          child: const Text('Cancel'),
+
+                    SizedBox(height: 16.h),
+
+                    // =================================================
+                    // TITLE
+                    // =================================================
+                    Text(
+                      "Write a Review",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xff1E1E1E),
+                      ),
+                    ),
+
+                    SizedBox(height: 8.h),
+
+                    // =================================================
+                    // SUBTITLE
+                    // =================================================
+                    Text(
+                      "Share your experience with us",
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        fontSize: 14.sp,
+                        color: const Color(0xff666666),
+                        height: 1.4,
+                      ),
+                    ),
+
+                    SizedBox(height: 24.h),
+
+                    // =================================================
+                    // REVIEW INPUT CONTAINER
+                    // =================================================
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(14.w),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14.r),
+                        border: Border.all(
+                          color: const Color(0xFFF1E8E4),
+                          width: 0.8.w,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.035),
+                            blurRadius: 12.r,
+                            offset: Offset(0, 3.h),
+                          ),
+                        ],
+                      ),
+                      child: TextField(
+                        controller: _reviewController,
+                        maxLines: 5,
+                        textInputAction: TextInputAction.newline,
+                        style: GoogleFonts.poppins(
+                          fontSize: 12.sp,
+                          color: const Color(0xff222222),
+                          fontWeight: FontWeight.w500,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: "Share your experience...",
+                          hintStyle: GoogleFonts.poppins(
+                            fontSize: 12.sp,
+                            color: const Color(0xff999999),
+                          ),
+                          filled: true,
+                          fillColor: const Color(0xFFFFFCFB),
+                          contentPadding: EdgeInsets.symmetric(
+                            horizontal: 14.w,
+                            vertical: 14.h,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFF1E8E4),
+                            ),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                            borderSide: const BorderSide(
+                              color: Color(0xFFF1E8E4),
+                            ),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12.r),
+                            borderSide: const BorderSide(
+                              color: Color(0xffFF6B00),
+                              width: 1.2,
+                            ),
+                          ),
                         ),
                       ),
-                      SizedBox(width: 10.w),
-                      Expanded(
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            final text = _reviewController.text;
-                            Navigator.pop(context);
-                            await _submitReview(text);
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFFFF6100),
+                    ),
+
+                    SizedBox(height: 20.h),
+
+                    // =================================================
+                    // SUBMIT BUTTON
+                    // =================================================
+                    SizedBox(
+                      width: double.infinity,
+                      child: CustomButton(
+                        text: "Submit Review",
+                        onPressed: () async {
+                          final text =
+                          _reviewController.text.trim();
+
+                          if (text.isEmpty) {
+                            Get.snackbar(
+                              "Review",
+                              "Please write a review first.",
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                            return;
+                          }
+
+                          Get.back();
+
+                          await _submitReview(text);
+                        },
+                        borderRadius: 30.r,
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                        textColor: Colors.white,
+                        backgroundColor:
+                        const Color(0xffFF6B00),
+                        showArrow: true,
+
+                      ),
+                    ),
+
+                    SizedBox(height: 10.h),
+
+                    // =================================================
+                    // CANCEL BUTTON
+                    // =================================================
+                    SizedBox(
+                      width: double.infinity,
+                      height: 48.h,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          Get.back();
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor:
+                          const Color(0xffFF6B00),
+                          side: const BorderSide(
+                            color: Color(0xffFF6B00),
                           ),
-                          child: const Text(
-                            'Submit',
-                            style: TextStyle(color: Colors.white),
+                          backgroundColor:
+                          Colors.white.withOpacity(0.55),
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                            BorderRadius.circular(30.r),
                           ),
                         ),
+                        child: Row(
+                          mainAxisAlignment:
+                          MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.close,
+                              size: 19.sp,
+                              color: const Color(0xffFF6B00),
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              "Cancel",
+                              style: GoogleFonts.poppins(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w600,
+                                color:
+                                const Color(0xffFF6B00),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+
+                    SizedBox(height: 4.h),
+                  ],
+                ),
               ),
-            ),
-          );
-        },
+            ],
+          ),
+        ),
       ),
     );
   }
+
+
 
   // ✅ Reviews ke liye state variables
   List<Map<String, dynamic>> reviews = [];
@@ -1260,7 +1454,7 @@ class _ProfiledetailViewState extends State<ProfiledetailView> {
                                       style: TextStyle(
                                         color: Colors.black,
                                         decoration: TextDecoration.underline,
-                                        fontWeight: FontWeight.w500,
+                                      fontSize: 14.sp
                                       ),
                                     ),
                                   ),
@@ -1547,7 +1741,7 @@ class _ProfiledetailViewState extends State<ProfiledetailView> {
                                 Text(
                                   "Message",
                                   style: GoogleFonts.poppins(
-                                    fontSize: 11.sp,
+                                    fontSize: 14.sp,
                                     fontWeight: FontWeight.w600,
                                     color: Colors.white,
                                   ),
@@ -1558,7 +1752,7 @@ class _ProfiledetailViewState extends State<ProfiledetailView> {
                                 Icon(
                                   Icons.arrow_forward_rounded,
                                   color: Colors.white,
-                                  size: 16.sp,
+                                  size: 18.sp,
                                 ),
                               ],
                             ),

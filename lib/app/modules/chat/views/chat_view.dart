@@ -41,6 +41,27 @@ final ImagePicker _picker = ImagePicker();
 
 late final ChatService _chatService;
 
+String? chatRoomId;
+String? otherUserId;
+String otherUserName = 'Srivalli';
+String otherUserImage = '';
+String? currentUserId;
+
+bool _isLoading = true;
+bool _isSending = false;
+bool _otherUserOnline = false;
+bool _isOtherUserTyping = false;
+
+Timer? _typingDebounceTimer;
+Timer? _markReadTimer;
+
+bool _isFirstLoad = true;
+bool _isMarkingRead = false;
+String? _lastMessageId;
+int _lastMessageCount = 0;
+
+int _offlineConfirmCount = 0;
+
 Future<void> _downloadOrOpenFile(String url) async {
 try {
 final uri = Uri.parse(url);
@@ -154,8 +175,7 @@ resourceID: "zego_call",
 );
 
 if (!success) {
-dashboardController
-    .markCallServiceUnavailable();
+dashboardController.markCallServiceUnavailable();
 
 CustomToast.error(
 'Call service is currently unavailable. Please try again later.',
@@ -191,17 +211,12 @@ retryCount: retryCount + 1,
 return;
 }
 
-if (errorStr.contains(
-'signaling is not connected',
-) ||
-errorStr.contains(
-'signaling plugin is null',
-) ||
+if (errorStr.contains('signaling is not connected') ||
+errorStr.contains('signaling plugin is null') ||
 errorStr.contains('disconnected') ||
 errorStr.contains('suspended') ||
 errorStr.contains('expired')) {
-dashboardController
-    .markCallServiceUnavailable();
+dashboardController.markCallServiceUnavailable();
 
 CustomToast.error(
 'Call service is currently unavailable. Please try again later.',
@@ -233,7 +248,8 @@ PermissionStatus camStatus =
 PermissionStatus.granted;
 
 if (isVideoCall) {
-camStatus = await Permission.camera.status;
+camStatus =
+await Permission.camera.status;
 }
 
 if (micStatus.isGranted &&
@@ -241,8 +257,7 @@ if (micStatus.isGranted &&
 return true;
 }
 
-Map<Permission, PermissionStatus> statuses =
-await [
+final statuses = await [
 Permission.microphone,
 if (isVideoCall) Permission.camera,
 ].request();
@@ -251,8 +266,7 @@ final micGranted =
 statuses[Permission.microphone]?.isGranted ??
 false;
 
-final camGranted =
-!isVideoCall ||
+final camGranted = !isVideoCall ||
 (statuses[Permission.camera]?.isGranted ??
 false);
 
@@ -348,24 +362,6 @@ return null;
 }
 }
 
-String? chatRoomId;
-String? otherUserId;
-String otherUserName = 'Srivalli';
-String otherUserImage = '';
-String? currentUserId;
-
-bool _isLoading = true;
-bool _isSending = false;
-bool _otherUserOnline = false;
-bool _isOtherUserTyping = false;
-
-Timer? _typingDebounceTimer;
-
-bool _isFirstLoad = true;
-bool _isMarkingRead = false;
-String? _lastMessageId;
-int _lastMessageCount = 0;
-
 @override
 void initState() {
 super.initState();
@@ -399,8 +395,7 @@ arguments['chatRoomId']?.toString();
 if (otherUserId != null &&
 otherUserId!.isNotEmpty) {
 CallInvitationService
-    .userAvatars[
-otherUserId!] =
+    .userAvatars[otherUserId!] =
 otherUserImage;
 }
 }
@@ -410,8 +405,7 @@ chatRoomId!.isEmpty) {
 if (otherUserId != null &&
 otherUserId!.isNotEmpty) {
 chatRoomId =
-await _chatService
-    .getOrCreateChatRoom(
+await _chatService.getOrCreateChatRoom(
 otherUserId!,
 );
 }
@@ -424,8 +418,7 @@ _listenTypingStatus();
 if (!_isMarkingRead) {
 _isMarkingRead = true;
 
-await _chatService
-    .markMessagesAsRead(
+await _chatService.markMessagesAsRead(
 chatRoomId!,
 );
 }
@@ -459,9 +452,7 @@ return;
 }
 
 _chatService
-    .getConversationStream(
-chatRoomId!,
-)
+    .getConversationStream(chatRoomId!)
     .listen(
 (snapshot) {
 try {
@@ -476,8 +467,7 @@ data?['typing']
 as Map<String, dynamic>?;
 
 final isTyping =
-typingMap?[otherUserId] ??
-false;
+typingMap?[otherUserId] ?? false;
 
 if (_isOtherUserTyping !=
 isTyping) {
@@ -514,8 +504,7 @@ text.isNotEmpty,
 _typingDebounceTimer?.cancel();
 
 if (text.isNotEmpty) {
-_typingDebounceTimer =
-Timer(
+_typingDebounceTimer = Timer(
 const Duration(seconds: 3),
 () {
 _chatService.setTypingStatus(
@@ -526,8 +515,6 @@ false,
 );
 }
 }
-
-int _offlineConfirmCount = 0;
 
 void _loadUserStatus() {
 if (otherUserId == null) return;
@@ -570,8 +557,7 @@ _otherUserOnline;
 if (!computedOnline) {
 _offlineConfirmCount++;
 
-if (_offlineConfirmCount <
-2) {
+if (_offlineConfirmCount < 2) {
 return;
 }
 } else {
@@ -599,13 +585,11 @@ void _scrollToBottom() {
 WidgetsBinding.instance
     .addPostFrameCallback((_) {
 try {
-if (scrollController
-    .hasClients) {
+if (scrollController.hasClients) {
 scrollController.animateTo(
 0,
-duration: const Duration(
-milliseconds: 300,
-),
+duration:
+const Duration(milliseconds: 300),
 curve: Curves.easeOut,
 );
 }
@@ -748,25 +732,18 @@ throw Exception(
 
 CustomToast.show(
 message: 'Uploading image...',
-backgroundColor:
-Colors.orange,
+backgroundColor: Colors.orange,
 textColor: Colors.white,
 duration: 2,
 );
 
 imageUrl =
-await _chatService
-    .uploadImage(file);
-
-print(
-'✅✅✅ IMAGE URL FROM BACKEND: $imageUrl',
-);
+await _chatService.uploadImage(file);
 
 CustomToast.show(
 message:
 'Image uploaded successfully!',
-backgroundColor:
-Colors.green,
+backgroundColor: Colors.green,
 textColor: Colors.white,
 duration: 1,
 );
@@ -785,29 +762,22 @@ throw Exception(
 CustomToast.show(
 message:
 'Uploading ${fileName ?? "file"}...',
-backgroundColor:
-Colors.orange,
+backgroundColor: Colors.orange,
 textColor: Colors.white,
 duration: 2,
 );
 
 uploadedFileUrl =
-await _chatService
-    .uploadFile(file);
+await _chatService.uploadFile(file);
 
 CustomToast.show(
 message:
 'File uploaded successfully!',
-backgroundColor:
-Colors.green,
+backgroundColor: Colors.green,
 textColor: Colors.white,
 duration: 1,
 );
 }
-
-print(
-'📤📤📤 SAVING TO FIRESTORE WITH URL: $imageUrl',
-);
 
 await _chatService.sendMessage(
 chatRoomId: chatRoomId!,
@@ -815,10 +785,6 @@ message: text,
 imageUrl: imageUrl,
 fileUrl: uploadedFileUrl,
 fileName: fileName,
-);
-
-print(
-'✅✅✅ MESSAGE SAVED TO FIRESTORE WITH IMAGE URL',
 );
 
 _sendPushNotification(
@@ -831,12 +797,10 @@ messageController.clear();
 
 _scrollToBottom();
 
-if (chatRoomId != null) {
 _chatService.setTypingStatus(
 chatRoomId!,
 false,
 );
-}
 } catch (e) {
 CustomToast.error(
 'Failed to send: ${e.toString()}',
@@ -902,8 +866,7 @@ CustomToast.error(
 Future<void> _pickDocument() async {
 try {
 final result =
-await FilePicker.platform
-    .pickFiles(
+await FilePicker.platform.pickFiles(
 type: FileType.custom,
 allowedExtensions: [
 'pdf',
@@ -919,8 +882,7 @@ allowedExtensions: [
 );
 
 if (result != null &&
-result.files.single.path !=
-null) {
+result.files.single.path != null) {
 final path =
 result.files.single.path!;
 
@@ -948,8 +910,7 @@ final uri = Uri.parse(url);
 if (await canLaunchUrl(uri)) {
 await launchUrl(
 uri,
-mode:
-LaunchMode.externalApplication,
+mode: LaunchMode.externalApplication,
 );
 } else {
 CustomToast.error(
@@ -995,8 +956,7 @@ emojiData.emoji;
 },
 config: const emoji.Config(
 height: 350,
-checkPlatformCompatibility:
-true,
+checkPlatformCompatibility: true,
 ),
 ),
 ),
@@ -1011,11 +971,8 @@ return 'Just now';
 }
 
 try {
-final date =
-timestamp.toDate();
-
+final date = timestamp.toDate();
 final now = DateTime.now();
-
 final difference =
 now.difference(date);
 
@@ -1056,526 +1013,542 @@ super.dispose();
 Widget build(BuildContext context) {
 ScreenUtil.init(
 context,
-designSize:
-const Size(375, 812),
+designSize: const Size(375, 812),
 minTextAdapt: true,
 splitScreenMode: true,
 );
 
 return Scaffold(
-backgroundColor:
-Colors.transparent,
+backgroundColor: const Color(0xFFF7F7F7),
 
+// TRUE hi rakha hai
 extendBodyBehindAppBar: true,
-extendBody: true,
+
+// Black bottom strip avoid karne ke liye false
+extendBody: false,
 
 appBar: _buildAppBar(),
+
 
 body: Stack(
 fit: StackFit.expand,
 children: [
-// Same background
+// Background
 Positioned.fill(
-child: Image.asset(
-'assets/images/LoginBack2.png',
-fit: BoxFit.cover,
-),
-),
+    child: Container(
+    color: const Color(0xFFF7F7F7),
+  ),
+  ),
 
-// Same white overlay
-Positioned.fill(
-child: Container(
-color: Colors.white
-    .withOpacity(0.70),
-),
-),
+  Positioned.fill(
+  child: Image.asset(
+  'assets/images/LoginBack2.png',
+  fit: BoxFit.cover,
+  ),
+  ),
 
-// Chat UI
-Positioned.fill(
-child: SafeArea(
-bottom: false,
-child: Column(
-children: [
-SizedBox(height: 16.h),
+  // White overlay
+  Positioned.fill(
+  child: Container(
+  color: Colors.white.withOpacity(0.70),
+  ),
+  ),
 
-Container(
-padding:
-EdgeInsets.symmetric(
-horizontal: 12.w,
-vertical: 5.h,
-),
-decoration:
-BoxDecoration(
-color:
-const Color(
-0xffE8DDD6,
-),
-borderRadius:
-BorderRadius.circular(
-8.r,
-),
-),
-child: Text(
-'Today',
-style:
-gf.GoogleFonts.poppins(
-fontSize: 12.sp,
-color:
-Colors.black87,
-),
-),
-),
+  // Main layout
+  Positioned.fill(
+  child: SafeArea(
+  child: Padding(
+  padding: EdgeInsets.fromLTRB(
+  14.w,
+  14.h,
+  14.w,
+  10.h,
+  ),
+  child: Column(
+  children: [
+  // ==============================
+  // WHITE CHAT CONTAINER
+  // ==============================
+  Expanded(
+  child: Container(
+  width: double.infinity,
+  padding: EdgeInsets.fromLTRB(
+  10.w,
+  12.h,
+  10.w,
+  10.h,
+  ),
+  decoration: BoxDecoration(
+  color: Colors.white,
+  borderRadius: BorderRadius.circular(14.r),
+  border: Border.all(
+  color: const Color(0xFFF1E8E4),
+  width: 0.8.w,
+  ),
+  boxShadow: [
+  BoxShadow(
+  color: Colors.black.withOpacity(0.035),
+  blurRadius: 12.r,
+  offset: Offset(0, 3.h),
+  ),
+  ],
+  ),
+  child: Column(
+  children: [
+  // Today
+  Container(
+  padding: EdgeInsets.symmetric(
+  horizontal: 12.w,
+  vertical: 5.h,
+  ),
+  decoration: BoxDecoration(
+  color: const Color(0xffE8DDD6),
+  borderRadius: BorderRadius.circular(8.r),
+  ),
+  child: Text(
+  'Today',
+  style: gf.GoogleFonts.poppins(
+  fontSize: 12.sp,
+  color: Colors.black87,
+  ),
+  ),
+  ),
 
-SizedBox(height: 20.h),
+  SizedBox(height: 12.h),
 
-Expanded(
-child: _isLoading
-? const Center(
-child:
-CircularProgressIndicator(
-color:
-Color(
-0xffFF6A00,
-),
-),
-)
-    : chatRoomId ==
-null
-? Center(
-child:
-Column(
-mainAxisAlignment:
-MainAxisAlignment
-    .center,
-children: [
-Icon(
-Icons
-    .chat_bubble_outline,
-size:
-60.sp,
-color:
-Colors
-    .grey
-    .shade300,
-),
-SizedBox(
-height:
-16.h,
-),
-Text(
-'No chat room found',
-style: gf
-    .GoogleFonts
-    .poppins(
-fontSize:
-16.sp,
-color:
-Colors
-    .grey
-    .shade500,
-),
-),
-],
-),
-)
-    : _buildMessagesStream(),
-),
+  // Messages
+  Expanded(
+  child: _isLoading
+  ? const Center(
+  child: CircularProgressIndicator(
+  color: Color(0xffFF6A00),
+  ),
+  )
+      : chatRoomId == null
+  ? Center(
+  child: Column(
+  mainAxisAlignment:
+  MainAxisAlignment.center,
+  children: [
+  Icon(
+  Icons.chat_bubble_outline,
+  size: 60.sp,
+  color: Colors.grey.shade300,
+  ),
+  SizedBox(height: 16.h),
+  Text(
+  'No chat room found',
+  style: gf.GoogleFonts.poppins(
+  fontSize: 16.sp,
+  color: Colors.grey.shade500,
+  ),
+  ),
+  ],
+  ),
+  )
+      : _buildMessagesStream(),
+  ),
+  ],
+  ),
+  ),
+  ),
 
-SafeArea(
-top: false,
-child: Padding(
-padding:
-EdgeInsets.all(
-12.w,
-),
-child: Row(
-children: [
-Expanded(
-child:
-Container(
-height: 50.h,
-padding:
-EdgeInsets
-    .symmetric(
-horizontal:
-14.w,
-),
-decoration:
-BoxDecoration(
-color:
-Colors
-    .white,
-borderRadius:
-BorderRadius
-    .circular(
-25.r,
-),
-border:
-Border.all(
-color:
-const Color(
-0xffFF6A00,
-),
-width: 1.w,
-),
-),
-child: Row(
-children: [
-GestureDetector(
-onTap:
-_showEmojiPicker,
-child:
-Icon(
-Icons
-    .sentiment_satisfied_alt_outlined,
-color:
-Colors
-    .grey
-    .shade400,
-size:
-22.sp,
-),
-),
+  // =================================
+  // SPACE BETWEEN WHITE CONTAINER
+  // AND TEXT FIELD
+  // =================================
+  SizedBox(height: 10.h),
 
-SizedBox(
-width:
-8.w,
-),
+  // =================================
+  // MESSAGE INPUT - OUTSIDE CONTAINER
+  // =================================
+  SafeArea(
+  top: false,
+  child: Row(
+  children: [
+  Expanded(
+  child: Container(
+  height: 50.h,
+  padding: EdgeInsets.symmetric(
+  horizontal: 14.w,
+  ),
+  decoration: BoxDecoration(
+  color: Colors.white,
+  borderRadius: BorderRadius.circular(25.r),
+  border: Border.all(
+  color: const Color(0xffFF6A00),
+  width: 1.w,
+  ),
+  ),
+  child: Row(
+  children: [
+  // Emoji
+  GestureDetector(
+  onTap: _showEmojiPicker,
+  child: Icon(
+  Icons.sentiment_satisfied_alt_outlined,
+  color: Colors.grey.shade400,
+  size: 22.sp,
+  ),
+  ),
 
-Expanded(
-child:
-TextField(
-controller:
-messageController,
-decoration:
-InputDecoration(
-border:
-InputBorder.none,
-hintText:
-'Type a message...',
-hintStyle:
-gf.GoogleFonts.poppins(
-fontSize:
-13.sp,
-color:
-Colors.grey,
-),
-),
-onChanged:
-_onMessageTextChanged,
-onSubmitted:
-(_) =>
-_sendMessage(),
-),
-),
+  SizedBox(width: 8.w),
 
-GestureDetector(
-onTap:
-_showAttachMenu,
-child:
-Icon(
-Icons
-    .attach_file,
-color:
-Colors
-    .grey
-    .shade400,
-size:
-22.sp,
-),
-),
+  // TextField
+  Expanded(
+  child: TextField(
+  controller: messageController,
+  decoration: InputDecoration(
+  border: InputBorder.none,
+  hintText: 'Type a message...',
+  hintStyle: gf.GoogleFonts.poppins(
+  fontSize: 13.sp,
+  color: Colors.grey,
+  ),
+  ),
+  onChanged: _onMessageTextChanged,
+  onSubmitted: (_) => _sendMessage(),
+  ),
+  ),
 
-SizedBox(
-width:
-10.w,
-),
+  // Attachment
+  GestureDetector(
+  onTap: _showAttachMenu,
+  child: Icon(
+  Icons.attach_file,
+  color: Colors.grey.shade400,
+  size: 22.sp,
+  ),
+  ),
 
-GestureDetector(
-onTap:
-_openCamera,
-child:
-Icon(
-Icons
-    .camera_alt_outlined,
-color:
-Colors
-    .grey
-    .shade400,
-size:
-22.sp,
-),
-),
-],
-),
-),
-),
+  SizedBox(width: 10.w),
 
-SizedBox(
-width: 10.w,
-),
+  // Camera
+  GestureDetector(
+  onTap: _openCamera,
+  child: Icon(
+  Icons.camera_alt_outlined,
+  color: Colors.grey.shade400,
+  size: 22.sp,
+  ),
+  ),
+  ],
+  ),
+  ),
+  ),
 
-GestureDetector(
-onTap:
-_isSending
-? null
-    : _sendMessage,
-child:
-Container(
-height: 48.h,
-width: 48.w,
-decoration:
-const BoxDecoration(
-color:
-Color(
-0xffFF6A00,
-),
-shape:
-BoxShape
-    .circle,
-),
-child:
-Center(
-child: Icon(
-Icons.send,
-color:
-Colors
-    .white,
-size:
-24.sp,
-),
-),
-),
-),
-],
-),
-),
-),
-],
-),
-),
-),
-],
-),
+  SizedBox(width: 10.w),
+
+  // Send Button
+  GestureDetector(
+  onTap: _isSending ? null : _sendMessage,
+  child: Container(
+  height: 48.h,
+  width: 48.w,
+  decoration: const BoxDecoration(
+  color: Color(0xffFF6A00),
+  shape: BoxShape.circle,
+  ),
+  child: Center(
+  child: Icon(
+  Icons.send,
+  color: Colors.white,
+  size: 24.sp,
+  ),
+  ),
+  ),
+  ),
+  ],
+  ),
+  ),
+  ],
+  ),
+  ),
+  ),
+  ),
+  ],
+  ),
+
+
 );
 }
 
-
 PreferredSizeWidget _buildAppBar() {
-  return AppBar(
-    backgroundColor: Colors.transparent,
-    elevation: 0,
-    surfaceTintColor: Colors.transparent,
-    shadowColor: Colors.transparent,
+return AppBar(
+backgroundColor: Colors.transparent,
+elevation: 0,
+surfaceTintColor: Colors.transparent,
+shadowColor: Colors.transparent,
 
-    // CustomAppBar jaisa status bar
-    systemOverlayStyle: const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      systemNavigationBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-      statusBarBrightness: Brightness.light,
-      systemNavigationBarIconBrightness: Brightness.dark,
-    ),
+systemOverlayStyle:
+const SystemUiOverlayStyle(
+statusBarColor: Colors.transparent,
+systemNavigationBarColor:
+Colors.transparent,
+statusBarIconBrightness:
+Brightness.dark,
+statusBarBrightness:
+Brightness.light,
+systemNavigationBarIconBrightness:
+Brightness.dark,
+),
 
-    // CustomAppBar jaisa background
-    flexibleSpace: Container(
-      decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [
-            Color.fromARGB(255, 253, 242, 234),
-            Color.fromARGB(255, 253, 242, 234),
-          ],
-        ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(24.r),
-          bottomRight: Radius.circular(24.r),
-        ),
+flexibleSpace: Container(
+decoration: BoxDecoration(
+gradient: const LinearGradient(
+begin: Alignment.centerLeft,
+end: Alignment.centerRight,
+colors: [
+Color.fromARGB(
+255,
+253,
+242,
+234,
+),
+Color.fromARGB(
+255,
+253,
+242,
+234,
+),
+],
+),
+borderRadius: BorderRadius.only(
+bottomLeft:
+Radius.circular(24.r),
+bottomRight:
+Radius.circular(24.r),
+),
+),
+),
+
+leadingWidth: 70.w,
+
+leading: Padding(
+padding: EdgeInsets.only(left: 10.w),
+child: IconButton(
+onPressed: () => Get.back(),
+padding: EdgeInsets.zero,
+icon: Container(
+width: 40.w,
+height: 40.w,
+decoration: BoxDecoration(
+color: Colors.white,
+shape: BoxShape.circle,
+boxShadow: [
+BoxShadow(
+color:
+Colors.black.withOpacity(0.10),
+blurRadius: 8.r,
+offset: Offset(0, 3.h),
+),
+],
+),
+child: Center(
+child: Icon(
+Icons.chevron_left_rounded,
+size: 24.sp,
+color:
+const Color(0xFFFF6B00),
+),
+),
+),
+),
+),
+
+titleSpacing: 5.w,
+
+title: Row(
+children: [
+CircleAvatar(
+radius: 18.r,
+backgroundImage:
+otherUserImage.isNotEmpty
+? NetworkImage(
+otherUserImage,
+)
+    : const AssetImage(
+'assets/images/profile1.png',
+) as ImageProvider,
+),
+
+SizedBox(width: 10.w),
+
+Column(
+crossAxisAlignment:
+CrossAxisAlignment.start,
+children: [
+  SizedBox(
+    width: 146.w,
+    child: Text(
+      otherUserName,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      style: gf.GoogleFonts.poppins(
+        fontSize: 16.sp,
+        fontWeight: FontWeight.w600,
+        color: Colors.black,
       ),
     ),
+  ),
 
-    leadingWidth: 70.w,
+_isOtherUserTyping
+? Text(
+'typing...',
+style:
+gf.GoogleFonts.poppins(
+fontSize: 11.sp,
+color:
+const Color(
+0xffFF6A00,
+),
+fontStyle:
+FontStyle.italic,
+),
+)
+    : Row(
+children: [
+Container(
+height: 7.h,
+width: 7.w,
+decoration:
+BoxDecoration(
+color:
+_otherUserOnline
+? Colors.green
+    : Colors.grey,
+shape:
+BoxShape.circle,
+),
+),
 
-    leading: Padding(
-      padding: EdgeInsets.only(left: 10.w),
-      child: IconButton(
-        onPressed: () => Get.back(),
-        padding: EdgeInsets.zero,
-        icon: Container(
-          width: 40.w,
-          height: 40.w,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.10),
-                blurRadius: 8.r,
-                offset: Offset(0, 3.h),
-              ),
-            ],
-          ),
-          child: Center(
-            child: Icon(
-              Icons.chevron_left_rounded,
-              size: 24.sp,
-              color: const Color(0xFFFF6B00),
-            ),
-          ),
-        ),
-      ),
-    ),
+SizedBox(width: 4.w),
 
-    titleSpacing: 5.w,
+Text(
+_otherUserOnline
+? 'Online'
+    : 'Offline',
+style: gf
+    .GoogleFonts
+    .poppins(
+fontSize: 11.sp,
+color: Colors
+    .grey
+    .shade600,
+),
+),
+],
+),
+],
+),
+],
+),
 
-    title: Row(
-      children: [
-        CircleAvatar(
-          radius: 18.r,
-          backgroundImage: otherUserImage.isNotEmpty
-              ? NetworkImage(otherUserImage)
-              : const AssetImage(
-            'assets/images/profile1.png',
-          ) as ImageProvider,
-        ),
+actions: [
+Padding(
+padding:
+EdgeInsets.only(right: 12.w),
+child: Row(
+children: [
+Obx(() {
+final dashboardController =
+Get.find<
+DashboardController>();
 
-        SizedBox(width: 10.w),
+return GestureDetector(
+onTap: dashboardController
+    .isCallServiceReady
+    .value
+? () => _startCall(true)
+    : null,
+child: Container(
+width: 40.w,
+height: 40.w,
+decoration:
+BoxDecoration(
+color: Colors.white,
+shape: BoxShape.circle,
+boxShadow: [
+BoxShadow(
+color: Colors.black
+    .withOpacity(0.10),
+blurRadius: 8.r,
+offset:
+Offset(0, 3.h),
+),
+],
+),
+child: Opacity(
+opacity: dashboardController
+    .isCallServiceReady
+    .value
+? 1.0
+    : 0.4,
+child: Center(
+child:
+SvgPicture.asset(
+"assets/icons/vc.svg",
+width: 18.w,
+height: 18.w,
+colorFilter:
+const ColorFilter
+    .mode(
+Color(
+0xFFFF6A00,
+),
+BlendMode.srcIn,
+),
+),
+),
+),
+),
+);
+}),
 
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              otherUserName,
-              style: gf.GoogleFonts.poppins(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w600,
-                color: Colors.black,
-              ),
-            ),
+SizedBox(width: 10.w),
 
-            _isOtherUserTyping
-                ? Text(
-              'typing...',
-              style: gf.GoogleFonts.poppins(
-                fontSize: 11.sp,
-                color: const Color(0xffFF6A00),
-                fontStyle: FontStyle.italic,
-              ),
-            )
-                : Row(
-              children: [
-                Container(
-                  height: 7.h,
-                  width: 7.w,
-                  decoration: BoxDecoration(
-                    color: _otherUserOnline
-                        ? Colors.green
-                        : Colors.grey,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-
-                SizedBox(width: 4.w),
-
-                Text(
-                  _otherUserOnline ? 'Online' : 'Offline',
-                  style: gf.GoogleFonts.poppins(
-                    fontSize: 11.sp,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ],
-    ),
-
-    actions: [
-      Padding(
-        padding: EdgeInsets.only(right: 12.w),
-        child: Row(
-          children: [
-            Obx(() {
-              final dashboardController =
-              Get.find<DashboardController>();
-
-              return GestureDetector(
-                onTap: dashboardController.isCallServiceReady.value
-                    ? () => _startCall(true)
-                    : null,
-                child: Container(
-                  width: 40.w,
-                  height: 40.w,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.10),
-                        blurRadius: 8.r,
-                        offset: Offset(0, 3.h),
-                      ),
-                    ],
-                  ),
-                  child: Opacity(
-                    opacity:
-                    dashboardController.isCallServiceReady.value
-                        ? 1.0
-                        : 0.4,
-                    child: Center(
-                      child: SvgPicture.asset(
-                        "assets/icons/vc.svg",
-                        width: 18.w,
-                        height: 18.w,
-                        colorFilter: const ColorFilter.mode(
-                          Color(0xFFFF6B00),
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
-
-            SizedBox(width: 10.w),
-
-            GestureDetector(
-              onTap: () => _startCall(false),
-              child: Container(
-                width: 40.w,
-                height: 40.w,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.10),
-                      blurRadius: 8.r,
-                      offset: Offset(0, 3.h),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: SvgPicture.asset(
-                    "assets/icons/Call.svg",
-                    width: 18.w,
-                    height: 18.w,
-                    colorFilter: const ColorFilter.mode(
-                      Color(0xFFFF6B00),
-                      BlendMode.srcIn,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    ],
-  );
+GestureDetector(
+onTap: () =>
+_startCall(false),
+child: Container(
+width: 40.w,
+height: 40.w,
+decoration:
+BoxDecoration(
+color: Colors.white,
+shape: BoxShape.circle,
+boxShadow: [
+BoxShadow(
+color: Colors.black
+    .withOpacity(0.10),
+blurRadius: 8.r,
+offset:
+Offset(0, 3.h),
+),
+],
+),
+child: Center(
+child:
+SvgPicture.asset(
+"assets/icons/Call.svg",
+width: 18.w,
+height: 18.w,
+colorFilter:
+const ColorFilter.mode(
+Color(0xFFFF6A00),
+BlendMode.srcIn,
+),
+),
+),
+),
+),
+],
+),
+),
+],
+);
 }
+
 Widget _buildMessagesStream() {
 return StreamBuilder<QuerySnapshot>(
 stream: _chatService
@@ -1589,10 +1562,8 @@ if (snapshot.connectionState ==
 ConnectionState.waiting &&
 !snapshot.hasData) {
 return const Center(
-child:
-CircularProgressIndicator(
-color:
-Color(0xffFF6A00),
+child: CircularProgressIndicator(
+color: Color(0xffFF6A00),
 ),
 );
 }
@@ -1610,10 +1581,6 @@ errStr.contains(
 );
 
 if (isPermRace) {
-print(
-'⏳ Permission race on new room, retrying silently...',
-);
-
 Future.delayed(
 const Duration(
 milliseconds: 800,
@@ -1626,55 +1593,37 @@ setState(() {});
 );
 
 return const Center(
-child:
-CircularProgressIndicator(
-color:
-Color(0xffFF6A00),
+child: CircularProgressIndicator(
+color: Color(0xffFF6A00),
 ),
 );
 }
 
-print(
-'❌ Stream error: ${snapshot.error}',
-);
-
 return Center(
 child: Column(
 mainAxisAlignment:
-MainAxisAlignment
-    .center,
+MainAxisAlignment.center,
 children: [
 Icon(
 Icons.error_outline,
 size: 60.sp,
 color: Colors.red,
 ),
-SizedBox(
-height: 16.h,
-),
+SizedBox(height: 16.h),
 Text(
 'Error loading messages',
-style: gf
-    .GoogleFonts
-    .poppins(
+style: gf.GoogleFonts.poppins(
 fontSize: 16.sp,
-color:
-Colors.red,
+color: Colors.red,
 ),
 ),
-SizedBox(
-height: 8.h,
-),
+SizedBox(height: 8.h),
 Text(
-snapshot.error
-    .toString(),
-style: gf
-    .GoogleFonts
-    .poppins(
+snapshot.error.toString(),
+style: gf.GoogleFonts.poppins(
 fontSize: 12.sp,
-color: Colors
-    .grey
-    .shade600,
+color:
+Colors.grey.shade600,
 ),
 ),
 ],
@@ -1688,43 +1637,27 @@ snapshot.data!.docs.isEmpty) {
 return Center(
 child: Column(
 mainAxisAlignment:
-MainAxisAlignment
-    .center,
+MainAxisAlignment.center,
 children: [
 Icon(
-Icons
-    .chat_bubble_outline,
+Icons.chat_bubble_outline,
 size: 60.sp,
-color: Colors
-    .grey
-    .shade300,
+color: Colors.grey.shade300,
 ),
-SizedBox(
-height: 16.h,
-),
+SizedBox(height: 16.h),
 Text(
 'No messages yet',
-style: gf
-    .GoogleFonts
-    .poppins(
+style: gf.GoogleFonts.poppins(
 fontSize: 16.sp,
-color: Colors
-    .grey
-    .shade500,
+color: Colors.grey.shade500,
 ),
 ),
-SizedBox(
-height: 8.h,
-),
+SizedBox(height: 8.h),
 Text(
 'Say hello to $otherUserName',
-style: gf
-    .GoogleFonts
-    .poppins(
+style: gf.GoogleFonts.poppins(
 fontSize: 14.sp,
-color: Colors
-    .grey
-    .shade400,
+color: Colors.grey.shade400,
 ),
 ),
 ],
@@ -1747,19 +1680,16 @@ currentMessageCount;
 if (messages.isNotEmpty) {
 final lastMsg =
 messages.last.data()
-as Map<String,
-dynamic>;
+as Map<String, dynamic>;
 
 final lastMsgSender =
-lastMsg['senderId'] ??
-'';
+lastMsg['senderId'] ?? '';
 
-final myId =
-currentUserId;
+final myId = currentUserId;
 
-if (lastMsgSender !=
-myId &&
+if (lastMsgSender != myId &&
 lastMsgSender
+    .toString()
     .isNotEmpty) {
 _markMessagesAsReadDebounced(
 chatRoomId!,
@@ -1778,11 +1708,6 @@ ScrollNotification>(
 onNotification:
 (ScrollNotification
 scrollInfo) {
-if (scrollInfo
-is UserScrollNotification) {
-// User manually scrolled.
-}
-
 return true;
 },
 child: ListView.builder(
@@ -1793,12 +1718,11 @@ controller:
 scrollController,
 padding:
 EdgeInsets.symmetric(
-horizontal: 16.w,
-vertical: 10.h,
+horizontal: 6.w,
+vertical: 8.h,
 ),
 reverse: true,
-itemCount:
-messages.length,
+itemCount: messages.length,
 itemBuilder:
 (context, index) {
 try {
@@ -1808,93 +1732,73 @@ messages.length -
 index;
 
 final doc =
-messages[
-reversedIndex];
+messages[reversedIndex];
 
 final msg =
 doc.data()
-as Map<String,
-dynamic>;
+as Map<String, dynamic>;
 
-msg['id'] =
-doc.id;
+msg['id'] = doc.id;
 
 final isSender =
 msg['senderId'] ==
 currentUserId;
 
 final messageType =
-msg['type'] ??
-'text';
+msg['type'] ?? 'text';
 
 final hasImage =
-msg['imageUrl'] !=
-null &&
+msg['imageUrl'] != null &&
 msg['imageUrl']
     .toString()
     .isNotEmpty;
 
 final hasFile =
-msg['fileUrl'] !=
-null &&
+msg['fileUrl'] != null &&
 msg['fileUrl']
     .toString()
     .isNotEmpty;
 
 final messageText =
-msg['message'] ??
-'';
+msg['message'] ?? '';
 
 final timestamp =
 msg['timestamp']
 as Timestamp?;
 
 final time =
-_getMessageTime(
-timestamp,
-);
+_getMessageTime(timestamp);
 
-if (messageType ==
-'call') {
+if (messageType == 'call') {
 return RepaintBoundary(
-key: ValueKey(
-doc.id,
-),
-child:
-_callMessage(
+key: ValueKey(doc.id),
+child: _callMessage(
 callType:
 msg['callType'] ??
 'voice',
 time: time,
-isSender:
-isSender,
+isSender: isSender,
 ),
 );
 }
 
 if (hasFile) {
 return RepaintBoundary(
-key: ValueKey(
-doc.id,
-),
-child:
-_buildFileMessage(
+key: ValueKey(doc.id),
+child: _buildFileMessage(
 fileUrl:
 msg['fileUrl'],
 fileName:
 msg['fileName'] ??
 'File',
 time: time,
-isSender:
-isSender,
+isSender: isSender,
 ),
 );
 }
 
 return RepaintBoundary(
-key: ValueKey(
-doc.id,
-),
+key: ValueKey(doc.id),
 child: hasImage
 ? _buildImageMessage(
 imageUrl:
@@ -1907,23 +1811,20 @@ isSender,
 ? _senderMessage(
 message:
 messageText,
-time:
-time,
+time: time,
 )
     : _receiverMessage(
 message:
 messageText,
-time:
-time,
+time: time,
 ),
 );
 } catch (e) {
 print(
-'❌ Error building message at index $index: $e',
+'❌ Error building message: $e',
 );
 
-return const SizedBox
-    .shrink();
+return const SizedBox.shrink();
 }
 },
 ),
@@ -1931,8 +1832,6 @@ return const SizedBox
 },
 );
 }
-
-Timer? _markReadTimer;
 
 void _markMessagesAsReadDebounced(
 String chatRoomId,
@@ -1940,15 +1839,12 @@ String chatRoomId,
 _markReadTimer?.cancel();
 
 _markReadTimer = Timer(
-const Duration(
-milliseconds: 500,
-),
+const Duration(milliseconds: 500),
 () async {
 if (!_isMarkingRead) {
 _isMarkingRead = true;
 
-await _chatService
-    .markMessagesAsRead(
+await _chatService.markMessagesAsRead(
 chatRoomId,
 );
 
@@ -1963,8 +1859,7 @@ required String message,
 required String time,
 }) {
 return Align(
-alignment:
-Alignment.centerRight,
+alignment: Alignment.centerRight,
 child: Column(
 crossAxisAlignment:
 CrossAxisAlignment.end,
@@ -1981,48 +1876,34 @@ vertical: 10.h,
 ),
 decoration:
 const BoxDecoration(
-color:
-Color(0xffFF6A00),
+color: Color(0xffFF6A00),
 borderRadius:
 BorderRadius.only(
 topLeft:
-Radius.circular(
-14,
-),
+Radius.circular(14),
 topRight:
-Radius.circular(
-14,
-),
+Radius.circular(14),
 bottomLeft:
-Radius.circular(
-14,
-),
+Radius.circular(14),
 ),
 ),
 child: Text(
 message,
-style:
-gf.GoogleFonts.poppins(
+style: gf.GoogleFonts.poppins(
 fontSize: 12.sp,
-color:
-Colors.white,
+color: Colors.white,
 ),
 ),
 ),
-
-SizedBox(
-height: 3.h,
-),
-
+SizedBox(height: 3.h),
 Text(
 time,
-style:
-gf.GoogleFonts.poppins(
+style: gf.GoogleFonts.poppins(
 fontSize: 10.sp,
-color:
-Colors.grey,
+color: Colors.grey,
 ),
 ),
+SizedBox(height: 8.h),
 ],
 ),
 );
@@ -2034,8 +1915,7 @@ required String time,
 required bool isSender,
 }) {
 return Align(
-alignment:
-Alignment.center,
+alignment: Alignment.center,
 child: Container(
 margin:
 EdgeInsets.symmetric(
@@ -2048,12 +1928,9 @@ vertical: 8.h,
 ),
 decoration:
 BoxDecoration(
-color:
-Colors.grey.shade200,
+color: Colors.grey.shade200,
 borderRadius:
-BorderRadius.circular(
-20.r,
-),
+BorderRadius.circular(20.r),
 ),
 child: Row(
 mainAxisSize:
@@ -2065,37 +1942,23 @@ callType == 'video'
     : Icons.call,
 size: 16.sp,
 color:
-const Color(
-0xffFF6A00,
+const Color(0xffFF6A00),
 ),
-),
-
-SizedBox(
-width: 6.w,
-),
-
+SizedBox(width: 6.w),
 Text(
 '${isSender ? "Outgoing" : "Incoming"} '
 '${callType == "video" ? "video" : "voice"} call',
-style:
-gf.GoogleFonts.poppins(
+style: gf.GoogleFonts.poppins(
 fontSize: 12.sp,
-color:
-Colors.black87,
+color: Colors.black87,
 ),
 ),
-
-SizedBox(
-width: 6.w,
-),
-
+SizedBox(width: 6.w),
 Text(
 time,
-style:
-gf.GoogleFonts.poppins(
+style: gf.GoogleFonts.poppins(
 fontSize: 10.sp,
-color:
-Colors.grey,
+color: Colors.grey,
 ),
 ),
 ],
@@ -2109,8 +1972,7 @@ required String message,
 required String time,
 }) {
 return Align(
-alignment:
-Alignment.centerLeft,
+alignment: Alignment.centerLeft,
 child: Column(
 crossAxisAlignment:
 CrossAxisAlignment.start,
@@ -2128,38 +1990,27 @@ vertical: 10.h,
 decoration:
 BoxDecoration(
 color:
-const Color(
-0xffA89D99,
-),
+const Color(0xffA89D99),
 borderRadius:
-BorderRadius.circular(
-8.r,
-),
+BorderRadius.circular(8.r),
 ),
 child: Text(
 message,
-style:
-gf.GoogleFonts.poppins(
+style: gf.GoogleFonts.poppins(
 fontSize: 12.sp,
-color:
-Colors.white,
+color: Colors.white,
 ),
 ),
 ),
-
-SizedBox(
-height: 3.h,
-),
-
+SizedBox(height: 3.h),
 Text(
 time,
-style:
-gf.GoogleFonts.poppins(
+style: gf.GoogleFonts.poppins(
 fontSize: 10.sp,
-color:
-Colors.grey,
+color: Colors.grey,
 ),
 ),
+SizedBox(height: 8.h),
 ],
 ),
 );
@@ -2172,36 +2023,30 @@ required String time,
 required bool isSender,
 }) {
 final ext =
-fileName.split('.').last
-    .toLowerCase();
+fileName.split('.').last.toLowerCase();
 
 IconData icon;
 
 if (ext == 'pdf') {
-icon =
-Icons.picture_as_pdf;
+icon = Icons.picture_as_pdf;
 } else if ([
 'mp4',
 'mov',
 'avi',
 ].contains(ext)) {
-icon =
-Icons.videocam;
+icon = Icons.videocam;
 } else if ([
 'doc',
 'docx',
 ].contains(ext)) {
-icon =
-Icons.description;
+icon = Icons.description;
 } else if ([
 'xls',
 'xlsx',
 ].contains(ext)) {
-icon =
-Icons.table_chart;
+icon = Icons.table_chart;
 } else {
-icon =
-Icons.insert_drive_file;
+icon = Icons.insert_drive_file;
 }
 
 return Align(
@@ -2209,16 +2054,12 @@ alignment: isSender
 ? Alignment.centerRight
     : Alignment.centerLeft,
 child: Column(
-crossAxisAlignment:
-isSender
-? CrossAxisAlignment
-    .end
-    : CrossAxisAlignment
-    .start,
+crossAxisAlignment: isSender
+? CrossAxisAlignment.end
+    : CrossAxisAlignment.start,
 children: [
 GestureDetector(
-onTap: () =>
-_openFile(fileUrl),
+onTap: () => _openFile(fileUrl),
 child: Container(
 constraints:
 BoxConstraints(
@@ -2232,76 +2073,51 @@ vertical: 10.h,
 decoration:
 BoxDecoration(
 color: isSender
-? const Color(
-0xffFF6A00,
-)
-    : const Color(
-0xffA89D99,
-),
+? const Color(0xffFF6A00)
+    : const Color(0xffA89D99),
 borderRadius:
-BorderRadius.circular(
-12.r,
-),
+BorderRadius.circular(12.r),
 ),
 child: Row(
 children: [
 Icon(
 icon,
-color:
-Colors.white,
+color: Colors.white,
 size: 28.sp,
 ),
-
-SizedBox(
-width: 10.w,
-),
-
+SizedBox(width: 10.w),
 Expanded(
 child: Text(
 fileName,
 maxLines: 2,
 overflow:
-TextOverflow
-    .ellipsis,
-style: gf
-    .GoogleFonts
-    .poppins(
-fontSize:
-12.sp,
-color:
-Colors.white,
+TextOverflow.ellipsis,
+style:
+gf.GoogleFonts.poppins(
+fontSize: 12.sp,
+color: Colors.white,
 ),
 ),
 ),
-
-SizedBox(
-width: 6.w,
-),
-
+SizedBox(width: 6.w),
 Icon(
 Icons.download,
-color:
-Colors.white,
+color: Colors.white,
 size: 18.sp,
 ),
 ],
 ),
 ),
 ),
-
-SizedBox(
-height: 3.h,
-),
-
+SizedBox(height: 3.h),
 Text(
 time,
-style:
-gf.GoogleFonts.poppins(
+style: gf.GoogleFonts.poppins(
 fontSize: 10.sp,
-color:
-Colors.grey,
+color: Colors.grey,
 ),
 ),
+SizedBox(height: 8.h),
 ],
 ),
 );
@@ -2317,23 +2133,16 @@ alignment: isSender
 ? Alignment.centerRight
     : Alignment.centerLeft,
 child: Column(
-crossAxisAlignment:
-isSender
-? CrossAxisAlignment
-    .end
-    : CrossAxisAlignment
-    .start,
+crossAxisAlignment: isSender
+? CrossAxisAlignment.end
+    : CrossAxisAlignment.start,
 children: [
 Stack(
 children: [
 ClipRRect(
 borderRadius:
-BorderRadius
-    .circular(
-12.r,
-),
-child:
-Image.network(
+BorderRadius.circular(12.r),
+child: Image.network(
 imageUrl,
 width: 220.w,
 fit: BoxFit.cover,
@@ -2346,12 +2155,9 @@ stackTrace,
 return Container(
 width: 220.w,
 height: 180.h,
-color: Colors
-    .grey
-    .shade300,
+color: Colors.grey.shade300,
 child: Icon(
-Icons
-    .broken_image,
+Icons.broken_image,
 size: 50.sp,
 ),
 );
@@ -2362,36 +2168,24 @@ size: 50.sp,
 if (!isSender)
 Positioned.fill(
 child: Center(
-child:
-GestureDetector(
+child: GestureDetector(
 onTap: () =>
 _downloadOrOpenFile(
 imageUrl,
 ),
-child:
-Container(
+child: Container(
 padding:
-EdgeInsets
-    .all(
-10.w,
-),
+EdgeInsets.all(10.w),
 decoration:
 BoxDecoration(
-color: Colors
-    .black
-    .withOpacity(
-0.45,
-),
+color: Colors.black
+    .withOpacity(0.45),
 shape:
-BoxShape
-    .circle,
+BoxShape.circle,
 ),
 child: Icon(
-Icons
-    .download,
-color:
-Colors
-    .white,
+Icons.download,
+color: Colors.white,
 size: 24.sp,
 ),
 ),
@@ -2401,19 +2195,17 @@ size: 24.sp,
 ],
 ),
 
-SizedBox(
-height: 4.h,
-),
+SizedBox(height: 4.h),
 
 Text(
 time,
-style:
-gf.GoogleFonts.poppins(
+style: gf.GoogleFonts.poppins(
 fontSize: 10.sp,
-color:
-Colors.grey,
+color: Colors.grey,
 ),
 ),
+
+SizedBox(height: 8.h),
 ],
 ),
 );

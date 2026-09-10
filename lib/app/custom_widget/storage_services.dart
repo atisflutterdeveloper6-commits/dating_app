@@ -27,7 +27,7 @@ class StorageService {
   static const String keyLoginData = 'login_data';
   static const String keyIsLoggedIn = 'is_logged_in';
   static const String keyLoginTime = 'login_time';
-  
+  static const String keyAppName = 'app_name';
   // User preferences
   static const String keyThemeMode = 'theme_mode';
   static const String keyLanguage = 'language';
@@ -44,7 +44,13 @@ class StorageService {
     await _storage.write(keyToken, token);
     print('✅ Token saved to storage');
   }
-
+  Future<void> saveAppName(String name) async {
+    await _storage.write(keyAppName, name);
+    print('✅ App name saved to storage: $name');
+  }
+  String getAppName() {
+    return _storage.read<String>(keyAppName) ?? 'Vibely';
+  }
   String? getToken() {
     return _storage.read<String>(keyToken);
   }

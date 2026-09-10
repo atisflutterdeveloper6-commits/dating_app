@@ -303,12 +303,12 @@ class _OnboardingViewState extends State<OnboardingView> {
                                 .onboardingData
                                 .length -
                                 1
-                            ? "Get Started"
+                            ? "Next"
                             : "Next",
 
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 13.sp,
+                          fontSize: 14.sp,
                           fontWeight:
                           FontWeight.w600,
                         ),
@@ -323,7 +323,7 @@ class _OnboardingViewState extends State<OnboardingView> {
                                 .length -
                                 1
                             ? Icons
-                            .check_rounded
+                            .arrow_forward_rounded
                             : Icons
                             .arrow_forward_rounded,
 

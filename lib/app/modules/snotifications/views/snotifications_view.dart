@@ -31,7 +31,7 @@ splitScreenMode: true,
 return Scaffold(
 backgroundColor: Colors.transparent,
 
-// Same as Verification screen
+// Keep TRUE
 extendBodyBehindAppBar: true,
 extendBody: true,
 
@@ -41,6 +41,7 @@ extendBody: true,
 
 appBar: CustomAppBar(
 title: "Notification",
+    subtitle: "Manage your notification preferences",
 onBackPressed: () {
 Navigator.pop(context);
 },
@@ -74,16 +75,38 @@ color: Colors.white.withOpacity(0.70),
 ),
 
 // ======================================================
-// CONTENT
+// WHITE CONTENT CONTAINER
 // ======================================================
 
-SafeArea(
-child: SingleChildScrollView(
+SingleChildScrollView(
 padding: EdgeInsets.fromLTRB(
 16.w,
-16.h,
+120.h, // AppBar ke niche
 16.w,
-30.h,
+90.h,
+),
+child: Container(
+width: double.infinity,
+padding: EdgeInsets.fromLTRB(
+16.w,
+20.h,
+16.w,
+20.h,
+),
+decoration: BoxDecoration(
+color: Colors.white,
+borderRadius: BorderRadius.circular(14.r),
+border: Border.all(
+color: const Color(0xFFF1E8E4),
+width: 0.8,
+),
+boxShadow: [
+BoxShadow(
+color: Colors.black.withOpacity(0.035),
+blurRadius: 12.r,
+offset: Offset(0, 3.h),
+),
+],
 ),
 child: Column(
 crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,7 +240,7 @@ newMatches = value;
 SizedBox(height: 8.h),
 
 // ==================================================
-// VOTES / LIKES
+// LIKES / VOTES
 // ==================================================
 
 _notificationTile(
@@ -352,5 +375,3 @@ WidgetStateProperty.all(0),
 );
 }
 }
-
-

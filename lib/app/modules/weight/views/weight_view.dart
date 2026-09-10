@@ -279,321 +279,278 @@ fontSize: 12.sp,
 }
 
 return Padding(
-padding: EdgeInsets.symmetric(
-horizontal: 28.w,
-),
-child: Column(
-crossAxisAlignment:
-CrossAxisAlignment.start,
-children: [
+  padding: EdgeInsets.symmetric(
+    horizontal: 28.w,
+  ),
+  child: Column(
+    children: [
 
-SizedBox(height: 20.h),
+      // ==========================================
+      // CENTER CONTENT
+      // ==========================================
 
-// ======================================================
-// HEADER
-// ======================================================
+      Expanded(
+        child: Center(
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
 
-Row(
-crossAxisAlignment:
-CrossAxisAlignment.center,
-children: [
+                // ==========================================
+                // HEADER - WHITE BOX KE JUST UPAR
+                // ==========================================
 
-Container(
-padding: EdgeInsets.all(8.w),
-decoration: BoxDecoration(
-shape: BoxShape.circle,
-border: Border.all(
-color:
-const Color(0xFFFFE0CC),
-width: 1.2.w,
-),
-),
-child: Icon(
-Icons.monitor_weight_outlined,
-color:
-const Color(0xFFFF6B00),
-size: 22.sp,
-),
-),
+                SizedBox(
+                  width: 320.w,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
 
-SizedBox(width: 20.w),
+                      Container(
+                        padding: EdgeInsets.all(8.w),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0xFFFFE0CC),
+                            width: 1.2.w,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.monitor_weight_outlined,
+                          color: const Color(0xFFFF6B00),
+                          size: 22.sp,
+                        ),
+                      ),
 
-Expanded(
-child: Column(
-crossAxisAlignment:
-CrossAxisAlignment.start,
-children: [
+                      SizedBox(width: 14.w),
 
-Text(
-"Weight",
-style:
-GoogleFonts.poppins(
-fontSize: 14.sp,
-fontWeight:
-FontWeight.w700,
-letterSpacing: 1.2,
-),
-),
+                      Column(
+                        crossAxisAlignment:
+                        CrossAxisAlignment.start,
+                        children: [
 
-SizedBox(height: 8.h),
+                          Text(
+                            "Weight",
+                            style: GoogleFonts.poppins(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
 
-Text(
-"Update your weight.",
-style:
-GoogleFonts.poppins(
-fontSize: 9.sp,
-color: Colors.black54,
-letterSpacing: 0.5,
-),
-),
-],
-),
-),
-],
-),
+                          SizedBox(height: 4.h),
 
-SizedBox(height: 20.h),
+                          Text(
+                            "Update your weight.",
+                            style: GoogleFonts.poppins(
+                              fontSize: 9.sp,
+                              color: Colors.black54,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
 
-// ======================================================
-// WHITE CONTENT CARD
-// ======================================================
+                // Header → White Box gap
+                SizedBox(height: 12.h),
 
-Expanded(
-child: SingleChildScrollView(
-child: Container(
-width: double.infinity,
-padding: EdgeInsets.fromLTRB(
-16.w,
-30.h,
-16.w,
-30.h,
-),
-decoration: BoxDecoration(
-color: Colors.white,
-borderRadius:
-BorderRadius.circular(14.r),
-border: Border.all(
-color:
-const Color(0xFFF1E8E4),
-width: 0.8.w,
-),
-boxShadow: [
-BoxShadow(
-color: Colors.black
-    .withOpacity(0.035),
-blurRadius: 12.r,
-offset:
-Offset(0, 3.h),
-),
-],
-),
-child: Column(
-crossAxisAlignment:
-CrossAxisAlignment.start,
-children: [
+                // ==========================================
+                // WHITE CENTER BOX
+                // ==========================================
 
-// ======================================================
-// LABEL
-// ======================================================
+                Container(
+                  width: 320.w,
+                  padding: EdgeInsets.fromLTRB(
+                    16.w,
+                    30.h,
+                    16.w,
+                    30.h,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(14.r),
+                    border: Border.all(
+                      color: const Color(0xFFF1E8E4),
+                      width: 0.8.w,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.035),
+                        blurRadius: 12.r,
+                        offset: Offset(0, 3.h),
+                      ),
+                    ],
+                  ),
 
-Text(
-'Select your weight',
-style:
-GoogleFonts.poppins(
-fontSize: 13.sp,
-fontWeight:
-FontWeight.w500,
-color:
-const Color(
-0xff1F1F1F),
-),
-),
+                  child: Column(
+                    crossAxisAlignment:
+                    CrossAxisAlignment.start,
+                    children: [
 
-SizedBox(height: 12.h),
+                      // ==========================================
+                      // LABEL
+                      // ==========================================
 
-// ======================================================
-// WEIGHT DROPDOWN
-// ======================================================
+                      Text(
+                        'Select your weight',
+                        style: GoogleFonts.poppins(
+                          fontSize: 13.sp,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xff1F1F1F),
+                        ),
+                      ),
 
-Container(
-height: 50.h,
-width: double.infinity,
-padding:
-EdgeInsets.symmetric(
-horizontal: 14.w,
-),
-decoration:
-BoxDecoration(
-color: Colors.white,
-borderRadius:
-BorderRadius
-    .circular(12.r),
-border: Border.all(
-color: const Color(
-0xffDCDCDC),
-),
-),
-child:
-DropdownButtonHideUnderline(
-child:
-DropdownButton<
-String?>(
-value:
-selectedWeight.value,
-isExpanded: true,
+                      SizedBox(height: 12.h),
 
-icon: Icon(
-Icons
-    .keyboard_arrow_down,
-size: 20.sp,
-color:
-const Color(
-0xff555555),
-),
+                      // ==========================================
+                      // WEIGHT DROPDOWN
+                      // ==========================================
 
-style:
-GoogleFonts.poppins(
-fontSize: 13.sp,
-color:
-const Color(
-0xff444444),
-),
+                      Container(
+                        height: 50.h,
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 14.w,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius:
+                          BorderRadius.circular(12.r),
+                          border: Border.all(
+                            color: const Color(0xffDCDCDC),
+                          ),
+                        ),
 
-hint: Text(
-'Select your weight',
-style:
-GoogleFonts.poppins(
-fontSize: 13.sp,
-color:
-const Color(
-0xff999999),
-),
-),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String?>(
+                            value: selectedWeight.value,
+                            isExpanded: true,
 
-items:
-weights.map(
-(weight) {
-return DropdownMenuItem<
-String?>(
-value: weight,
-child: Text(
-weight,
-maxLines: 1,
-overflow:
-TextOverflow
-    .ellipsis,
-),
-);
-},
-).toList(),
+                            icon: Icon(
+                              Icons.keyboard_arrow_down,
+                              size: 20.sp,
+                              color: const Color(0xff555555),
+                            ),
 
-onChanged:
-isLoading.value
-? null
-    : (newValue) {
-if (newValue !=
-null) {
-selectedWeight
-    .value =
-newValue;
-}
-},
-),
-),
-),
+                            style: GoogleFonts.poppins(
+                              fontSize: 13.sp,
+                              color: const Color(0xff444444),
+                            ),
 
-// ======================================================
-// CURRENT WEIGHT
-// ======================================================
+                            hint: Text(
+                              'Select your weight',
+                              style: GoogleFonts.poppins(
+                                fontSize: 13.sp,
+                                color: const Color(0xff999999),
+                              ),
+                            ),
 
-if (profileService
-    .profile
-    .value
-    .weight !=
-null &&
-profileService
-    .profile
-    .value
-    .weight!
-    .isNotEmpty)
-Padding(
-padding:
-EdgeInsets.only(
-top: 12.h,
-),
-child: Text(
-'Current: ${profileService.profile.value.weight}',
-style:
-GoogleFonts.poppins(
-fontSize: 10.sp,
-color:
-Colors.grey[600],
-fontStyle:
-FontStyle.italic,
-),
-maxLines: 1,
-overflow:
-TextOverflow.ellipsis,
-),
-),
-],
-),
-),
-),
-),
+                            items: weights.map((weight) {
+                              return DropdownMenuItem<String?>(
+                                value: weight,
+                                child: Text(
+                                  weight,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              );
+                            }).toList(),
 
-SizedBox(height: 18.h),
+                            onChanged: isLoading.value
+                                ? null
+                                : (newValue) {
+                              if (newValue != null) {
+                                selectedWeight.value =
+                                    newValue;
+                              }
+                            },
+                          ),
+                        ),
+                      ),
 
-// ======================================================
-// UPDATE BUTTON
-// ======================================================
+                      // ==========================================
+                      // CURRENT WEIGHT
+                      // ==========================================
 
-SafeArea(
-top: false,
-child: Obx(
-() => CustomButton(
-text: "Update",
+                      if (profileService
+                          .profile
+                          .value
+                          .weight !=
+                          null &&
+                          profileService
+                              .profile
+                              .value
+                              .weight!
+                              .isNotEmpty)
+                        Padding(
+                          padding: EdgeInsets.only(
+                            top: 12.h,
+                          ),
+                          child: Text(
+                            'Current: ${profileService.profile.value.weight}',
+                            style: GoogleFonts.poppins(
+                              fontSize: 10.sp,
+                              color: Colors.grey[600],
+                              fontStyle: FontStyle.italic,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
 
-onPressed:
-selectedWeight.value ==
-null ||
-isLoading.value
-? () {}
-    : updateWeight,
+      // ==========================================
+      // UPDATE BUTTON
+      // ==========================================
 
-isLoading:
-isLoading.value,
+      SafeArea(
+        top: false,
+        child: Obx(
+              () => CustomButton(
+            text: "Update",
 
-backgroundColor:
-selectedWeight.value !=
-null
-? const Color(
-0xffFF6B00)
-    : Colors.grey,
+            onPressed:
+            selectedWeight.value == null ||
+                isLoading.value
+                ? () {}
+                : updateWeight,
 
-textColor: Colors.white,
+            isLoading: isLoading.value,
 
-borderRadius:
-30.r,
+            backgroundColor:
+            selectedWeight.value != null
+                ? const Color(0xffFF6B00)
+                : Colors.grey,
 
-fontSize:
-11.sp,
+            textColor: Colors.white,
 
-fontWeight:
-FontWeight.w600,
+            borderRadius: 30.r,
 
-letterSpacing:
-0,
+            fontSize: 11.sp,
 
-showArrow:
-true,
-),
-),
-),
+            fontWeight: FontWeight.w600,
 
-SizedBox(height: 90.h),
-],
-),
+            letterSpacing: 0,
+
+            showArrow: true,
+          ),
+        ),
+      ),
+
+      SizedBox(height: 90.h),
+    ],
+  ),
 );
 },
 ),
